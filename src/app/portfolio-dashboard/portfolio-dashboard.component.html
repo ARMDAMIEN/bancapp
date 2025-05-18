@@ -1,0 +1,253 @@
+<div class="portfolio-dashboard" [ngClass]="{'modal-mode': isModal}">
+  <div class="dashboard-header">
+    <h2 class="dashboard-title">Portfolio Dashboard</h2>
+    <div class="dashboard-actions">
+      <button class="withdraw-button" (click)="withdrawFunds()">
+        <i class="withdraw-icon"></i>
+        Withdraw Funds
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Cards de statistiques principales -->
+    <div class="stats-cards">
+      <div class="stat-card total-balance">
+        <div class="card-content">
+          <div class="stat-info">
+            <span class="stat-label">Total Balance</span>
+            <h3 class="stat-value">{{ portfolioData.totalBalance | currency:'USDC ':'symbol':'1.2-2' }}</h3>
+          </div>
+          <div class="stat-icon">
+            <i class="balance-icon"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="change-indicator" [ngClass]="portfolioData.balanceChange >= 0 ? 'positive' : 'negative'">
+            <i class="arrow-icon" [ngClass]="portfolioData.balanceChange >= 0 ? 'arrow-up' : 'arrow-down'"></i>
+            {{ portfolioData.balanceChange | number:'1.2-2' }}% since last week
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-card daily-pnl">
+        <div class="card-content">
+          <div class="stat-info">
+            <span class="stat-label">Daily Profit/Loss</span>
+            <h3 class="stat-value" [ngClass]="portfolioData.dailyPnl >= 0 ? 'positive' : 'negative'">
+              {{ portfolioData.dailyPnl > 0 ? '+' : '' }}{{ portfolioData.dailyPnl | currency:'USDC ':'symbol':'1.2-2'
+              }}
+            </h3>
+          </div>
+          <div class="stat-icon" [ngClass]="portfolioData.dailyPnl >= 0 ? 'positive' : 'negative'">
+            <i class="daily-icon"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="change-indicator" [ngClass]="portfolioData.dailyPnlPercent >= 0 ? 'positive' : 'negative'">
+            {{ portfolioData.dailyPnlPercent > 0 ? '+' : '' }}{{ portfolioData.dailyPnlPercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-card total-pnl">
+        <div class="card-content">
+          <div class="stat-info">
+            <span class="stat-label">Total Profit/Loss</span>
+            <h3 class="stat-value" [ngClass]="portfolioData.totalPnl >= 0 ? 'positive' : 'negative'">
+              {{ portfolioData.totalPnl > 0 ? '+' : '' }}{{ portfolioData.totalPnl | currency:'USDC ':'symbol':'1.2-2'
+              }}
+            </h3>
+          </div>
+          <div class="stat-icon" [ngClass]="portfolioData.totalPnl >= 0 ? 'positive' : 'negative'">
+            <i class="total-icon"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="change-indicator" [ngClass]="portfolioData.totalPnlPercent >= 0 ? 'positive' : 'negative'">
+            {{ portfolioData.totalPnlPercent > 0 ? '+' : '' }}{{ portfolioData.totalPnlPercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-card win-ratio">
+        <div class="card-content">
+          <div class="stat-info">
+            <span class="stat-label">Win Rate</span>
+            <h3 class="stat-value">{{ portfolioData.winRatio | number:'1.0-2' }}%</h3>
+          </div>
+          <div class="stat-icon">
+            <i class="rate-icon"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-trades">{{ portfolioData.totalTrades }} trades</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique de performance -->
+    <div class="performance-chart-container">
+      <div class="chart-header">
+        <h3 class="chart-title">Performance History</h3>
+        <div class="chart-period-selector">
+          <button class="period-btn" *ngFor="let period of periods" [ngClass]="{'active': selectedPeriod === period}"
+            (click)="changePeriod(period)">
+            {{ period }}
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-wrapper">
+        <!-- Emplacement pour le graphique de performance -->
+        <div class="performance-chart">
+          <canvas #performanceChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ventilation des performances -->
+    <div class="performance-breakdown">
+      <div class="breakdown-container">
+        <div class="breakdown-header">
+          <h3 class="breakdown-title">Win/Loss Ratio</h3>
+        </div>
+
+        <div class="ratio-visualizer">
+          <div class="ratio-bar">
+            <div class="ratio-segment wins" [style.width.%]="portfolioData.winRatio">
+              <span *ngIf="portfolioData.winRatio >= 20">{{ portfolioData.winRatio | number:'1.0-2' }}%</span>
+            </div>
+            <div class="ratio-segment losses" [style.width.%]="100 - portfolioData.winRatio">
+              <span *ngIf="100 - portfolioData.winRatio >= 20">{{ 100 - portfolioData.winRatio | number:'1.0-2'
+                }}%</span>
+            </div>
+          </div>
+
+          <div class="ratio-legend">
+            <div class="legend-item">
+              <div class="legend-color wins"></div>
+              <span class="legend-label">Winning Trades</span>
+              <span class="legend-value">{{ portfolioData.winCount }} trades</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color losses"></div>
+              <span class="legend-label">Losing Trades</span>
+              <span class="legend-value">{{ portfolioData.lossCount }} trades</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="breakdown-container">
+        <div class="breakdown-header">
+          <h3 class="breakdown-title">Assets Breakdown</h3>
+        </div>
+
+        <div class="assets-list">
+          <div class="asset-item" *ngFor="let asset of portfolioData.assets">
+            <div class="asset-info">
+              <div class="asset-icon" [style.background-color]="asset.color">
+                {{ asset.symbol.substring(0, 2) }}
+              </div>
+              <div class="asset-details">
+                <span class="asset-name">{{ asset.name }}</span>
+                <span class="asset-allocation">{{ asset.allocation | number:'1.2-2' }}%</span>
+              </div>
+            </div>
+            <div class="asset-value">
+              <span class="current-value">{{ asset.value | currency:'USDC ':'symbol':'1.2-2' }}</span>
+              <span class="value-change" [ngClass]="asset.change >= 0 ? 'positive' : 'negative'">
+                {{ asset.change > 0 ? '+' : '' }}{{ asset.change | number:'1.2-2' }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de retrait des fonds -->
+<div class="modal-overlay" *ngIf="showWithdrawModal" (click)="closeWithdrawModal($event)">
+  <div class="withdraw-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">Withdraw Funds</h3>
+      <button class="modal-close-button" (click)="closeWithdrawModal($event)">
+        <i class="close-icon"></i>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="available-balance">
+        <div class="balance-info">
+          <span class="balance-label">Available Balance</span>
+          <h3 class="balance-value">{{ portfolioData.totalBalance | currency:'USDC ':'symbol':'1.2-2' }}</h3>
+        </div>
+      </div>
+
+      <form class="withdraw-form" [formGroup]="withdrawForm">
+        <div class="form-group">
+          <label for="destination">Destination Portfolio</label>
+          <input id="destination" formControlName="destination" class="form-control"
+            placeholder="Enter crypto wallet address" autocomplete="off">
+          <div class="form-error"
+            *ngIf="withdrawForm.get('destination')?.errors?.['required'] && withdrawForm.get('destination')?.touched">
+            Please select a destination portfolio
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount to Withdraw</label>
+          <div class="amount-input-wrapper">
+            <span class="currency-symbol">$</span>
+            <input type="number" id="amount" formControlName="amount" class="form-control amount-input"
+              placeholder="0.00" [max]="portfolioData.totalBalance" step="0.01">
+            <button type="button" class="max-amount-btn" (click)="setMaxAmount()">MAX</button>
+          </div>
+          <div class="form-error"
+            *ngIf="withdrawForm.get('amount')?.errors?.['required'] && withdrawForm.get('amount')?.touched">
+            Please enter an amount
+          </div>
+          <div class="form-error"
+            *ngIf="withdrawForm.get('amount')?.errors?.['max'] && withdrawForm.get('amount')?.touched">
+            Amount exceeds available balance
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes (Optional)</label>
+          <textarea id="notes" formControlName="notes" class="form-control"
+            placeholder="Add any notes about this withdrawal" rows="3"></textarea>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <div class="withdrawal-summary" *ngIf="withdrawForm.get('amount')?.value">
+        <div class="summary-row">
+          <span class="summary-label">Amount</span>
+          <span class="summary-value">{{ withdrawForm.get('amount')?.value | currency:'USDC ':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Transaction Fee</span>
+          <span class="summary-value">$0.00</span>
+        </div>
+        <div class="divider"></div>
+        <div class="summary-row total">
+          <span class="summary-label">Total</span>
+          <span class="summary-value">{{ withdrawForm.get('amount')?.value | currency:'USDC ':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeWithdrawModal($event)">Cancel</button>
+        <button class="withdraw-btn" [disabled]="!withdrawForm.valid || withdrawForm.pristine"
+          (click)="confirmWithdrawal()">
+          <i class="withdraw-icon"></i>
+          Confirm Withdrawal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

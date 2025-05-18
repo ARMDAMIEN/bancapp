@@ -1,0 +1,417 @@
+<div class="admin-dashboard">
+  <!-- Ajouter ceci juste après le header -->
+  <div class="message-container" *ngIf="message">
+    <div class="message">{{ message }}</div>
+  </div>
+
+  <div class="tabs-navigation">
+    <div class="tab-button" [ngClass]="{'active': activeTab === 'deposits'}" (click)="setActiveTab('deposits')">
+      <i class="deposit-icon"></i>
+      <span>Deposits</span>
+      <div class="tab-count">{{ filteredDeposits.length }}</div>
+    </div>
+    <div class="tab-button" [ngClass]="{'active': activeTab === 'withdrawals'}" (click)="setActiveTab('withdrawals')">
+      <i class="withdraw-icon"></i>
+      <span>Withdrawals</span>
+      <div class="tab-count">{{ filteredWithdrawals.length }}</div>
+    </div>
+  </div>
+
+  <div class="admin-content">
+    <!-- Filter Section -->
+    <section class="admin-section filter-section">
+      <div class="section-header">
+        <h2 class="section-title">Filters</h2>
+      </div>
+
+      <div class="section-content">
+        <div class="filters-container">
+          <div class="filter-group">
+            <label for="search" class="filter-label">Search</label>
+            <div class="input-wrapper search-wrapper">
+              <i class="search-icon"></i>
+              <input type="text" id="search" class="form-input search-input" [(ngModel)]="searchTerm"
+                placeholder="Search by User ID, Wallet or Transaction ID" (input)="applyFilters()">
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="status-filter" class="filter-label">Deposit Status</label>
+            <div class="select-wrapper">
+              <select id="status-filter" class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <i class="dropdown-icon"></i>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="network-filter" class="filter-label">Wallet Network</label>
+            <div class="select-wrapper">
+              <select id="network-filter" class="form-select" [(ngModel)]="networkFilter" (change)="applyFilters()">
+                <option value="all">All Networks</option>
+                <option value="ethereum">Ethereum (USDC)</option>
+                <option value="tron">Tron (USDC)</option>
+                <option value="solana">Solana (USDC)</option>
+                <option value="polygon">Polygon (USDC)</option>
+              </select>
+              <i class="dropdown-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deposits List Section -->
+    <section class="admin-section deposits-section" *ngIf="activeTab === 'deposits'">
+      <div class="section-header">
+        <h2 class="section-title">Deposits</h2>
+        <div class="list-count">{{ filteredDeposits.length }} {{ filteredDeposits.length === 1 ? 'deposit' : 'deposits'
+          }}</div>
+      </div>
+
+      <div class="section-content">
+        <div class="deposits-container">
+          <div class="deposits-list-header">
+            <div class="deposit-header user-col">User</div>
+            <div class="deposit-header wallet-col">Wallet Details</div>
+            <div class="deposit-header amount-col">Amount</div>
+            <div class="deposit-header date-col">Date</div>
+            <div class="deposit-header status-col">Status</div>
+            <div class="deposit-header actions-col">Actions</div>
+          </div>
+
+          <div class="deposits-list">
+            <div class="empty-list" *ngIf="filteredDeposits.length === 0">
+              <div class="empty-icon"></div>
+              <p class="empty-text">No deposits found</p>
+            </div>
+
+            <div class="deposit-item" *ngFor="let deposit of filteredDeposits">
+              <div class="deposit-cell user-col">
+                <div class="user-info">
+                  <div class="user-id">#{{ deposit.userId }}</div>
+                  <div class="user-email" *ngIf="getUserEmail(deposit.userId)">
+                    {{ getUserEmail(deposit.userId) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="deposit-cell wallet-col">
+                <div class="wallet-info">
+                  <div class="wallet-network">{{ deposit.walletNetwork }}</div>
+                  <div class="wallet-address">{{ truncateAddress(deposit.walletAddress) }}</div>
+                  <div class="wallet-verification"
+                    [ngClass]="deposit.confirmWalletOwnership ? 'verified' : 'unverified'">
+                    {{ deposit.confirmWalletOwnership ? 'Verified' : 'Unverified' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="deposit-cell amount-col">
+                <div class="deposit-amount">{{ deposit.depositAmount | number:'1.2-2' }} USDC</div>
+                <div class="transaction-id" *ngIf="deposit.transactionId">
+                  <span class="label">TX:</span> {{ truncateAddress(deposit.transactionId) }}
+                </div>
+              </div>
+
+              <div class="deposit-cell date-col">
+                <div class="date-created">{{ deposit.createdAt | date:'medium' }}</div>
+                <div class="date-updated" *ngIf="deposit.updatedAt">
+                  <span class="label">Updated:</span> {{ deposit.updatedAt | date:'short' }}
+                </div>
+              </div>
+
+              <div class="deposit-cell status-col">
+                <div class="status-badge" [ngClass]="getStatusClass(deposit)">
+                  {{ getStatusLabel(deposit) }}
+                </div>
+              </div>
+
+              <div class="deposit-cell actions-col">
+                <div class="action-buttons">
+                  <button class="action-btn approve-btn" *ngIf="isPending(deposit)" (click)="approveDeposit(deposit.id)"
+                    [disabled]="isProcessing">
+                    <i class="approve-icon"></i>
+                    <span>Approve</span>
+                  </button>
+
+                  <button class="action-btn reject-btn" *ngIf="isPending(deposit)" (click)="rejectDeposit(deposit.id)"
+                    [disabled]="isProcessing">
+                    <i class="reject-icon"></i>
+                    <span>Reject</span>
+                  </button>
+
+                  <button class="action-btn view-btn" (click)="viewDepositDetails(deposit)">
+                    <i class="view-icon"></i>
+                    <span>View</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" *ngIf="totalPages > 1">
+            <button class="page-btn prev-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+              <i class="prev-icon"></i>
+            </button>
+
+            <div class="page-info">
+              Page {{ currentPage }} of {{ totalPages }}
+            </div>
+
+            <button class="page-btn next-btn" [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)">
+              <i class="next-icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-section withdrawals-section" *ngIf="activeTab === 'withdrawals'">
+      <div class="section-header">
+        <h2 class="section-title">Withdrawals</h2>
+        <div class="list-count">{{ filteredWithdrawals.length }} {{ filteredWithdrawals.length === 1 ? 'withdrawal' :
+          'withdrawals' }}</div>
+      </div>
+
+      <div class="section-content">
+        <div class="withdrawals-container">
+          <div class="withdrawals-list-header">
+            <div class="withdrawal-header user-col">User</div>
+            <div class="withdrawal-header destination-col">Destination Address</div>
+            <div class="withdrawal-header amount-col">Amount</div>
+            <div class="withdrawal-header status-col">Status</div>
+            <div class="withdrawal-header actions-col">Actions</div>
+          </div>
+
+          <div class="withdrawals-list">
+            <div class="empty-list" *ngIf="filteredWithdrawals.length === 0">
+              <div class="empty-icon"></div>
+              <p class="empty-text">No withdrawals found</p>
+            </div>
+
+            <div class="withdrawal-item" *ngFor="let withdrawal of filteredWithdrawals">
+              <div class="withdrawal-cell user-col" data-label="User">
+                <div class="user-info">
+                  <div class="user-name">{{ withdrawal.username }}</div>
+                </div>
+              </div>
+
+              <div class="withdrawal-cell destination-col" data-label="Destination">
+                <div class="wallet-info">
+                  <div class="wallet-address">{{ truncateAddress(withdrawal.destinationAddress) }}</div>
+                </div>
+              </div>
+
+              <div class="withdrawal-cell amount-col" data-label="Amount">
+                <div class="withdrawal-amount">{{ withdrawal.amount | number:'1.2-2' }} USDC</div>
+              </div>
+
+              <div class="withdrawal-cell status-col" data-label="Status">
+                <div class="status-badge" [ngClass]="withdrawal.completed ? 'status-confirmed' : 'status-pending'">
+                  {{ withdrawal.completed ? 'Completed' : 'Pending' }}
+                </div>
+              </div>
+
+              <div class="withdrawal-cell actions-col" data-label="Actions">
+                <div class="action-buttons">
+                  <button class="action-btn approve-btn" *ngIf="!withdrawal.completed"
+                    (click)="approveWithdrawal(withdrawal)" [disabled]="isProcessing">
+                    <i class="approve-icon"></i>
+                    <span>Complete</span>
+                  </button>
+
+                  <button class="action-btn view-btn" (click)="viewWithdrawalDetails(withdrawal)">
+                    <i class="view-icon"></i>
+                    <span>View</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination pour les retraits -->
+          <div class="pagination" *ngIf="withdrawalTotalPages > 1">
+            <button class="page-btn prev-btn" [disabled]="withdrawalCurrentPage === 1"
+              (click)="goToWithdrawalPage(withdrawalCurrentPage - 1)">
+              <i class="prev-icon"></i>
+            </button>
+
+            <div class="page-info">
+              Page {{ withdrawalCurrentPage }} of {{ withdrawalTotalPages }}
+            </div>
+
+            <button class="page-btn next-btn" [disabled]="withdrawalCurrentPage === withdrawalTotalPages"
+              (click)="goToWithdrawalPage(withdrawalCurrentPage + 1)">
+              <i class="next-icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deposit Detail Modal (would be shown when clicking View) -->
+    <div class="modal-overlay" *ngIf="selectedDeposit">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">Deposit Details</h3>
+          <button class="close-btn" (click)="closeDepositDetails()">
+            <i class="close-icon"></i>
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <div class="detail-item">
+            <div class="detail-label">Deposit ID</div>
+            <div class="detail-value">{{ selectedDeposit.id }}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">User ID</div>
+            <div class="detail-value">{{ selectedDeposit.userId }}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">User Details</div>
+            <div class="detail-value user-details" *ngIf="selectedUser">
+              <div>{{ selectedUser.firstname }} {{ selectedUser.lastname }}</div>
+              <div>{{ selectedUser.email }}</div>
+              <div>{{ selectedUser.phoneNumber }}</div>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Network</div>
+            <div class="detail-value">{{ selectedDeposit.walletNetwork }}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Wallet Address</div>
+            <div class="detail-value with-copy">
+              <span>{{ selectedDeposit.walletAddress }}</span>
+              <button class="copy-btn" (click)="copyToClipboard(selectedDeposit.walletAddress)">
+                <i class="copy-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value">{{ selectedDeposit.depositAmount | number:'1.2-2' }} USDC</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Transaction ID</div>
+            <div class="detail-value with-copy" *ngIf="selectedDeposit.transactionId">
+              <span>{{ selectedDeposit.transactionId }}</span>
+              <button class="copy-btn" (click)="copyToClipboard(selectedDeposit.transactionId)">
+                <i class="copy-icon"></i>
+              </button>
+            </div>
+            <div class="detail-value" *ngIf="!selectedDeposit.transactionId">Not provided</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Wallet Ownership</div>
+            <div class="detail-value verification"
+              [ngClass]="selectedDeposit.confirmWalletOwnership ? 'verified' : 'unverified'">
+              {{ selectedDeposit.confirmWalletOwnership ? 'Verified' : 'Unverified' }}
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Deposit Status</div>
+            <div class="detail-value verification"
+              [ngClass]="selectedDeposit.confirmDeposit ? 'verified' : 'unverified'">
+              {{ selectedDeposit.confirmDeposit ? 'Confirmed' : 'Pending' }}
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Created</div>
+            <div class="detail-value">{{ selectedDeposit.createdAt | date:'medium' }}</div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedDeposit.updatedAt">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value">{{ selectedDeposit.updatedAt | date:'medium' }}</div>
+          </div>
+        </div>
+
+        <div class="modal-actions" *ngIf="isPending(selectedDeposit)">
+          <button class="modal-btn approve-btn" (click)="approveDeposit(selectedDeposit.id); closeDepositDetails()"
+            [disabled]="isProcessing">
+            Approve Deposit
+          </button>
+          <button class="modal-btn reject-btn" (click)="rejectDeposit(selectedDeposit.id); closeDepositDetails()"
+            [disabled]="isProcessing">
+            Reject Deposit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="selectedWithdrawal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">Withdrawal Details</h3>
+          <button class="close-btn" (click)="closeWithdrawalDetails()">
+            <i class="close-icon"></i>
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <div class="detail-item">
+            <div class="detail-label">Username</div>
+            <div class="detail-value">{{ selectedWithdrawal.username }}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Destination Address</div>
+            <div class="detail-value with-copy">
+              <span>{{ selectedWithdrawal.destinationAddress }}</span>
+              <button class="copy-btn" (click)="copyToClipboard(selectedWithdrawal.destinationAddress)">
+                <i class="copy-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value">{{ selectedWithdrawal.amount | number:'1.2-2' }} USDC</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value verification" [ngClass]="selectedWithdrawal.completed ? 'verified' : 'unverified'">
+              {{ selectedWithdrawal.completed ? 'Completed' : 'Pending' }}
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedWithdrawal.createdAt">
+            <div class="detail-label">Created</div>
+            <div class="detail-value">{{ selectedWithdrawal.createdAt | date:'medium' }}</div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedWithdrawal.completedAt">
+            <div class="detail-label">Completed At</div>
+            <div class="detail-value">{{ selectedWithdrawal.completedAt | date:'medium' }}</div>
+          </div>
+        </div>
+
+        <div class="modal-actions" *ngIf="!selectedWithdrawal.completed">
+          <button class="modal-btn approve-btn"
+            (click)="approveWithdrawal(selectedWithdrawal); closeWithdrawalDetails()" [disabled]="isProcessing">
+            Complete Withdrawal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

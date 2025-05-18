@@ -1,0 +1,72 @@
+<div class="live-view-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="logo-container">
+    </div>
+    <div class="header-controls flex-m">
+      <div class="market-status">
+        <div class="status-indicator online"></div>
+        <span class="status-text">Open Market</span>
+      </div>
+      <div class="account-info">
+        <span class="balance">Balance: <span class="balance-amount">{{balance | number:'1.0-2'}} USDC</span></span>
+        <button class="user-profile-btn">
+          <i class="profile-icon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Chart Section -->
+    <section class="chart-section">
+      <div class="chart-header">
+        <div class="chart-title-container">
+          <h2 class="chart-title">BTC/USDC</h2>
+          <span class="price-display">32,456.78</span>
+          <span class="price-change positive">+2.34%</span>
+        </div>
+        <div class="chart-controls">
+          <div class="timeframe-selector">
+            <button class="timeframe-btn">1m</button>
+            <button class="timeframe-btn active">5m</button>
+            <button class="timeframe-btn">15m</button>
+            <button class="timeframe-btn">1h</button>
+            <button class="timeframe-btn">4h</button>
+            <button class="timeframe-btn">1d</button>
+          </div>
+          <div class="chart-options">
+            <button class="chart-option-btn">
+              <i class="settings-icon"></i>
+            </button>
+            <button class="chart-option-btn">
+              <i class="fullscreen-icon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Emplacement pour le composant de graphique -->
+      <div class="chart-component-wrapper">
+        <app-graph></app-graph>
+      </div>
+    </section>
+
+    <!-- Live Trades Section -->
+    <section class="live-trades-section">
+      <div class="section-header">
+        <h3 class="section-title">Lives Trades</h3>
+        <div class="section-controls">
+          <button class="view-all-btn">Previous Trades</button>
+          <div class="filter-dropdown">
+            <button class="filter-btn">Filter <i class="filter-icon"></i></button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Emplacement pour le composant de trades en direct -->
+      <app-live-trades></app-live-trades>
+    </section>
+  </main>
+</div>

@@ -1,0 +1,219 @@
+<div class="admin-dashboard">
+  <header class="admin-header">
+    <h1 class="admin-title">Admin Dashboard</h1>
+    <div class="admin-actions">
+      <button class="refresh-button" (click)="refreshUserList()">
+        <i class="refresh-icon"></i>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="admin-content">
+    <!-- User Selection Section -->
+    <section class="admin-section user-selection-section">
+      <div class="section-header">
+        <h2 class="section-title">User Management</h2>
+      </div>
+      
+      <div class="section-content">
+        <div class="user-selector-container">
+          <label for="user-select" class="select-label">Select User</label>
+          <div class="select-wrapper">
+            <select 
+              id="user-select" 
+              class="user-select" 
+              [(ngModel)]="selectedUserId" 
+              (change)="onUserSelect()">
+              <option value="" disabled>-- Select a user --</option>
+              <option *ngFor="let user of users" [value]="user.id">
+                {{ user.fullName }} ({{ user.email }})
+              </option>
+            </select>
+            <i class="dropdown-icon"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- User Details Section -->
+    <section class="admin-section user-details-section" *ngIf="selectedUser">
+      <div class="section-header">
+        <h2 class="section-title">User Details</h2>
+      </div>
+      
+      <div class="section-content">
+        <div class="user-info-card">
+          <div class="user-info-header">
+            <div class="user-avatar" [style.background-color]="selectedUser.avatarColor">
+              {{ selectedUser.initials }}
+            </div>
+            <div class="user-primary-info">
+              <h3 class="user-name">{{ selectedUser.fullName }}</h3>
+              <p class="user-email">{{ selectedUser.email }}</p>
+            </div>
+            <div class="user-status" [ngClass]="selectedUser.status.toLowerCase()">
+              {{ selectedUser.status }}
+            </div>
+          </div>
+          
+          <div class="user-info-body">
+            <div class="info-group">
+              <div class="info-item">
+                <span class="info-label">Account ID</span>
+                <span class="info-value">{{ selectedUser.id }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Joined</span>
+                <span class="info-value">{{ selectedUser.joinDate | date:'mediumDate' }}</span>
+              </div>
+            </div>
+            
+            <div class="info-group">
+              <div class="info-item">
+                <span class="info-label">Current Balance</span>
+                <span class="info-value balance-value">{{ selectedUser.balance | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Last Login</span>
+                <span class="info-value">{{ selectedUser.lastLogin | date:'short' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Funds Section -->
+    <section class="admin-section add-funds-section" *ngIf="selectedUser">
+      <div class="section-header">
+        <h2 class="section-title">Add Funds</h2>
+      </div>
+      
+      <div class="section-content">
+        <form class="add-funds-form" (ngSubmit)="addFunds()" #fundsForm="ngForm">
+          <div class="form-group">
+            <label for="amount" class="form-label">Amount (USD)</label>
+            <div class="input-wrapper">
+              <span class="currency-symbol">$</span>
+              <input 
+                type="number" 
+                id="amount" 
+                class="form-input" 
+                [(ngModel)]="fundAmount" 
+                name="amount"
+                min="1"
+                step="0.01"
+                required
+                placeholder="Enter amount">
+            </div>
+            <span class="helper-text">Minimum $1.00</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="description" class="form-label">Description (Optional)</label>
+            <textarea 
+              id="description" 
+              class="form-textarea" 
+              [(ngModel)]="fundDescription" 
+              name="description"
+              placeholder="Enter a description for this transaction"
+              rows="3"></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="form-submit-btn" 
+              [disabled]="!fundsForm.valid || fundAmount <= 0"
+              [class.loading]="isSubmitting">
+              <span *ngIf="!isSubmitting">Add Funds</span>
+              <span *ngIf="isSubmitting" class="spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Remove Funds Section -->
+<section class="admin-section remove-funds-section" *ngIf="selectedUser">
+  <div class="section-header">
+    <h2 class="section-title">Remove Funds</h2>
+  </div>
+  
+  <div class="section-content">
+    <form class="remove-funds-form" (ngSubmit)="removeFunds()" #removeFundsForm="ngForm">
+      <div class="form-group">
+        <label for="removeAmount" class="form-label">Amount (USD)</label>
+        <div class="input-wrapper">
+          <span class="currency-symbol">$</span>
+          <input 
+            type="number" 
+            id="removeAmount" 
+            class="form-input" 
+            [(ngModel)]="removeFundAmount" 
+            name="removeAmount"
+            min="1"
+            step="0.01"
+            required
+            placeholder="Enter amount">
+        </div>
+        <span class="helper-text">Available: {{ selectedUser.balance | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="removeDescription" class="form-label">Description (Optional)</label>
+        <textarea 
+          id="removeDescription" 
+          class="form-textarea" 
+          [(ngModel)]="removeFundDescription" 
+          name="removeDescription"
+          placeholder="Enter a description for this transaction"
+          rows="3"></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="form-submit-btn remove-btn" 
+          [disabled]="!removeFundsForm.valid || removeFundAmount <= 0 || removeFundAmount > selectedUser.balance"
+          [class.loading]="isSubmitting">
+          <span *ngIf="!isSubmitting">Remove Funds</span>
+          <span *ngIf="isSubmitting" class="spinner"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+    <!-- Transaction History Section -->
+    <section class="admin-section transaction-history-section" *ngIf="selectedUser && selectedUser.transactions?.length">
+      <div class="section-header">
+        <h2 class="section-title">Transaction History</h2>
+      </div>
+      
+      <div class="section-content">
+        <div class="transactions-list">
+          <div class="transaction-item" *ngFor="let transaction of selectedUser.transactions">
+            <div class="transaction-details">
+              <div class="transaction-type" [ngClass]="transaction.type.toLowerCase()">
+                {{ transaction.type }}
+              </div>
+              <div class="transaction-description">
+                {{ transaction.description || 'Fund deposit' }}
+              </div>
+            </div>
+            <div class="transaction-info">
+              <div class="transaction-amount" [ngClass]="transaction.type === 'DEPOSIT' ? 'positive' : 'negative'">
+                {{ transaction.type === 'DEPOSIT' ? '+' : '-' }}{{ transaction.amount | currency:'USD':'symbol':'1.2-2' }}
+              </div>
+              <div class="transaction-date">
+                {{ transaction.date | date:'short' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

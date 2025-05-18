@@ -1,0 +1,130 @@
+<div class="live-trades-wrapper">
+  <div class="trades-filters">
+    <div class="filters-group">
+      <div class="filter-item">
+        <label for="pair-filter" class="filter-label">Pair</label>
+        <select id="pair-filter" class="filter-select" [(ngModel)]="selectedPair">
+          <option value="all">All</option>
+          <option *ngFor="let pair of availablePairs" [value]="pair">{{ pair }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="type-filter" class="filter-label">Type</label>
+        <select id="type-filter" class="filter-select" [(ngModel)]="selectedType">
+          <option value="all">All</option>
+          <option value="buy">Buy</option>
+          <option value="sell">Sell</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="direction-filter" class="filter-label">Direction</label>
+        <select id="direction-filter" class="filter-select" [(ngModel)]="selectedDirection">
+          <option value="all">All</option>
+          <option value="long">Long</option>
+          <option value="short">Short</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="trades-stats">
+      <div class="stat-item">
+        <span class="stat-label">Total Trades</span>
+        <span class="stat-value">{{ trades.length }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Profitable</span>
+        <span class="stat-value profit">{{ profitableCount }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Unprofitable</span>
+        <span class="stat-value loss">{{ unprofitableCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="trades-container">
+    <div class="trades-table-wrapper">
+      <table class="trades-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Direction</th>
+            <th>Pair</th>
+            <th>Entry Price</th>
+            <th>Exit Price</th>
+            <th>Amount</th>
+            <th>Profit/Loss</th>
+            <th>Profit %</th>
+            <th>Open Time</th>
+            <th>Close Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredTrades.length === 0" class="empty-trades">
+            <td colspan="12">No trades match your filters</td>
+          </tr>
+
+          <tr *ngFor="let trade of filteredTrades" class="trade-row" [ngClass]="{'active': trade.status === 'active'}">
+            <td class="trade-id">#{{ trade.id }}</td>
+            <td class="trade-type" [ngClass]="trade.type">
+              {{ trade.type === 'buy' ? 'Buy' : 'Sell' }}
+            </td>
+            <td class="trade-direction" [ngClass]="trade.direction.toLowerCase()">
+              {{ trade.direction }}
+            </td>
+            <td>{{ 0 }}</td>
+            <td>{{ trade.entryPrice | number:'1.2-8' }}</td>
+            <td>{{ trade.displayExitPrice ? (trade.exitPrice | number:'1.2-8') : '-' }}</td>
+            <td>{{ trade.amount | number:'1.2-6' }}</td>
+            <td class="pnl" [ngClass]="getPnlClass(trade)">
+              <span *ngIf=" trade.displayProfit">
+                {{ trade.displayProfit > 0 ? '+' : '' }}{{ trade.displayProfit | number:'1.2-2' }} USDC
+              </span>
+              <span *ngIf="trade.status === 'active'">In progress</span>
+            </td>
+            <td class="profit-percent" [ngClass]="getPnlClass(trade)">
+              <span *ngIf="trade.profitPercent && trade.status === 'completed'">
+                {{ trade.profitPercent > 0 ? '+' : '' }}{{ trade.profitPercent | number:'1.2-2' }}%
+              </span>
+              <span *ngIf="trade.status === 'active'">-</span>
+            </td>
+            <td>{{ trade.createdAt ? (getDisplayDate(trade.createdAt)) : '-' }}</td>
+            <td>{{ trade.closedAt ? (getDisplayDate(trade.closedAt)) : '-' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="trade.displayStatus || trade.status">
+                {{ trade.displayStatus === 'closed' ? 'Closed' : 'Active' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="trades-actions">
+    <div class="pagination">
+      <button class="pagination-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+        <i class="chevron-left-icon"></i>
+      </button>
+      <span class="page-info">Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+        <i class="chevron-right-icon"></i>
+      </button>
+    </div>
+
+    <div class="page-size">
+      <label for="page-size" class="page-size-label">Show</label>
+      <select id="page-size" class="page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+        <option [value]="10">10</option>
+        <option [value]="20">20</option>
+        <option [value]="50">50</option>
+        <option [value]="100">100</option>
+      </select>
+      <span class="page-size-label">per page</span>
+    </div>
+  </div>
+</div>
