@@ -2,7 +2,7 @@ import { Inject, Injectable, PLATFORM_ID, TransferState, makeStateKey } from "@a
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { isPlatformServer } from "@angular/common";
-import { environment } from "../environment/environment-prod";
+import { environment } from "../environments/environment";
 
 const TOKEN_KEY = makeStateKey<string>('authToken');
 

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
-import { environment } from '../../environment/environment';
+import { environment } from '../../environments/environment';
 import { WithdrawDTO } from '../../interfaces/withdraw-dto';
 import { WithdrawService } from '../../services/withdrawal.service';
 
