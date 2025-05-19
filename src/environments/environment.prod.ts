@@ -1,6 +1,6 @@
 // src/environment/environment-prod.ts
 export const environment = {
   production: true,
-  finnhubApiKey: process.env['FINNHUB_API_KEY'],
-  apiUrl: process.env['API_URL']
+  finnhubApiKey: 'd0fieg1r01qsv9ehn9kgd0fieg1r01qsv9ehn9l0',
+  apiUrl: 'https://tradingcryptobot-be-ae06e674d043.herokuapp.com'
 };
