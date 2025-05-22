@@ -101,3 +101,179 @@
 :host ::ng-deep .apexcharts-menu-item:hover {
   background: var(--indigo-dark) !important;
 }
+
+/* Ajustements responsives pour ApexCharts */
+:host ::ng-deep .apexcharts-canvas {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:host ::ng-deep .apexcharts-graphical {
+  width: 100% !important;
+}
+
+:host ::ng-deep .apexcharts-tooltip {
+  font-size: 12px;
+}
+
+/* Media queries pour les différentes tailles d'écran */
+@media (max-width: 1200px) {
+  .chart-container {
+    min-height: 280px;
+  }
+  
+  :host ::ng-deep .apexcharts-xaxis-label,
+  :host ::ng-deep .apexcharts-yaxis-label {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .chart-container {
+    min-height: 260px;
+  }
+  
+  :host ::ng-deep .apexcharts-text tspan {
+    font-size: 10px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-legend-text {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    min-height: 240px;
+  }
+  
+  :host ::ng-deep .apexcharts-toolbar {
+    transform: scale(0.9);
+    transform-origin: top right;
+  }
+  
+  :host ::ng-deep .apexcharts-menu {
+    min-width: 120px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-tooltip {
+    padding: 5px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-tooltip-title {
+    padding: 3px 5px !important;
+    margin-bottom: 3px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .chart-container {
+    min-height: 220px;
+  }
+  
+  .loading-spinner {
+    width: 36px;
+    height: 36px;
+    border-width: 2.5px;
+    margin-bottom: 12px;
+  }
+  
+  :host ::ng-deep .apexcharts-canvas {
+    padding: 0 !important;
+  }
+  
+  :host ::ng-deep .apexcharts-toolbar {
+    transform: scale(0.85);
+  }
+  
+  :host ::ng-deep .apexcharts-legend {
+    padding: 5px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-yaxis-label,
+  :host ::ng-deep .apexcharts-xaxis-label {
+    font-size: 9px !important;
+  }
+  
+  /* Augmente légèrement l'espacement des marqueurs pour une meilleure touche sur mobile */
+  :host ::ng-deep .apexcharts-series-markers.apexcharts-series-line {
+    transform: scale(1.2);
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    min-height: 200px;
+  }
+  
+  :host ::ng-deep .apexcharts-legend-marker {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-legend-text {
+    font-size: 10px !important;
+    margin-left: 5px !important;
+  }
+  
+  /* Optimisation des étiquettes sur l'axe X pour petits écrans */
+  :host ::ng-deep .apexcharts-xaxis-label {
+    transform: rotate(-20deg) translateY(10px) !important;
+    text-anchor: start !important;
+  }
+  
+  :host ::ng-deep .apexcharts-yaxis-title {
+    font-size: 10px !important;
+  }
+}
+
+/* Pour assurer la compatibilité sur très petits écrans */
+@media (max-width: 375px) {
+  .chart-container {
+    min-height: 180px;
+  }
+  
+  /* Masquer certains éléments non-essentiels sur les très petits écrans */
+  :host ::ng-deep .apexcharts-legend-marker {
+    width: 7px !important;
+    height: 7px !important;
+  }
+  
+  :host ::ng-deep .apexcharts-toolbar {
+    transform: scale(0.8);
+  }
+  
+  /* Assurer que les tooltips restent dans les limites sur petits écrans */
+  :host ::ng-deep .apexcharts-tooltip {
+    max-width: 160px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+/* Pour les écrans en orientation paysage sur mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .chart-container {
+    min-height: 150px;
+  }
+  
+  :host ::ng-deep .apexcharts-legend {
+    padding: 2px !important;
+  }
+}
+
+/* Optimisation pour l'écart entre les barres/candles sur différentes tailles d'écran */
+@media (max-width: 992px) {
+  :host ::ng-deep .apexcharts-bar-series .apexcharts-bar,
+  :host ::ng-deep .apexcharts-candlestick-series .apexcharts-candlestick {
+    stroke-width: 1px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  :host ::ng-deep .apexcharts-bar-series .apexcharts-bar,
+  :host ::ng-deep .apexcharts-candlestick-series .apexcharts-candlestick {
+    width: 4px !important;
+    stroke-width: 0.8px !important;
+  }
+}

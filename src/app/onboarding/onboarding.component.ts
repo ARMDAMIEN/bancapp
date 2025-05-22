@@ -188,7 +188,7 @@ export class OnboardingComponent implements OnInit {
 
   navigateToDashboard(): void {
     // Navigate to the dashboard
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/live-view']);
   }
 
   get wallet() {

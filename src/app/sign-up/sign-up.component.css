@@ -190,8 +190,69 @@
     height: 30px;
 }
 
+/* Style pour les messages d'erreur */
+.error {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.p-t-10 {
+    padding-top: 10px;
+}
+
+/* Style pour les boutons principaux (s'il n'est pas déjà défini dans vos styles globaux) */
+.primary-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--indigo-dark, #4338ca);
+    color: var(--text-light, #ffffff);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+    background-color: var(--indigo-light, #6366f1);
+}
+
+.primary-btn:disabled {
+    background-color: var(--text-muted, #6b7280);
+    cursor: not-allowed;
+}
+
+.accent-link {
+    color: var(--indigo-light, #6366f1);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.accent-link:hover {
+    text-decoration: underline;
+}
+
 /* Media queries pour responsivité */
-@media (max-width: 768px) {
+/* Tablettes */
+@media screen and (max-width: 1024px) {
+    .img {
+        width: 200px;
+        height: 60px;
+    }
+    
+    .form-ctn {
+        max-width: 350px;
+    }
+    
+    .welcome-text {
+        font-size: 26px;
+    }
+}
+
+/* Petites tablettes et grands téléphones */
+@media screen and (max-width: 768px) {
     .login-container {
         flex-direction: column;
     }
@@ -204,5 +265,162 @@
     .sect-right {
         width: 100%;
         height: 70%;
+    }
+    
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .sect-form-ctn {
+        height: 75%;
+    }
+    
+    .header-logo-ctn {
+        width: 80%;
+    }
+    
+    .img {
+        width: 180px;
+        height: 55px;
+    }
+    
+    .welcome-text {
+        font-size: 24px;
+    }
+}
+
+/* Smartphones */
+@media screen and (max-width: 480px) {
+    .login-container {
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .sect-left {
+        width: 100%;
+        height: 20%;
+        display: none;
+    }
+    
+    .sect-right {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .header-logo-ctn {
+        width: 90%;
+    }
+    
+    .img {
+        width: 160px;
+        height: 50px;
+    }
+    
+    .form-ctn {
+        padding: 0 15px;
+    }
+    
+    .welcome-text {
+        font-size: 22px;
+    }
+    
+    .form-item {
+        margin-bottom: 12px;
+    }
+    
+    .input-label {
+        font-size: 13px;
+    }
+}
+
+/* Pour les très petits écrans */
+@media screen and (max-width: 375px) {
+    .sect-header-ctn {
+        height: 12%;
+    }
+    
+    .header-logo-ctn {
+        width: 95%;
+    }
+    
+    .img {
+        width: 140px;
+        height: 45px;
+    }
+    
+    .form-ctn {
+        padding: 0 10px;
+    }
+    
+    .welcome-text {
+        font-size: 20px;
+    }
+    
+    .input-label {
+        margin-bottom: 6px;
+    }
+    
+    .password-match-error {
+        font-size: 12px;
+    }
+}
+
+/* Ajustements pour la hauteur */
+@media screen and (max-height: 600px) {
+    .sect-header-ctn {
+        height: 12%;
+    }
+    
+    .sect-form-ctn {
+        height: 88%;
+    }
+    
+    .form-header {
+        margin-bottom: 15px;
+        height: auto;
+    }
+    
+    .form-item {
+        margin-bottom: 10px;
+    }
+    
+    .signup-link {
+        margin-top: 15px;
+    }
+}
+
+/* Orientation paysage sur mobile */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .login-container {
+        flex-direction: row;
+    }
+    
+    .sect-left {
+        display: none;
+    }
+    
+    .sect-right {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .sect-form-ctn {
+        height: 85%;
+    }
+    
+    .form-item {
+        margin-bottom: 8px;
+    }
+    
+    .form {
+        gap: 10px;
     }
 }

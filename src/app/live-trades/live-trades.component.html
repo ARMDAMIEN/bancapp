@@ -11,7 +11,7 @@
 
       <div class="filter-item">
         <label for="type-filter" class="filter-label">Type</label>
-        <select id="type-filter" class="filter-select" [(ngModel)]="selectedType">
+        <select id="type-filter" class="filter-select" [(ngModel)]="selectedType" (change)="applyFiltersAndPagination()">
           <option value="all">All</option>
           <option value="buy">Buy</option>
           <option value="sell">Sell</option>
@@ -20,7 +20,7 @@
 
       <div class="filter-item">
         <label for="direction-filter" class="filter-label">Direction</label>
-        <select id="direction-filter" class="filter-select" [(ngModel)]="selectedDirection">
+        <select id="direction-filter" class="filter-select" [(ngModel)]="selectedDirection" (change)="applyFiltersAndPagination()">
           <option value="all">All</option>
           <option value="long">Long</option>
           <option value="short">Short</option>
@@ -69,32 +69,32 @@
           </tr>
 
           <tr *ngFor="let trade of filteredTrades" class="trade-row" [ngClass]="{'active': trade.status === 'active'}">
-            <td class="trade-id">#{{ trade.id }}</td>
-            <td class="trade-type" [ngClass]="trade.type">
+            <td class="trade-id" data-label="ID">#{{ trade.id }}</td>
+            <td class="trade-type" [ngClass]="trade.type" data-label="Type">
               {{ trade.type === 'buy' ? 'Buy' : 'Sell' }}
             </td>
-            <td class="trade-direction" [ngClass]="trade.direction.toLowerCase()">
+            <td class="trade-direction" [ngClass]="trade.direction.toLowerCase()" data-label="Direction">
               {{ trade.direction }}
             </td>
-            <td>{{ 0 }}</td>
-            <td>{{ trade.entryPrice | number:'1.2-8' }}</td>
-            <td>{{ trade.displayExitPrice ? (trade.exitPrice | number:'1.2-8') : '-' }}</td>
-            <td>{{ trade.amount | number:'1.2-6' }}</td>
-            <td class="pnl" [ngClass]="getPnlClass(trade)">
+            <td data-label="Pair">{{ 0 }}</td>
+            <td data-label="Entry Price">{{ trade.entryPrice | number:'1.2-8' }}</td>
+            <td data-label="Exit Price">{{ trade.displayExitPrice ? (trade.exitPrice | number:'1.2-8') : '-' }}</td>
+            <td data-label="Amount">{{ trade.amount | number:'1.2-6' }}</td>
+            <td class="pnl" [ngClass]="getPnlClass(trade)" data-label="Profit/Loss">
               <span *ngIf=" trade.displayProfit">
                 {{ trade.displayProfit > 0 ? '+' : '' }}{{ trade.displayProfit | number:'1.2-2' }} USDC
               </span>
               <span *ngIf="trade.status === 'active'">In progress</span>
             </td>
-            <td class="profit-percent" [ngClass]="getPnlClass(trade)">
+            <td class="profit-percent" [ngClass]="getPnlClass(trade)" data-label="Profit %">
               <span *ngIf="trade.profitPercent && trade.status === 'completed'">
                 {{ trade.profitPercent > 0 ? '+' : '' }}{{ trade.profitPercent | number:'1.2-2' }}%
               </span>
               <span *ngIf="trade.status === 'active'">-</span>
             </td>
-            <td>{{ trade.createdAt ? (getDisplayDate(trade.createdAt)) : '-' }}</td>
-            <td>{{ trade.closedAt ? (getDisplayDate(trade.closedAt)) : '-' }}</td>
-            <td>
+            <td data-label="Open Time">{{ trade.createdAt ? (getDisplayDate(trade.createdAt)) : '-' }}</td>
+            <td data-label="Close Time">{{ trade.closedAt ? (getDisplayDate(trade.closedAt)) : '-' }}</td>
+            <td data-label="Status">
               <span class="status-badge" [ngClass]="trade.displayStatus || trade.status">
                 {{ trade.displayStatus === 'closed' ? 'Closed' : 'Active' }}
               </span>

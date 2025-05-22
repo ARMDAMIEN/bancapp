@@ -1,3 +1,4 @@
+/* CSS de base avec ajout de styles responsives */
 .login-container {
     display: flex;
     height: 100vh;
@@ -175,4 +176,216 @@
     margin: auto;
     width: 30px;
     height: 30px;
+}
+
+
+.primary-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--indigo-dark, #4338ca);
+    color: var(--text-light, #ffffff);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-btn:hover {
+    background-color: var(--indigo-light, #6366f1);
+}
+
+.primary-btn:disabled {
+    background-color: var(--text-muted, #6b7280);
+    cursor: not-allowed;
+}
+
+.fp-link, .accent-link {
+    color: var(--cyan-electric);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.fp-link:hover, .accent-link:hover {
+    text-decoration: underline;
+}
+
+/* Media queries pour rendre la page responsive */
+
+/* Tablettes */
+@media screen and (max-width: 1024px) {
+    .img {
+        width: 200px;
+        height: 60px;
+    }
+    
+    .form-ctn {
+        width: 80%;
+        max-width: 305px;
+    }
+    
+    .form {
+        width: 100%;
+    }
+}
+
+/* Petites tablettes et grands téléphones */
+@media screen and (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+    
+    .sect-left {
+        width: 100%;
+        height: 30%;
+    }
+    
+    .sect-right {
+        width: 100%;
+        height: 70%;
+    }
+    
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .sect-form-ctn {
+        height: 75%;
+    }
+    
+    .welcome-text {
+        font-size: 24px;
+    }
+}
+
+/* Smartphones */
+@media screen and (max-width: 480px) {
+    .login-container {
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .sect-left {
+        width: 100%;
+        height: 20%;
+        display: none;
+    }
+    
+    .sect-right {
+        width: 100%;
+        height: 80%;
+    }
+    
+    .img {
+        width: 180px;
+        height: 50px;
+    }
+    
+    .header-logo-ctn {
+        width: 90%;
+    }
+    
+    .form-ctn {
+        width: 90%;
+    }
+
+    .form {
+        gap: 50px;
+    }
+    
+    .welcome-text {
+        font-size: 22px;
+    }
+    
+    .form-item {
+        margin-bottom: 15px;
+    }
+    
+    .input-label {
+        font-size: 13px;
+    }
+    
+    .input {
+        height: 38px;
+    }
+    
+    .primary-btn {
+        height: 45px;
+        font-size: 15px;
+    }
+}
+
+/* Pour les très petits écrans */
+@media screen and (max-width: 375px) {
+    .sect-left {
+        height: 15%;
+        display: none;
+    }
+    
+    .sect-right {
+        height: 85%;
+    }
+    
+    .img {
+        width: 150px;
+        height: 45px;
+    }
+    
+    .form-ctn {
+        width: 95%;
+    }
+    
+    .welcome-text {
+        font-size: 20px;
+    }
+}
+
+/* Ajustements pour la hauteur */
+@media screen and (max-height: 600px) {
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .form-item {
+        margin-bottom: 12px;
+    }
+    
+    .forgot-password {
+        margin-bottom: 15px;
+    }
+    
+    .signup-link {
+        margin-top: 15px;
+    }
+}
+
+/* Orientation paysage sur mobile */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .login-container {
+        flex-direction: row;
+    }
+    
+    .sect-left {
+        width: 30%;
+        height: 100%;
+    }
+    
+    .sect-right {
+        width: 70%;
+        height: 100%;
+    }
+    
+    .sect-header-ctn {
+        height: 15%;
+    }
+    
+    .sect-form-ctn {
+        height: 85%;
+        padding: 0;
+    }
+    
+    .form-item {
+        margin-bottom: 10px;
+    }
 }
