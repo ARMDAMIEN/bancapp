@@ -15,11 +15,8 @@ export class HeaderComponent implements OnInit {
   
   // Définition des items de navigation
   navItems = [
-    { path: '/portfolio', label: 'Portfolio', icon: 'dashboard-icon', adminOnly: false },
-    { path: '/live-view', label: 'Live View', icon: 'chart-icon', adminOnly: false },
-    { path: '/addFund', label: 'Add Funds', icon: 'add-icon', adminOnly: false },
-    { path: '/admin-dashboard', label: 'Admin Dashboard', icon: 'admin-icon', adminOnly: true },
-    { path: '/deposits', label: 'Pending Deposits', icon: 'deposit-icon', adminOnly: true }
+    { path: '/dashboard', label: 'Customer portal', icon: 'deposit-icon', adminOnly: false },
+    { path: '/admin', label: 'Admin', icon: 'deposit-icon', adminOnly: true }
   ];
 
   constructor(private router: Router) {}

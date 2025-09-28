@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SignUpComponent } from './sign-up/sign-up.component';
+import { SignUpComponent } from './pages/sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
-import { SignInComponent } from './sign-in/sign-in.component';
-import { LiveViewComponent } from './live-view/live-view.component';
-import { PortfolioDashboardComponent } from './portfolio-dashboard/portfolio-dashboard.component';
-import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { OnboardingComponent } from './onboarding/onboarding.component';
-import { PendingDepositsComponent } from './pending-deposits/pending-deposits.component';
+import { SignInComponent } from './pages/sign-in/sign-in.component';
 import { LayoutComponent } from './layout/layout.component';
 import { AuthGuard } from './guards/auth.guard';
+import { FundingComponent } from './pages/funding/funding.component';
+import { AnalyseOfferComponent } from './pages/analyse-offer/analyse-offer.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { AdminComponent } from './pages/admin/admin.component';
+import { DocumentsSuppComponent } from './pages/documents-supp/documents-supp.component';
 
 const routes: Routes = [
   // Routes accessibles sans authentification
@@ -26,12 +26,12 @@ const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
-      {path: 'addFund', component: OnboardingComponent},
-      {path: 'live-view', component: LiveViewComponent},
-      {path: 'portfolio', component: PortfolioDashboardComponent},
-      {path: 'admin-dashboard', component: AdminDashboardComponent},
-      {path: 'deposits', component: PendingDepositsComponent},
-      {path: '', redirectTo: 'portfolio', pathMatch: 'full'} // Redirection par défaut
+      {path: '', redirectTo: 'portfolio', pathMatch: 'full'}, // Redirection par défaut
+      {path: 'funding', component: FundingComponent},
+      {path: 'analyseOffer', component: AnalyseOfferComponent},
+      {path: 'documentSupp', component: DocumentsSuppComponent},
+      {path: 'dashboard', component: DashboardComponent},
+      {path: 'admin', component: AdminComponent}
     ]
   }
 ];

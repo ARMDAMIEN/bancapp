@@ -1,0 +1,329 @@
+<div class="analysis-container">
+    <!-- Header -->
+    <div class="analysis-header">
+        <h1 class="page-title">AI Financial Analysis</h1>
+        <p class="page-subtitle">Based on your financial data, here are your available financing options</p>
+        
+        <!-- Revenue Info Display -->
+        <div class="revenue-info-card" *ngIf="showRevenueInfo">
+            <div class="revenue-header">
+                <h3 class="revenue-title">Based on your average monthly revenue: {{getFormattedMonthlyRevenue()}}</h3>
+                <p class="revenue-subtitle">Estimated annual revenue: {{getEstimatedAnnualRevenue()}}</p>
+            </div>
+            <div class="revenue-recommendation">
+                <span class="recommendation-badge">Recommended Category</span>
+                <span class="recommended-category">{{getRecommendedCategory().title}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Section -->
+    <div class="loading-section" *ngIf="isAnalyzing">
+        <div class="loading-content">
+            <div class="ai-brain-animation">
+                <div class="brain-core"></div>
+                <div class="neural-network">
+                    <div class="neural-node" *ngFor="let node of neuralNodes"></div>
+                </div>
+                <div class="data-flow">
+                    <div class="data-particle" *ngFor="let particle of dataParticles"></div>
+                </div>
+            </div>
+            
+            <h2 class="loading-title">Analyzing Your Financial Data</h2>
+            <p class="loading-subtitle">Our AI is analyzing your bank statements to propose the best financing options</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="analysisProgress"></div>
+            </div>
+            <p class="progress-text">{{analysisProgress}}% Complete</p>
+            
+            <div class="analysis-steps">
+                <div class="step-item" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+                    <div class="step-icon">1</div>
+                    <span>Processing bank statements</span>
+                </div>
+                <div class="step-item" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+                    <div class="step-icon">2</div>
+                    <span>Analyzing revenue patterns</span>
+                </div>
+                <div class="step-item" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+                    <div class="step-icon">3</div>
+                    <span>Risk assessment</span>
+                </div>
+                <div class="step-item" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4">
+                    <div class="step-icon">4</div>
+                    <span>Generating recommendations</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" *ngIf="!isAnalyzing">
+        <!-- Categories Display with Ordering -->
+        <div class="categories-container">
+            <div class="category-section" 
+                 *ngFor="let categoryItem of getOrderedCategories(); let i = index"
+                 [class.recommended-category]="categoryItem.isRecommended">
+                
+                <div class="category-header">
+                    <div class="category-title-row">
+                        <h2 class="category-title">{{categoryItem.category.title}}</h2>
+                        <div class="category-badges">
+                            <span class="recommended-badge" *ngIf="categoryItem.isRecommended">
+                                ⭐ Recommended for You
+                            </span>
+                        </div>
+                    </div>
+                    <p class="category-description">{{categoryItem.category.description}}</p>
+                    <div class="category-range">{{categoryItem.category.range}}</div>
+                    
+                    <!-- Revenue Match Info for Recommended Category -->
+                    <div class="revenue-match-info" *ngIf="categoryItem.isRecommended && showRevenueInfo">
+                        <div class="match-indicator">
+                            <span class="match-icon">💡</span>
+                            <span class="match-text">
+                                This category matches your monthly revenue of {{getFormattedMonthlyRevenue()}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Options Grid for Each Category -->
+                <div class="options-grid">
+                    <div class="option-card" 
+                         *ngFor="let option of categoryItem.category.options; let optIndex = index"
+                         [class.selected]="isOptionSelected(categoryItem.index, optIndex)"
+                         [class.recommended-option]="categoryItem.isRecommended"
+                         (click)="selectOption(categoryItem.index, optIndex)">
+                        
+                        <div class="option-header">
+                            <h4 class="option-title">{{option.title}}</h4>
+                            <div class="option-badge" [ngClass]="option.type">{{option.badge}}</div>
+                        </div>
+                        
+                        <div class="option-amount">
+                            <span class="amount">{{option.amount | currency:'USD':'symbol':'1.0-0'}}</span>
+                            <span class="structure">{{option.structure}}</span>
+                        </div>
+                        
+                        <div class="option-payback">
+                            <div class="payback-info">
+                                <span class="payback-label">Total Payback:</span>
+                                <span class="payback-amount">{{option.payback | currency:'USD':'symbol':'1.0-0'}}</span>
+                            </div>
+                            <div class="term-info">
+                                <span class="term-label">Term:</span>
+                                <span class="term-value">{{option.term}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-info">
+                            <div class="payment-amount">{{option.payment}}</div>
+                            <div class="payment-frequency">{{option.frequency}}</div>
+                        </div>
+                        
+                        <div class="option-features">
+                            <div class="feature-item" *ngFor="let feature of option.features">
+                                <div class="feature-icon">✓</div>
+                                <span class="feature-text">{{feature}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="option-select" *ngIf="isOptionSelected(categoryItem.index, optIndex)">
+                            <div class="select-indicator">
+                                <span class="select-icon">✓</span>
+                                Selected
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+        <!-- Selected Options Summary -->
+        <div class="selection-summary" *ngIf="hasSelectedOptions()">
+            <h3 class="summary-title">Your Selected Options</h3>
+            <div class="selected-options-list">
+                <div class="selected-option" *ngFor="let selection of getSelectedOptions()">
+                    <div class="selected-option-info">
+                        <h4 class="selected-title">{{selection.option.title}}</h4>
+                        <p class="selected-category">{{selection.category.title}}</p>
+                        <div class="selected-details">
+                            <span class="selected-amount">{{selection.option.amount | currency:'USD':'symbol':'1.0-0'}}</span>
+                            <span class="selected-payment">{{selection.option.payment}}</span>
+                        </div>
+                    </div>
+                    <button class="remove-selection" (click)="removeSelection(selection.categoryIndex, selection.optionIndex)">
+                        <span class="remove-icon">×</span>
+                    </button>
+                </div>
+            </div>
+            <div class="summary-total">
+                <div class="total-funding">
+                    <span class="total-label">Total Funding Amount:</span>
+                    <span class="total-value">{{getTotalFunding() | currency:'USD':'symbol':'1.0-0'}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="results-actions">
+            <button type="button" class="form-btn secondary-btn" (click)="goBack()">
+                ← Back to Revenue Data
+            </button>
+            <button type="button" class="form-btn secondary-btn" (click)="clearSelections()">
+                Clear All Selections
+            </button>
+            <button type="button" class="form-btn primary-btn" 
+                    [disabled]="!hasSelectedOptions()"
+                    (click)="proceedWithSelections()">
+                Proceed with Selected Options ({{getSelectedCount()}})
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Selection Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showConfirmationModal" (click)="closeConfirmationModal()">
+    <div class="modal-content confirmation-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">Confirm Your Financing Selection</h3>
+            <button type="button" class="modal-close" (click)="closeConfirmationModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Revenue Context in Modal -->
+            <div class="modal-revenue-context" *ngIf="showRevenueInfo">
+                <div class="context-icon">📊</div>
+                <div class="context-info">
+                    <span class="context-label">Based on your monthly revenue:</span>
+                    <span class="context-value">{{getFormattedMonthlyRevenue()}}</span>
+                </div>
+            </div>
+
+            <!-- Selection Overview -->
+            <div class="confirmation-overview">
+                <div class="overview-icon">💼</div>
+                <div class="overview-text">
+                    <h4 class="overview-title">You have selected {{getSelectedCount()}} financing option(s)</h4>
+                    <p class="overview-subtitle">Please review your selections before proceeding</p>
+                </div>
+            </div>
+
+            <!-- Selected Options Details -->
+            <div class="confirmation-details">
+                <h4 class="details-title">Selected Options:</h4>
+                <div class="confirmation-options">
+                    <div class="confirmation-option" *ngFor="let selection of getSelectedOptions(); let i = index">
+                        <div class="option-summary">
+                            <div class="option-header-confirm">
+                                <h5 class="option-name">{{selection.option.title}}</h5>
+                                <span class="option-category-badge" 
+                                      [class.recommended-category-badge]="isCategoryRecommended(selection.categoryIndex)">
+                                    {{selection.category.title}}
+                                    <span *ngIf="isCategoryRecommended(selection.categoryIndex)"> ⭐</span>
+                                </span>
+                            </div>
+                            
+                            <div class="option-key-details">
+                                <div class="key-detail">
+                                    <span class="detail-icon">💰</span>
+                                    <div class="detail-info">
+                                        <span class="detail-label">Funding Amount</span>
+                                        <span class="detail-value">{{selection.option.amount | currency:'USD':'symbol':'1.0-0'}}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="key-detail">
+                                    <span class="detail-icon">💸</span>
+                                    <div class="detail-info">
+                                        <span class="detail-label">Payment</span>
+                                        <span class="detail-value">{{selection.option.payment}}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="key-detail">
+                                    <span class="detail-icon">📅</span>
+                                    <div class="detail-info">
+                                        <span class="detail-label">Term</span>
+                                        <span class="detail-value">{{selection.option.term}}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="key-detail">
+                                    <span class="detail-icon">🔄</span>
+                                    <div class="detail-info">
+                                        <span class="detail-label">Total Payback</span>
+                                        <span class="detail-value payback">{{selection.option.payback | currency:'USD':'symbol':'1.0-0'}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="confirmation-notice">
+                <div class="notice-icon">⚠️</div>
+                <div class="notice-content">
+                    <h5 class="notice-title">Important Information</h5>
+                    <ul class="notice-list">
+                        <li>By proceeding, you acknowledge that you understand the terms and conditions of your selected financing options.</li>
+                        <li>Final approval is subject to additional verification and due diligence.</li>
+                        <li>Interest rates and terms may be adjusted based on final credit assessment.</li>
+                        <li>You will receive detailed loan agreements for each selected option.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="next-steps">
+                <h5 class="steps-title">What happens next?</h5>
+                <div class="steps-timeline">
+                    <div class="timeline-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <span class="step-title">Application Processing</span>
+                            <span class="step-description">Your application will be reviewed within 24-48 hours</span>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <span class="step-title">Documentation</span>
+                            <span class="step-description">You'll receive detailed agreements for signature</span>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <span class="step-title">Funding</span>
+                            <span class="step-description">Funds will be transferred upon completion</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button type="button" 
+                    class="form-btn secondary-btn" 
+                    (click)="closeConfirmationModal()">
+                <span class="btn-icon">🔙</span>
+                Review Again
+            </button>
+            <button type="button" 
+                    class="form-btn primary-btn confirm-btn" 
+                    (click)="confirmSelections()"
+                    [disabled]="isProcessing">
+                <span *ngIf="!isProcessing" class="btn-icon">✅</span>
+                <span *ngIf="isProcessing" class="spinner"></span>
+                <span>{{isProcessing ? 'Processing...' : 'Confirm & Proceed'}}</span>
+            </button>
+        </div>
+    </div>
+</div>

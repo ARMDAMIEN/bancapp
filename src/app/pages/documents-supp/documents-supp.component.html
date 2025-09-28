@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload - Identity Verification</title>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Identity Verification</h1>
+            <p>To complete your financing application, we need to verify your identity with the following documents</p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step completed">
+                    <div class="step-indicator">✓</div>
+                    <div class="step-label">Information</div>
+                </div>
+                <div class="step completed">
+                    <div class="step-indicator">✓</div>
+                    <div class="step-label">Financial Analysis</div>
+                </div>
+                <div class="step active">
+                    <div class="step-indicator">3</div>
+                    <div class="step-label">Documents</div>
+                </div>
+                <div class="step">
+                    <div class="step-indicator">4</div>
+                    <div class="step-label">Finalization</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <div class="security-icon">🔒</div>
+            <div class="security-content">
+                <div class="security-title">Security & Privacy</div>
+                <div class="security-text">
+                    Your documents are encrypted and stored securely. We use this information solely to verify your identity as part of your financing application.
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="form-section">
+            <h2 class="section-title">Required Documents</h2>
+            <p class="section-description">
+                Please upload the following documents in PDF format. Ensure that documents are clear and readable with all information visible.
+            </p>
+
+            <div class="upload-grid">
+                <!-- Driving License -->
+                <div class="upload-item" id="license-upload">
+                    <div class="upload-icon">🪪</div>
+                    <h3 class="upload-title">Driver's License</h3>
+                    <p class="upload-description">
+                        Upload a clear and readable copy of your driver's license
+                    </p>
+                    <div class="upload-requirements">
+                        <ul>
+                            <li>PDF format only</li>
+                            <li>Max size: 5 MB</li>
+                            <li>Valid and unexpired</li>
+                            <li>All information visible</li>
+                        </ul>
+                    </div>
+                    <input type="file" class="file-input" id="license-file" accept=".pdf" />
+                    <button class="upload-button">Choose File</button>
+                    
+                    <div class="file-preview">
+                        <div class="file-info">
+                            <div class="file-details">
+                                <div class="file-name"></div>
+                                <div class="file-size"></div>
+                            </div>
+                            <div class="file-status success">
+                                <span>✓ Valid</span>
+                            </div>
+                            <button class="remove-file" type="button">×</button>
+                        </div>
+                    </div>
+                    <div class="error-message" style="display: none;"></div>
+                </div>
+
+                <!-- Voided Check -->
+                <div class="upload-item" id="check-upload">
+                    <div class="upload-icon">🏦</div>
+                    <h3 class="upload-title">Voided Check</h3>
+                    <p class="upload-description">
+                        Upload a voided check to verify your banking information
+                    </p>
+                    <div class="upload-requirements">
+                        <ul>
+                            <li>PDF format only</li>
+                            <li>Max size: 5 MB</li>
+                            <li>Check clearly voided</li>
+                            <li>Banking info visible</li>
+                        </ul>
+                    </div>
+                    <input type="file" class="file-input" id="check-file" accept=".pdf" />
+                    <button class="upload-button">Choose File</button>
+                    
+                    <div class="file-preview">
+                        <div class="file-info">
+                            <div class="file-details">
+                                <div class="file-name"></div>
+                                <div class="file-size"></div>
+                            </div>
+                            <div class="file-status success">
+                                <span>✓ Valid</span>
+                            </div>
+                            <button class="remove-file" type="button">×</button>
+                        </div>
+                    </div>
+                    <div class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="goBack()">
+                    Back
+                </button>
+                <button type="button" class="btn btn-primary" id="continue-btn" disabled onclick="continueToNext()">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

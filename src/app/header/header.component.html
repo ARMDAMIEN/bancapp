@@ -1,12 +1,11 @@
 <div class="header-container">
   <div class="header-logo">
-   <!-- <img src="assets/logo.png" alt="App Logo" class="logo">--> 
-    <span class="app-name">CryptoTrader</span>
+    <!-- <img src="assets/logo.png" alt="App Logo" class="logo"> --> 
+    <span class="app-name">Nom de l'app</span>
   </div>
   
   <nav class="navigation">
     <ul class="nav-items">
-      <!-- Utilisez ng-container pour combiner ngFor et ngIf -->
       <ng-container *ngFor="let item of navItems">
         <li class="nav-item" [ngClass]="{ 'active': isActive(item.path) }" 
             *ngIf="shouldShowNavItem(item)">
@@ -20,15 +19,6 @@
   </nav>
   
   <div class="user-actions">
-    <div class="user-info">
-      <!-- <div class="user-avatar">
-        <span>{{ getUserInitials() }}</span>
-      </div> -->
-      <div class="user-details" *ngIf="userName">
-        <span class="user-name">{{ userName }}</span>
-      </div>
-    </div>
-    
     <button class="logout-btn" (click)="logout()">
       <i class="logout-icon"></i>
       <span>Logout</span>

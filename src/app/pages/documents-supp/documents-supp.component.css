@@ -1,0 +1,488 @@
+   * {
+       margin: 0;
+       padding: 0;
+       box-sizing: border-box;
+   }
+
+   body {
+       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background-color: var(--bg-primary);
+       color: var(--text-primary);
+       line-height: 1.6;
+       min-height: 100vh;
+   }
+
+   .container {
+       max-width: 800px;
+       margin: 0 auto;
+       padding: 40px 24px;
+   }
+
+   /* Header */
+   .header {
+       text-align: center;
+       margin-bottom: 40px;
+   }
+
+   .header h1 {
+       font-size: 28px;
+       font-weight: 600;
+       color: var(--text-primary);
+       margin-bottom: 12px;
+       letter-spacing: -0.02em;
+   }
+
+   .header p {
+       font-size: 16px;
+       color: var(--text-secondary);
+       max-width: 600px;
+       margin: 0 auto;
+       line-height: 1.5;
+   }
+
+   /* Progress Indicator */
+   .progress-section {
+       margin-bottom: 40px;
+   }
+
+   .progress-bar {
+       width: 100%;
+       height: 6px;
+       background-color: var(--border-light);
+       border-radius: 3px;
+       overflow: hidden;
+       margin-bottom: 16px;
+   }
+
+   .progress-fill {
+       height: 100%;
+       background: linear-gradient(90deg, var(--primary-accent), #4c9aff);
+       border-radius: 3px;
+       width: 30%;
+       transition: width 0.5s ease;
+   }
+
+   .progress-steps {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+   }
+
+   .step {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       gap: 8px;
+       flex: 1;
+   }
+
+   .step-indicator {
+       width: 32px;
+       height: 32px;
+       border-radius: 50%;
+       background-color: var(--border-light);
+       color: var(--text-muted);
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       font-size: 14px;
+       font-weight: 600;
+       transition: all 0.3s ease;
+   }
+
+   .step.active .step-indicator {
+       background-color: var(--primary-accent);
+       color: white;
+   }
+
+   .step.completed .step-indicator {
+       background-color: var(--success-green);
+       color: white;
+   }
+
+   .step-label {
+       font-size: 12px;
+       color: var(--text-muted);
+       text-align: center;
+       font-weight: 500;
+   }
+
+   .step.active .step-label,
+   .step.completed .step-label {
+       color: var(--text-secondary);
+   }
+
+   /* Main Form */
+   .form-section {
+       background-color: var(--bg-card);
+       border: 1px solid var(--border-light);
+       border-radius: 12px;
+       padding: 32px;
+       box-shadow: var(--shadow-soft);
+       margin-bottom: 32px;
+   }
+
+   .section-title {
+       font-size: 20px;
+       font-weight: 600;
+       color: var(--text-primary);
+       margin-bottom: 8px;
+   }
+
+   .section-description {
+       font-size: 14px;
+       color: var(--text-secondary);
+       margin-bottom: 32px;
+       line-height: 1.5;
+   }
+
+   /* Upload Areas */
+   .upload-grid {
+       display: grid;
+       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+       gap: 24px;
+       margin-bottom: 32px;
+   }
+
+   .upload-item {
+       background-color: var(--bg-secondary);
+       border: 2px dashed var(--border-light);
+       border-radius: 12px;
+       padding: 24px;
+       text-align: center;
+       transition: all 0.3s ease;
+       cursor: pointer;
+       position: relative;
+       z-index: 2;
+       /* Au-dessus de file-input mais en dessous des boutons */
+   }
+
+   .upload-item:hover {
+       border-color: var(--border-accent);
+       background-color: rgba(49, 130, 206, 0.05);
+   }
+
+   .upload-item.has-file {
+       border-color: var(--success-green);
+       background-color: rgba(56, 161, 105, 0.08);
+       border-style: solid;
+   }
+
+   .upload-item.error {
+       border-color: var(--error-red);
+       background-color: rgba(229, 62, 62, 0.08);
+   }
+
+   .upload-icon {
+       width: 48px;
+       height: 48px;
+       margin: 0 auto 16px;
+       background-color: var(--primary-accent);
+       border-radius: 50%;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       font-size: 20px;
+       color: white;
+   }
+
+   .upload-item.has-file .upload-icon {
+       background-color: var(--success-green);
+   }
+
+   .upload-title {
+       font-size: 16px;
+       font-weight: 600;
+       color: var(--text-primary);
+       margin-bottom: 8px;
+   }
+
+   .upload-description {
+       font-size: 14px;
+       color: var(--text-secondary);
+       margin-bottom: 16px;
+       line-height: 1.4;
+   }
+
+   .upload-requirements {
+       font-size: 12px;
+       color: var(--text-muted);
+       margin-bottom: 16px;
+   }
+
+   .upload-requirements ul {
+       list-style: none;
+       padding: 0;
+   }
+
+   .upload-requirements li {
+       margin-bottom: 4px;
+       position: relative;
+       padding-left: 16px;
+   }
+
+   .upload-requirements li::before {
+       content: "•";
+       color: var(--primary-accent);
+       position: absolute;
+       left: 0;
+   }
+
+   .file-input {
+       position: absolute;
+       opacity: 0;
+       width: 100%;
+       height: 100%;
+       cursor: pointer;
+       z-index: 1;
+       /* Plus bas que les boutons */
+       pointer-events: none;
+       /* Désactive les événements sur cet élément */
+   }
+
+   .upload-button {
+       background-color: var(--primary-accent);
+       color: white;
+       border: none;
+       padding: 8px 16px;
+       border-radius: 6px;
+       font-size: 14px;
+       font-weight: 600;
+       cursor: pointer;
+       transition: all 0.3s ease;
+   }
+
+   .upload-button:hover {
+       background-color: #2c5aa0;
+   }
+
+   /* File Preview */
+   .file-preview {
+       display: none;
+       margin-top: 16px;
+       padding: 12px;
+       background-color: var(--bg-primary);
+       border-radius: 8px;
+       border: 1px solid var(--border-light);
+   }
+
+   .upload-item.has-file .file-preview {
+       display: block;
+   }
+
+   .file-info {
+       display: flex;
+       align-items: center;
+       justify-content: space-between;
+       gap: 12px;
+   }
+
+   .file-details {
+       flex: 1;
+   }
+
+   .file-name {
+       font-size: 14px;
+       font-weight: 600;
+       color: var(--text-primary);
+       margin-bottom: 4px;
+   }
+
+   .file-size {
+       font-size: 12px;
+       color: var(--text-muted);
+   }
+
+   .file-status {
+       display: flex;
+       align-items: center;
+       gap: 8px;
+       font-size: 12px;
+       font-weight: 600;
+   }
+
+   .file-status.success {
+       color: var(--success-green);
+   }
+
+   .file-status.error {
+       color: var(--error-red);
+   }
+
+   .remove-file {
+       background-color: var(--error-red);
+       color: white;
+       border: none;
+       width: 24px;
+       height: 24px;
+       border-radius: 50%;
+       cursor: pointer;
+       font-size: 14px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       transition: all 0.3s ease;
+   }
+
+   .remove-file:hover {
+       background-color: #c53030;
+       transform: scale(1.1);
+   }
+
+   /* Error Messages */
+   .error-message {
+       background-color: rgba(229, 62, 62, 0.1);
+       border: 1px solid rgba(229, 62, 62, 0.3);
+       border-radius: 6px;
+       padding: 12px;
+       margin-top: 12px;
+       font-size: 12px;
+       color: var(--error-red);
+   }
+
+   /* Action Buttons */
+   .form-actions {
+       display: flex;
+       justify-content: space-between;
+       gap: 16px;
+       margin-top: 32px;
+       position: relative;
+       z-index: 10;
+       /* Assure que les boutons sont au-dessus */
+       background-color: var(--bg-card);
+       padding-top: 16px;
+   }
+
+   /* Assurer que les boutons sont cliquables */
+   .btn {
+       padding: 12px 24px;
+       border-radius: 8px;
+       font-size: 14px;
+       font-weight: 600;
+       cursor: pointer;
+       transition: all 0.3s ease;
+       border: none;
+       min-width: 120px;
+       position: relative;
+       z-index: 11;
+       /* Au-dessus de tout */
+       pointer-events: auto;
+       /* Force les événements */
+   }
+
+   .btn-secondary {
+       background-color: transparent;
+       color: var(--text-secondary);
+       border: 1px solid var(--border-medium);
+   }
+
+   .btn-secondary:hover {
+       background-color: var(--bg-secondary);
+       border-color: var(--border-accent);
+       color: var(--text-primary);
+   }
+
+   .btn-primary {
+       background-color: var(--primary-accent);
+       color: white;
+       border: 1px solid var(--primary-accent);
+   }
+
+   .btn-primary:hover:not(:disabled) {
+       background-color: #2c5aa0;
+       transform: translateY(-1px);
+       box-shadow: var(--shadow-soft);
+   }
+
+   .btn-primary:disabled {
+       background-color: var(--text-muted);
+       border-color: var(--text-muted);
+       cursor: not-allowed;
+       opacity: 0.6;
+   }
+
+   /* Security Notice */
+   .security-notice {
+       background-color: rgba(214, 158, 46, 0.08);
+       border: 1px solid rgba(214, 158, 46, 0.2);
+       border-radius: 8px;
+       padding: 16px;
+       margin-bottom: 24px;
+       display: flex;
+       gap: 12px;
+   }
+
+   .security-icon {
+       font-size: 20px;
+       color: var(--warning-amber);
+       flex-shrink: 0;
+   }
+
+   .security-content {
+       flex: 1;
+   }
+
+   .security-title {
+       font-size: 14px;
+       font-weight: 600;
+       color: var(--text-primary);
+       margin-bottom: 6px;
+   }
+
+   .security-text {
+       font-size: 12px;
+       color: var(--text-secondary);
+       line-height: 1.4;
+   }
+
+   /* Responsive */
+   @media screen and (max-width: 768px) {
+       .container {
+           padding: 24px 16px;
+       }
+
+       .form-section {
+           padding: 24px;
+       }
+
+       .upload-grid {
+           grid-template-columns: 1fr;
+           gap: 16px;
+       }
+
+       .progress-steps {
+           gap: 8px;
+       }
+
+       .step-label {
+           font-size: 10px;
+       }
+
+       .form-actions {
+           flex-direction: column;
+       }
+
+       .btn {
+           width: 100%;
+       }
+   }
+
+   @media screen and (max-width: 480px) {
+       .header h1 {
+           font-size: 24px;
+       }
+
+       .section-title {
+           font-size: 18px;
+       }
+
+       .upload-item {
+           padding: 20px;
+       }
+
+       .step-indicator {
+           width: 28px;
+           height: 28px;
+           font-size: 12px;
+       }
+   }

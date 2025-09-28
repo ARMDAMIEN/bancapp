@@ -1,0 +1,379 @@
+<div class="admin-container">
+
+    <!-- Main Content -->
+    <div class="admin-content">
+        <!-- Stats Overview -->
+        <div class="stats-section">
+            <h2 class="section-title">Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon users">👥</div>
+                    <div class="stat-info">
+                        <span class="stat-value">{{totalUsers}}</span>
+                        <span class="stat-label">Total Users</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management -->
+        <div class="users-section">
+            <div class="section-header">
+                <h3 class="section-title">Users Management</h3>
+                <div class="section-controls">
+                    <div class="search-box">
+                        <input type="text" class="search-input" placeholder="Search users..." [(ngModel)]="searchTerm"
+                            (input)="filterUsers()">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <select class="filter-select" [(ngModel)]="filterStatus" (change)="filterUsers()">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Last Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let user of filteredUsers" class="user-row">
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{user.firstName.charAt(0)}}{{user.lastName.charAt(0)}}
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="user-name">{{user.firstName}} {{user.lastName}}</span>
+                                        <span class="user-id">ID: {{user.id}}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="user-email">{{user.email}}</td>
+                            <td>
+                                <span class="balance-amount" [ngClass]="getBalanceClass(user.accountBalance)">
+                                    {{user.accountBalance | currency:'EUR':'symbol':'1.2-2'}}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge" [ngClass]="user.status">{{user.status}}</span>
+                            </td>
+                            <td class="last-activity">{{user.lastActivity | date:'short'}}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button type="button" class="action-btn add-funds"
+                                        (click)="openFundsModal(user, 'add')" title="Add Funds">
+                                        +
+                                    </button>
+                                    <button type="button" class="action-btn remove-funds"
+                                        (click)="openFundsModal(user, 'remove')" [disabled]="user.accountBalance <= 0"
+                                        title="Remove Funds">
+                                        -
+                                    </button>
+                                    <button type="button" class="action-btn view-details"
+                                        (click)="viewUserDetails(user)" title="View Details">
+                                        👁️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div class="empty-state" *ngIf="filteredUsers.length === 0">
+                    <div class="empty-icon">👤</div>
+                    <p class="empty-text">No users found</p>
+                    <p class="empty-subtext">Try adjusting your search or filter criteria</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" *ngIf="totalPages > 1">
+                <button type="button" class="pagination-btn" [disabled]="currentPage === 1"
+                    (click)="changePage(currentPage - 1)">
+                    Previous
+                </button>
+                <span class="pagination-info">
+                    Page {{currentPage}} of {{totalPages}}
+                </span>
+                <button type="button" class="pagination-btn" [disabled]="currentPage === totalPages"
+                    (click)="changePage(currentPage + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Funds Management Modal -->
+<div class="modal-overlay" *ngIf="showFundsModal" (click)="closeFundsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}} - {{selectedUser?.firstName}}
+                {{selectedUser?.lastName}}
+            </h3>
+            <button type="button" class="modal-close" (click)="closeFundsModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- User Info -->
+            <div class="user-summary">
+                <div class="user-avatar large">
+                    {{selectedUser?.firstName?.charAt(0)}}{{selectedUser?.lastName?.charAt(0)}}</div>
+                <div class="user-summary-info">
+                    <h4 class="summary-name">{{selectedUser?.firstName}} {{selectedUser?.lastName}}</h4>
+                    <p class="summary-email">{{selectedUser?.email}}</p>
+                    <p class="summary-balance">
+                        Current Balance: <strong>{{selectedUser?.accountBalance |
+                            currency:'EUR':'symbol':'1.2-2'}}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="amount-section">
+                <label for="fundsAmount" class="input-label">
+                    {{fundsAction === 'add' ? 'Amount to Add' : 'Amount to Remove'}}
+                </label>
+                <div class="currency-input">
+                    <input type="number" id="fundsAmount" class="input" [(ngModel)]="fundsAmount" min="0.01" step="0.01"
+                        [max]="getMaxAmount()" placeholder="0.00" #fundsAmountRef="ngModel">
+                    <span class="currency-symbol">€</span>
+                </div>
+                <div class="amount-validation" *ngIf="fundsAmountRef.invalid && fundsAmountRef.touched">
+                    <span class="error" *ngIf="fundsAmountRef.errors?.['min']">
+                        Amount must be greater than 0
+                    </span>
+                    <span class="error" *ngIf="fundsAmountRef.errors?.['max']">
+                        Amount cannot exceed current balance
+                    </span>
+                </div>
+            </div>
+
+            <!-- Reason Input -->
+            <div class="reason-section">
+                <label for="fundsReason" class="input-label">Reason (Optional)</label>
+                <textarea id="fundsReason" class="textarea" [(ngModel)]="fundsReason"
+                    placeholder="Enter reason for this transaction..." rows="3"></textarea>
+            </div>
+
+            <!-- Preview -->
+            <div class="transaction-preview" *ngIf="fundsAmount > 0">
+                <h4 class="preview-title">Transaction Preview</h4>
+                <div class="preview-details">
+                    <div class="preview-item">
+                        <span class="preview-label">Action:</span>
+                        <span class="preview-value" [ngClass]="fundsAction">
+                            {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}}
+                        </span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">Amount:</span>
+                        <span class="preview-value">{{fundsAmount | currency:'EUR':'symbol':'1.2-2'}}</span>
+                    </div>
+                    <div class="preview-item">
+                        <span class="preview-label">Current Balance:</span>
+                        <span class="preview-value">{{selectedUser?.accountBalance |
+                            currency:'EUR':'symbol':'1.2-2'}}</span>
+                    </div>
+                    <div class="preview-item total">
+                        <span class="preview-label">New Balance:</span>
+                        <span class="preview-value" [ngClass]="getNewBalanceClass()">
+                            {{getNewBalance() | currency:'EUR':'symbol':'1.2-2'}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="form-btn secondary-btn" (click)="closeFundsModal()" [disabled]="isProcessing">
+                Cancel
+            </button>
+            <button type="button" class="form-btn" [ngClass]="fundsAction === 'add' ? 'success-btn' : 'danger-btn'"
+                (click)="processFundsTransaction()" [disabled]="!isValidTransaction() || isProcessing">
+                <span *ngIf="!isProcessing">
+                    {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}}
+                </span>
+                <span *ngIf="isProcessing" class="processing-text">
+                    <span class="spinner"></span>
+                    Processing...
+                </span>
+            </button>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal-overlay" *ngIf="showUserDetailsModal" (click)="closeUserDetailsModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                User Details - {{selectedUserDetails?.firstName}} {{selectedUserDetails?.lastName}}
+            </h3>
+            <button type="button" class="modal-close" (click)="closeUserDetailsModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Personal Information -->
+            <div class="detail-section">
+                <h4 class="section-title">Personal Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Full Name:</span>
+                        <span class="detail-value">{{selectedUserDetails?.firstName}}
+                            {{selectedUserDetails?.lastName}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">{{selectedUserDetails?.email}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">SSN:</span>
+                        <span class="detail-value">{{formatSSN(selectedUserDetails?.ssn || '')}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Date of Birth:</span>
+                        <span class="detail-value">
+                            {{selectedUserDetails?.dateOfBirth | date:'mediumDate'}}
+                            (Age: {{calculateAge(selectedUserDetails?.dateOfBirth || '')}})
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="detail-section">
+                <h4 class="section-title">Business Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Company Name:</span>
+                        <span class="detail-value">{{selectedUserDetails?.companyName || 'N/A'}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Company Created:</span>
+                        <span class="detail-value">
+                            {{selectedUserDetails?.companyCreationDate | date:'mediumDate'}}
+                            <span *ngIf="selectedUserDetails?.companyCreationDate">
+                                ({{calculateCompanyAge(selectedUserDetails?.companyCreationDate)}} years)
+                            </span>
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">EIN Number:</span>
+                        <span class="detail-value">{{selectedUserDetails?.einNumber || 'N/A'}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="detail-section">
+                <h4 class="section-title">Account Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Account Balance:</span>
+                        <span class="detail-value"
+                            [ngClass]="getBalanceClass(selectedUserDetails?.accountBalance || 0)">
+                            {{selectedUserDetails?.accountBalance | currency:'EUR':'symbol':'1.2-2'}}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Last Balance Update:</span>
+                        <span class="detail-value">{{selectedUserDetails?.lastBalanceUpdate | date:'medium'}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status:</span>
+                        <span class="status-badge"
+                            [ngClass]="selectedUserDetails?.status">{{selectedUserDetails?.status}}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Member Since:</span>
+                        <span class="detail-value">{{selectedUserDetails?.createdAt | date:'mediumDate'}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <!-- Documents Section -->
+<div class="detail-section">
+    <h4 class="section-title">User Documents</h4>
+    
+    <!-- Check if user has any documents -->
+    <div *ngIf="hasAnyDocuments(selectedUserDetails!); else noDocuments">
+        <p class="documents-uploaded" *ngIf="selectedUserDetails?.documentsUploadDate">
+            Documents uploaded on: {{selectedUserDetails?.documentsUploadDate | date:'medium'}}
+        </p>
+        
+        <!-- RIB Documents -->
+        <div class="document-category" *ngIf="hasRibDocuments(selectedUserDetails!)">
+            <h5 class="category-title">RIB Documents</h5>
+            <div class="document-list">
+                <div class="document-item" *ngIf="selectedUserDetails?.rib1Path">
+                    <span class="doc-name">RIB Month 1</span>
+                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib1')">
+                        Download
+                    </button>
+                </div>
+                <div class="document-item" *ngIf="selectedUserDetails?.rib2Path">
+                    <span class="doc-name">RIB Month 2</span>
+                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib2')">
+                        Download
+                    </button>
+                </div>
+                <div class="document-item" *ngIf="selectedUserDetails?.rib3Path">
+                    <span class="doc-name">RIB Month 3</span>
+                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib3')">
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Identity Documents -->
+        <div class="document-category" *ngIf="hasIdentityDocuments(selectedUserDetails!)">
+            <h5 class="category-title">Identity Documents</h5>
+            <div class="document-list">
+                <div class="document-item" *ngIf="selectedUserDetails?.driverLicensePath">
+                    <span class="doc-name">Driver License</span>
+                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'driverLicense')">
+                        Download
+                    </button>
+                </div>
+                <div class="document-item" *ngIf="selectedUserDetails?.voidedCheckPath">
+                    <span class="doc-name">Voided Check</span>
+                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'voidedCheck')">
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <ng-template #noDocuments>
+        <p class="no-documents">No documents uploaded yet</p>
+    </ng-template>
+</div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="form-btn secondary-btn" (click)="closeUserDetailsModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>

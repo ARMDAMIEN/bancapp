@@ -1,0 +1,213 @@
+<div class="funding-container">
+    <div class="funding-header">
+        <h1 class="page-title">Account Funding</h1>
+        <p class="page-subtitle">Complete your funding application by uploading bank statements and providing revenue information</p>
+        
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step completed">
+                <div class="step-circle">1</div>
+                <span class="step-label">Documents</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step active">
+                <div class="step-circle">2</div>
+                <span class="step-label">Revenue Data</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step pending">
+                <div class="step-circle">3</div>
+                <span class="step-label">Completion</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="funding-content">
+        <form class="funding-form" #fundingForm="ngForm">
+            <!-- Section Upload RIB -->
+            <div class="funding-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="title-icon">📄</span>
+                        Upload Your Bank Statements
+                    </h3>
+                    <p class="section-subtitle">Upload your 3 most recent monthly bank statements for revenue verification</p>
+                </div>
+                
+                <div class="upload-grid">
+                    <div class="upload-item" *ngFor="let month of [1, 2, 3]; let i = index">
+                        <label class="upload-label">
+                            Bank Statements Month {{month}} 
+                            <span class="month-indicator">{{getMonthLabel(month)}}</span>
+                        </label>
+                        <div class="upload-zone" 
+                             [class.uploaded]="getFile(month)"
+                             [class.dragover]="isDragOver"
+                             (dragover)="onDragOver($event)" 
+                             (dragleave)="onDragLeave($event)"
+                             (drop)="onFileDropped($event, month)"
+                             (click)="getFileInput(month).click()">
+                            
+                            <div class="upload-content" *ngIf="!getFile(month)">
+                                <div class="upload-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14,2 14,8 20,8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                        <polyline points="10,9 9,9 8,9"/>
+                                    </svg>
+                                </div>
+                                <p class="upload-text">Drop your bank statement here</p>
+                                <p class="upload-subtext">or click to browse</p>
+                                <div class="file-format">PDF, JPG, PNG (max 10MB)</div>
+                            </div>
+                            
+                            <div class="uploaded-file" *ngIf="getFile(month)">
+                                <div class="file-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="file-details">
+                                    <p class="file-name">{{getFile(month)?.name}}</p>
+                                    <p class="file-size">{{getFileSize(getFile(month))}}</p>
+                                </div>
+                                <button type="button" class="remove-file" (click)="removeFile(month, $event)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <input #fileInput type="file" class="file-input" 
+                                   accept=".pdf,.jpg,.jpeg,.png" 
+                                   (change)="onFileSelected($event, month)">
+                        </div>
+                        <div class="upload-validation" *ngIf="getFileError(month)">
+                            <span class="error">{{getFileError(month)}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Montants -->
+            <div class="funding-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="title-icon">💰</span>
+                        Monthly Revenue Summary
+                    </h3>
+                    <p class="section-subtitle">Enter the total revenue amount for each corresponding month</p>
+                </div>
+                
+                <div class="revenue-grid">
+                    <div class="revenue-item" *ngFor="let month of [1, 2, 3]; let i = index">
+                        <label [for]="'revenue' + month" class="input-label">
+                            Month {{month}} Revenue 
+                            <span class="month-indicator">{{getMonthLabel(month)}}</span>
+                        </label>
+                        <div class="currency-input-wrapper">
+                            <div class="currency-input">
+                                <span class="currency-symbol">$</span>
+                                <input type="number" 
+                                       [id]="'revenue' + month" 
+                                       class="input revenue-input" 
+                                       [name]="'revenue' + month"
+                                       [ngModel]="getRevenue(month)" 
+                                       (ngModelChange)="setRevenue(month, $event)"
+                                       required min="0" step="0.01"
+                                       placeholder="0.00" 
+                                       (input)="calculateTotals()"
+                                       #revenueRef="ngModel">
+                            </div>
+                            <div class="input-helper">Enter gross monthly revenue</div>
+                        </div>
+                        <span class="error" *ngIf="revenueRef.errors?.['required'] && revenueRef.touched">
+                            Revenue amount is required
+                        </span>
+                        <span class="error" *ngIf="revenueRef.errors?.['min'] && revenueRef.touched">
+                            Revenue must be greater than 0
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Enhanced Summary Card -->
+                <div class="revenue-summary-card">
+                    <div class="summary-header">
+                        <h4 class="summary-title">Revenue Analysis</h4>
+                        <div class="summary-icon">📊</div>
+                    </div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Total 3-Month Revenue</span>
+                            <span class="summary-value total">{{totalRevenue | currency:'USD':'symbol':'1.2-2'}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Average Monthly Revenue</span>
+                            <span class="summary-value average">{{averageRevenue | currency:'USD':'symbol':'1.2-2'}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Estimated Annual Revenue</span>
+                            <span class="summary-value projected">{{(averageRevenue * 12) | currency:'USD':'symbol':'1.0-0'}}</span>
+                        </div>
+                    </div>
+                    <div class="revenue-trend" *ngIf="showTrend()">
+                        <div class="trend-indicator" [ngClass]="getTrendClass()">
+                            <span class="trend-icon">{{getTrendIcon()}}</span>
+                            <span class="trend-text">{{getTrendText()}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Status -->
+            <div class="application-status" *ngIf="getApplicationProgress() > 0">
+                <div class="status-header">
+                    <h4>Application Progress</h4>
+                    <span class="progress-percentage">{{getApplicationProgress()}}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="getApplicationProgress()"></div>
+                </div>
+                <div class="status-items">
+                    <div class="status-item" [ngClass]="{'completed': getUploadedFilesCount() > 0}">
+                        <span class="status-check">✓</span>
+                        Documents: {{getUploadedFilesCount()}}/3 uploaded
+                    </div>
+                    <div class="status-item" [ngClass]="{'completed': getCompletedRevenueCount() > 0}">
+                        <span class="status-check">✓</span>
+                        Revenue data: {{getCompletedRevenueCount()}}/3 completed
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Actions -->
+            <div class="form-actions">
+                <div class="action-info">
+                    <p class="action-description">
+                        By submitting this application, you confirm that all information provided is accurate and complete.
+                    </p>
+                </div>
+                <button type="submit" 
+                        class="form-btn primary-btn submit-btn" 
+                        [disabled]="!isFormValid()" 
+                        (click)="submitFunding()">
+                    <span class="btn-icon" *ngIf="!isSubmitting">🚀</span>
+                    <span class="spinner" *ngIf="isSubmitting"></span>
+                    <span>{{isSubmitting ? 'Processing Application...' : 'Complete Application'}}</span>
+                </button>
+            </div>
+
+            <!-- Enhanced Error Message -->
+            <div class="error-message-card" *ngIf="errorMessage">
+                <div class="error-icon">⚠️</div>
+                <div class="error-content">
+                    <h4>Application Error</h4>
+                    <p>{{errorMessage}}</p>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

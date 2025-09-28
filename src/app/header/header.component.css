@@ -1,34 +1,66 @@
+/* Header amélioré - remplacer dans votre CSS existant */
+
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background-color: var(--background-light);
-  border-bottom: 1px solid var(--border-color);
-  height: 70px;
+  padding: 0 32px;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 72px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Effet de fond animé */
+.header-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .header-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
 }
 
 .logo {
-  height: 36px;
+  height: 40px;
   width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .app-name {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-light);
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.5px;
 }
 
 .navigation {
   flex: 1;
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 
 .nav-items {
@@ -36,7 +68,12 @@
   list-style-type: none;
   margin: 0;
   padding: 0;
-  gap: 8px;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 6px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-item {
@@ -47,21 +84,56 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-radius: 8px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .nav-item a:hover {
-  background-color: rgba(45, 48, 71, 0.5);
-  color: var(--text-light);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item a:hover::before {
+  opacity: 1;
 }
 
 .nav-item.active a {
-  background-color: var(--indigo-dark);
-  color: var(--cyan-electric);
+  background: linear-gradient(135deg, var(--primary-accent), #4c9aff);
+  color: white;
+  box-shadow: 0 4px 16px rgba(49, 130, 206, 0.4);
+  transform: translateY(-1px);
+}
+
+.nav-item.active a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 
 .nav-icon {
@@ -75,9 +147,19 @@
   -webkit-mask-repeat: no-repeat;
   mask-position: center;
   -webkit-mask-position: center;
+  transition: transform 0.3s ease;
 }
 
-/* Définition des icônes spécifiques */
+.nav-item a:hover .nav-icon {
+  transform: scale(1.1);
+}
+
+.nav-label {
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+/* Icônes avec les mêmes définitions que votre CSS original */
 .dashboard-icon {
   mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>');
   -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>');
@@ -107,6 +189,8 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .user-info {
@@ -116,15 +200,18 @@
 }
 
 .user-avatar {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background-color: var(--indigo-dark);
+  background: linear-gradient(135deg, var(--primary-accent), #4c9aff);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: var(--text-light);
+  color: white;
+  font-size: 14px;
+  box-shadow: 0 3px 12px rgba(49, 130, 206, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .user-details {
@@ -133,33 +220,43 @@
 }
 
 .user-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .user-role {
   font-size: 12px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .logout-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background-color: transparent;
-  border: 1px solid var(--border-color);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: var(--text-light);
+  color: white;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .logout-btn:hover {
-  background-color: rgba(255, 51, 102, 0.1);
-  border-color: var(--error);
-  color: var(--error);
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
 }
 
 .logout-icon {
@@ -174,48 +271,87 @@
   -webkit-mask-repeat: no-repeat;
   mask-position: center;
   -webkit-mask-position: center;
+  transition: transform 0.3s ease;
+}
+
+.logout-btn:hover .logout-icon {
+  transform: translateX(2px);
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .header-container {
+    padding: 0 24px;
+  }
+}
+
 @media (max-width: 992px) {
   .nav-label {
     display: none;
   }
   
   .nav-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
+  }
+  
+  .nav-item a {
+    padding: 12px;
+  }
+  
+  .user-details {
+    display: none;
+  }
+  
+  .nav-items {
+    gap: 2px;
+    padding: 4px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+    height: 64px;
+  }
+  
+  .app-name {
+    font-size: 20px;
+  }
+  
+  .nav-items {
+    gap: 0;
+    padding: 3px;
   }
   
   .nav-item a {
     padding: 10px;
   }
   
-  .user-details {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .header-container {
-    padding: 12px 16px;
-  }
-  
-  .app-name {
-    display: none;
-  }
-  
-  .nav-items {
-    gap: 4px;
+  .user-actions {
+    gap: 12px;
   }
 }
 
 @media (max-width: 576px) {
+  .app-name {
+    display: none;
+  }
+  
   .logout-btn span {
     display: none;
   }
   
   .logout-btn {
+    padding: 10px;
+  }
+  
+  .nav-item a {
     padding: 8px;
+  }
+  
+  .nav-icon {
+    width: 20px;
+    height: 20px;
   }
 }

@@ -1,0 +1,47 @@
+<form class="form" #businessInfoForm="ngForm">
+    <div class="form-item">
+        <label for="businessName" class="input-label">Business Name</label>
+        <input type="text" id="businessName" class="input" name="businessName" 
+               [(ngModel)]="businessName" required #businessNameRef="ngModel">
+        <span class="error" *ngIf="businessNameRef.errors?.['required'] && businessNameRef.touched">
+            Business name is required
+        </span>
+    </div>
+
+    <div class="form-item">
+        <label for="foundingDate" class="input-label">Date of Founding</label>
+        <input type="date" id="foundingDate" class="input" name="foundingDate" 
+               [(ngModel)]="foundingDate" required #foundingDateRef="ngModel" lang="en">
+        <span class="error" *ngIf="foundingDateRef.errors?.['required'] && foundingDateRef.touched">
+            Date of founding is required
+        </span>
+    </div>
+
+    <div class="form-item">
+        <label for="ein" class="input-label">Employer Identification Number (EIN)</label>
+        <input type="text" id="ein" class="input" name="ein" placeholder="XX-XXXXXXX"
+               [(ngModel)]="ein" required pattern="^[0-9]{2}-[0-9]{7}$" 
+               maxlength="10" #einRef="ngModel">
+        <span class="error" *ngIf="einRef.errors?.['required'] && einRef.touched">
+            EIN is required
+        </span>
+        <span class="error" *ngIf="einRef.errors?.['pattern'] && einRef.touched">
+            Please enter a valid EIN format (XX-XXXXXXX)
+        </span>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="form-btn secondary-btn" (click)="previousStep()">
+            Previous Step
+        </button>
+        <button type="submit" class="form-btn primary-btn" 
+                [disabled]="!businessInfoForm.valid" 
+                (click)="submitBusinessInfo()">
+            Complete Registration
+        </button>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+        {{errorMessage}}
+    </div>
+</form>
