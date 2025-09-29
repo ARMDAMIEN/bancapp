@@ -1,6 +1,18 @@
 <div class="dashboard-container">
+    <!-- Initial Loading Screen -->
+    <div class="initial-loading-overlay" *ngIf="isInitialLoading">
+        <div class="loading-container">
+            <div class="loading-icon">💰</div>
+            <h2 class="loading-title">{{loadingMessage}}</h2>
+            <div class="loading-bar-container">
+                <div class="loading-bar" [style.width.%]="loadingProgress"></div>
+            </div>
+            <p class="loading-percentage">{{loadingProgress | number:'1.0-0'}}%</p>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <div class="dashboard-content">
+    <div class="dashboard-content" *ngIf="!isInitialLoading">
         <!-- Account Overview -->
         <div class="account-overview">
             <h2 class="section-title">Account Overview</h2>
@@ -30,7 +42,7 @@
                     </div>
                 </div>
 
-                <!-- Withdraw Button Section - Ajoutez cette section dans la balance-card -->
+                <!-- Withdraw Button Section -->
                 <div class="balance-actions">
                     <!-- Message de withdrawal pending -->
                     <div class="withdrawal-pending-notice" *ngIf="withdrawalPending">
@@ -144,349 +156,244 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Reimbursement Summary 
-        <div class="reimbursement-section">
-            <h3 class="section-title">Reimbursement Summary</h3>
-            
-            <div class="reimbursement-card">
-                <div class="reimbursement-header">
-                    <h4 class="reimbursement-title">Total Amount Reimbursed</h4>
-                    <div class="reimbursement-period">This Month</div>
-                </div>
-                
-                <div class="reimbursement-amount">
-                    <span class="currency">€</span>
-                    <span class="amount">{{totalReimbursed | number:'1.2-2'}}</span>
-                </div>
-                
-                <div class="reimbursement-info">
-                    <div class="info-item">
-                        <span class="info-label">Total Reimbursements:</span>
-                        <span class="info-value">{{reimbursementCount}}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Last Reimbursement:</span>
-                        <span class="info-value">
-                            <span *ngIf="lastReimbursementDate; else noReimbursement">
-                                {{lastReimbursementDate | date:'short'}}
-                            </span>
-                            <ng-template #noReimbursement>
-                                <span class="no-data">No reimbursements yet</span>
-                            </ng-template>
-                        </span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Average Amount:</span>
-                        <span class="info-value">{{averageReimbursement | currency:'EUR':'symbol':'1.2-2'}}</span>
+    <!-- Withdraw Confirmation Modal -->
+    <div class="modal-overlay" *ngIf="showWithdrawModal" (click)="closeWithdrawModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">Withdraw Funds</h3>
+                <button type="button" class="modal-close" (click)="closeWithdrawModal()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="withdrawal-summary">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-text">
+                        <p class="summary-title">You are about to withdraw:</p>
+                        <p class="summary-amount">{{currentBalance | currency:'USD':'symbol':'1.2-2'}}</p>
                     </div>
                 </div>
-                
-                <div class="reimbursement-trend" *ngIf="reimbursementTrend">
-                    <div class="trend-indicator" [ngClass]="reimbursementTrend.type">
-                        <span class="trend-icon">{{reimbursementTrend.icon}}</span>
-                        <span class="trend-text">{{reimbursementTrend.text}}</span>
-                        <span class="trend-percentage">{{reimbursementTrend.percentage}}%</span>
+
+                <!-- Bank Information Form -->
+                <div class="bank-form-section">
+                    <h4 class="form-title">Bank Account Information</h4>
+                    <form #bankForm="ngForm" class="bank-form">
+                        <div class="form-group">
+                            <label for="accountHolderName" class="form-label">Account Holder Name *</label>
+                            <input type="text" id="accountHolderName" name="accountHolderName" class="form-input"
+                                [(ngModel)]="bankInfo.accountHolderName" required
+                                placeholder="Enter full name as it appears on your account">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half-width">
+                                <label for="routingNumber" class="form-label">Routing Number *</label>
+                                <input type="text" id="routingNumber" name="routingNumber" class="form-input"
+                                    [(ngModel)]="bankInfo.routingNumber" required maxlength="9" pattern="[0-9]{9}"
+                                    placeholder="9 digits">
+                            </div>
+
+                            <div class="form-group half-width">
+                                <label for="accountNumber" class="form-label">Account Number *</label>
+                                <input type="text" id="accountNumber" name="accountNumber" class="form-input"
+                                    [(ngModel)]="bankInfo.accountNumber" required maxlength="17"
+                                    placeholder="Account number">
+                            </div>
+                        </div>
+
+                    
+                            <div class="form-group">
+                                <label for="bankName" class="form-label">Bank Name *</label>
+                                <input type="text" id="bankName" name="bankName" class="form-input"
+                                    [(ngModel)]="bankInfo.bankName" required placeholder="Bank name">
+                            </div>
+                    
+                    </form>
+                </div>
+
+                <div class="withdrawal-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Available Balance:</span>
+                        <span class="detail-value">{{currentBalance | currency:'USD':'symbol':'1.2-2'}}</span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Processing Time:</span>
+                        <span class="detail-value">1-3 business days</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Withdrawal Method:</span>
+                        <span class="detail-value">ACH Bank Transfer</span>
+                    </div>
+                </div>
+
+                <div class="withdrawal-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <p class="warning-text">
+                        This action will transfer your entire available balance to the bank account provided above.
+                        Please ensure all bank details are correct before proceeding.
+                    </p>
                 </div>
             </div>
-        </div> -->
 
-        <!-- Quick Actions -->
-        <!-- <div class="quick-actions-section">
-            <h3 class="section-title">Quick Actions</h3>
-            
-            <div class="quick-actions-grid">
-                <button type="button" 
-                        class="action-card" 
-                        (click)="refreshAccountData()"
-                        [disabled]="isLoadingSelection">
-                    <div class="action-icon">🔄</div>
-                    <div class="action-text">
-                        <div class="action-title">Refresh Data</div>
-                        <div class="action-subtitle">Update account info</div>
-                    </div>
+            <div class="modal-actions">
+                <button type="button" class="form-btn secondary-btn" (click)="closeWithdrawModal()"
+                    [disabled]="isProcessing">
+                    Cancel
                 </button>
-                
-                <button type="button" 
-                        class="action-card" 
-                        (click)="navigateToOfferSelection()">
-                    <div class="action-icon">💰</div>
-                    <div class="action-text">
-                        <div class="action-title">Browse Funding</div>
-                        <div class="action-subtitle">View available options</div>
-                    </div>
-                </button>
-                
-                <button type="button" 
-                        class="action-card" 
-                        (click)="navigateToSettings()">
-                    <div class="action-icon">⚙️</div>
-                    <div class="action-text">
-                        <div class="action-title">Account Settings</div>
-                        <div class="action-subtitle">Manage your account</div>
-                    </div>
-                </button>
-                
-                <button type="button" 
-                        class="action-card" 
-                        (click)="viewTransactionHistory()">
-                    <div class="action-icon">📋</div>
-                    <div class="action-text">
-                        <div class="action-title">Transaction History</div>
-                        <div class="action-subtitle">View all transactions</div>
-                    </div>
+                <button type="button" class="form-btn primary-btn" (click)="proceedToPayment()"
+                    [disabled]="isProcessing || currentBalance <= 0 || !isBankFormValid()">
+                    <span *ngIf="!isProcessing">Go to Payment</span>
+                    <span *ngIf="isProcessing" class="processing-text">
+                        <span class="spinner"></span>
+                        Processing...
+                    </span>
                 </button>
             </div>
         </div>
     </div>
-</div> -->
 
-        <!-- Withdraw Confirmation Modal -->
-        <div class="modal-overlay" *ngIf="showWithdrawModal" (click)="closeWithdrawModal()">
-            <div class="modal-content" (click)="$event.stopPropagation()">
-                <div class="modal-header">
-                    <h3 class="modal-title">Withdraw Funds</h3>
-                    <button type="button" class="modal-close" (click)="closeWithdrawModal()">×</button>
-                </div>
+    <!-- Payment Modal -->
+    <div class="modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
+        <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">Payment Instructions</h3>
+                <button type="button" class="modal-close" (click)="closePaymentModal()">×</button>
+            </div>
 
-                <div class="modal-body">
-                    <div class="withdrawal-summary">
-                        <div class="summary-icon">💰</div>
-                        <div class="summary-text">
-                            <p class="summary-title">You are about to withdraw:</p>
-                            <p class="summary-amount">{{currentBalance | currency:'USD':'symbol':'1.2-2'}}</p>
-                        </div>
-                    </div>
-
-                    <!-- Bank Information Form -->
-                    <div class="bank-form-section">
-                        <h4 class="form-title">Bank Account Information</h4>
-                        <form #bankForm="ngForm" class="bank-form">
-                            <div class="form-group">
-                                <label for="accountHolderName" class="form-label">Account Holder Name *</label>
-                                <input type="text" id="accountHolderName" name="accountHolderName" class="form-input"
-                                    [(ngModel)]="bankInfo.accountHolderName" required
-                                    placeholder="Enter full name as it appears on your account">
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group half-width">
-                                    <label for="routingNumber" class="form-label">Routing Number *</label>
-                                    <input type="text" id="routingNumber" name="routingNumber" class="form-input"
-                                        [(ngModel)]="bankInfo.routingNumber" required maxlength="9" pattern="[0-9]{9}"
-                                        placeholder="9 digits">
-                                </div>
-
-                                <div class="form-group half-width">
-                                    <label for="accountNumber" class="form-label">Account Number *</label>
-                                    <input type="text" id="accountNumber" name="accountNumber" class="form-input"
-                                        [(ngModel)]="bankInfo.accountNumber" required maxlength="17"
-                                        placeholder="Account number">
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group half-width">
-                                    <label for="bankName" class="form-label">Bank Name *</label>
-                                    <input type="text" id="bankName" name="bankName" class="form-input"
-                                        [(ngModel)]="bankInfo.bankName" required placeholder="Bank name">
-                                </div>
-
-                                <div class="form-group half-width">
-                                    <label for="accountType" class="form-label">Account Type *</label>
-                                    <select id="accountType" name="accountType" class="form-select"
-                                        [(ngModel)]="bankInfo.accountType" required>
-                                        <option value="">Select account type</option>
-                                        <option value="checking">Checking</option>
-                                        <option value="savings">Savings</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="withdrawal-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Available Balance:</span>
-                            <span class="detail-value">{{currentBalance | currency:'USD':'symbol':'1.2-2'}}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Processing Time:</span>
-                            <span class="detail-value">1-3 business days</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Withdrawal Method:</span>
-                            <span class="detail-value">ACH Bank Transfer</span>
-                        </div>
-                    </div>
-
-                    <div class="withdrawal-warning">
-                        <div class="warning-icon">⚠️</div>
-                        <p class="warning-text">
-                            This action will transfer your entire available balance to the bank account provided above.
-                            Please ensure all bank details are correct before proceeding.
-                        </p>
+            <div class="modal-body">
+                <div class="payment-summary">
+                    <div class="summary-icon">💳</div>
+                    <div class="summary-text">
+                        <p class="summary-title">Amount to Pay:</p>
+                        <p class="summary-amount">{{getPaymentAmount()}}</p>
+                        <p class="summary-subtitle">{{selectedFundingOption?.frequency}} Payment</p>
                     </div>
                 </div>
 
-                <div class="modal-actions">
-                    <button type="button" class="form-btn secondary-btn" (click)="closeWithdrawModal()"
-                        [disabled]="isProcessing">
-                        Cancel
-                    </button>
-                    <button type="button" class="form-btn primary-btn" (click)="proceedToPayment()"
-                        [disabled]="isProcessing || currentBalance <= 0 || !isBankFormValid()">
-                        <span *ngIf="!isProcessing">Go to Payment</span>
-                        <span *ngIf="isProcessing" class="processing-text">
-                            <span class="spinner"></span>
-                            Processing...
-                        </span>
-                    </button>
+                <!-- Bank Transfer Instructions -->
+                <div class="bank-instructions">
+                    <h4 class="instructions-title">Please transfer the payment to the following account:</h4>
+
+                    <div class="bank-details-card">
+                        <div class="bank-detail-row">
+                            <div class="detail-group">
+                                <span class="detail-label">Bank Name:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.bankName}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.bankName)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bank-detail-row">
+                            <div class="detail-group">
+                                <span class="detail-label">Account Holder:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.accountHolder}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.accountHolder)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bank-detail-row">
+                            <div class="detail-group half-width">
+                                <span class="detail-label">Routing Number:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.routingNumber}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.routingNumber)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="detail-group half-width">
+                                <span class="detail-label">Account Number:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.accountNumber}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.accountNumber)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bank-detail-row">
+                            <div class="detail-group">
+                                <span class="detail-label">SWIFT Code:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.swiftCode}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.swiftCode)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bank-detail-row">
+                            <div class="detail-group">
+                                <span class="detail-label">Bank Address:</span>
+                                <div class="detail-value-container">
+                                    <span class="detail-value">{{paymentBankInfo.address}}</span>
+                                    <button type="button" class="copy-btn"
+                                        (click)="copyToClipboard(paymentBankInfo.address)"
+                                        title="Copy to clipboard">
+                                        📋
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Instructions -->
+                <div class="payment-instructions">
+                    <h4 class="instructions-title">Important Notes:</h4>
+                    <ul class="instructions-list">
+                        <li>Processing time: 1-3 business days</li>
+                        <li>Include your account ID ({{accountId}}) in the transfer reference</li>
+                        <li>Transfer must be made from your registered bank account</li>
+                        <li>Contact support if you need assistance with the transfer</li>
+                    </ul>
+                </div>
+
+                <div class="payment-warning">
+                    <div class="warning-icon">⚠️</div>
+                    <p class="warning-text">
+                        Please ensure all bank details are correct before making the transfer.
+                        Double-check the amount and account information to avoid delays.
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <!-- Payment Modal -->
-        <div class="modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
-            <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
-                <div class="modal-header">
-                    <h3 class="modal-title">Payment Instructions</h3>
-                    <button type="button" class="modal-close" (click)="closePaymentModal()">×</button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="payment-summary">
-                        <div class="summary-icon">💳</div>
-                        <div class="summary-text">
-                            <p class="summary-title">Amount to Pay:</p>
-                            <p class="summary-amount">{{getPaymentAmount()}}</p>
-                            <p class="summary-subtitle">{{selectedFundingOption?.frequency}} Payment</p>
-                        </div>
-                    </div>
-
-                    <!-- Bank Transfer Instructions -->
-                    <div class="bank-instructions">
-                        <h4 class="instructions-title">Please transfer the payment to the following account:</h4>
-
-                        <div class="bank-details-card">
-                            <div class="bank-detail-row">
-                                <div class="detail-group">
-                                    <span class="detail-label">Bank Name:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.bankName}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.bankName)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bank-detail-row">
-                                <div class="detail-group">
-                                    <span class="detail-label">Account Holder:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.accountHolder}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.accountHolder)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bank-detail-row">
-                                <div class="detail-group half-width">
-                                    <span class="detail-label">Routing Number:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.routingNumber}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.routingNumber)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="detail-group half-width">
-                                    <span class="detail-label">Account Number:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.accountNumber}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.accountNumber)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bank-detail-row">
-                                <div class="detail-group">
-                                    <span class="detail-label">SWIFT Code:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.swiftCode}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.swiftCode)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bank-detail-row">
-                                <div class="detail-group">
-                                    <span class="detail-label">Bank Address:</span>
-                                    <div class="detail-value-container">
-                                        <span class="detail-value">{{paymentBankInfo.address}}</span>
-                                        <button type="button" class="copy-btn"
-                                            (click)="copyToClipboard(paymentBankInfo.address)"
-                                            title="Copy to clipboard">
-                                            📋
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Instructions -->
-                    <div class="payment-instructions">
-                        <h4 class="instructions-title">Important Notes:</h4>
-                        <ul class="instructions-list">
-                            <li>Processing time: 1-3 business days</li>
-                            <li>Include your account ID ({{accountId}}) in the transfer reference</li>
-                            <li>Transfer must be made from your registered bank account</li>
-                            <li>Contact support if you need assistance with the transfer</li>
-                        </ul>
-                    </div>
-
-                    <div class="payment-warning">
-                        <div class="warning-icon">⚠️</div>
-                        <p class="warning-text">
-                            Please ensure all bank details are correct before making the transfer.
-                            Double-check the amount and account information to avoid delays.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="form-btn secondary-btn" (click)="closePaymentModal()"
-                        [disabled]="isProcessing">
-                        Close
-                    </button>
-                    <button type="button" class="form-btn primary-btn" (click)="finalizePayment()"
-                        [disabled]="isProcessing">
-                        <span *ngIf="!isProcessing">I've Made the Transfer</span>
-                        <span *ngIf="isProcessing" class="processing-text">
-                            <span class="spinner"></span>
-                            Processing...
-                        </span>
-                    </button>
-                </div>
+            <div class="modal-actions">
+                <button type="button" class="form-btn secondary-btn" (click)="closePaymentModal()"
+                    [disabled]="isProcessing">
+                    Close
+                </button>
+                <button type="button" class="form-btn primary-btn" (click)="finalizePayment()"
+                    [disabled]="isProcessing">
+                    <span *ngIf="!isProcessing">I've Made the Transfer</span>
+                    <span *ngIf="isProcessing" class="processing-text">
+                        <span class="spinner"></span>
+                        Processing...
+                    </span>
+                </button>
             </div>
         </div>
+    </div>
+</div>

@@ -7,12 +7,12 @@
         <div class="progress-steps">
             <div class="step completed">
                 <div class="step-circle">1</div>
-                <span class="step-label">Documents</span>
+                <span class="step-label">Revenue Data</span>
             </div>
             <div class="step-connector"></div>
             <div class="step active">
                 <div class="step-circle">2</div>
-                <span class="step-label">Revenue Data</span>
+                <span class="step-label">Documents</span>
             </div>
             <div class="step-connector"></div>
             <div class="step pending">
@@ -24,73 +24,7 @@
 
     <div class="funding-content">
         <form class="funding-form" #fundingForm="ngForm">
-            <!-- Section Upload RIB -->
-            <div class="funding-section">
-                <div class="section-header">
-                    <h3 class="section-title">
-                        <span class="title-icon">📄</span>
-                        Upload Your Bank Statements
-                    </h3>
-                    <p class="section-subtitle">Upload your 3 most recent monthly bank statements for revenue verification</p>
-                </div>
-                
-                <div class="upload-grid">
-                    <div class="upload-item" *ngFor="let month of [1, 2, 3]; let i = index">
-                        <label class="upload-label">
-                            Bank Statements Month {{month}} 
-                            <span class="month-indicator">{{getMonthLabel(month)}}</span>
-                        </label>
-                        <div class="upload-zone" 
-                             [class.uploaded]="getFile(month)"
-                             [class.dragover]="isDragOver"
-                             (dragover)="onDragOver($event)" 
-                             (dragleave)="onDragLeave($event)"
-                             (drop)="onFileDropped($event, month)"
-                             (click)="getFileInput(month).click()">
-                            
-                            <div class="upload-content" *ngIf="!getFile(month)">
-                                <div class="upload-icon">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                        <polyline points="14,2 14,8 20,8"/>
-                                        <line x1="16" y1="13" x2="8" y2="13"/>
-                                        <line x1="16" y1="17" x2="8" y2="17"/>
-                                        <polyline points="10,9 9,9 8,9"/>
-                                    </svg>
-                                </div>
-                                <p class="upload-text">Drop your bank statement here</p>
-                                <p class="upload-subtext">or click to browse</p>
-                                <div class="file-format">PDF, JPG, PNG (max 10MB)</div>
-                            </div>
-                            
-                            <div class="uploaded-file" *ngIf="getFile(month)">
-                                <div class="file-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                    </svg>
-                                </div>
-                                <div class="file-details">
-                                    <p class="file-name">{{getFile(month)?.name}}</p>
-                                    <p class="file-size">{{getFileSize(getFile(month))}}</p>
-                                </div>
-                                <button type="button" class="remove-file" (click)="removeFile(month, $event)">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"/>
-                                        <line x1="6" y1="6" x2="18" y2="18"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            
-                            <input #fileInput type="file" class="file-input" 
-                                   accept=".pdf,.jpg,.jpeg,.png" 
-                                   (change)="onFileSelected($event, month)">
-                        </div>
-                        <div class="upload-validation" *ngIf="getFileError(month)">
-                            <span class="error">{{getFileError(month)}}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+           
 
             <!-- Section Montants -->
             <div class="funding-section">
@@ -162,6 +96,74 @@
                 </div>
             </div>
 
+             <!-- Section Upload RIB -->
+            <div class="funding-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span class="title-icon">📄</span>
+                        Upload Your Bank Statements
+                    </h3>
+                    <p class="section-subtitle">Upload your 3 most recent monthly bank statements for revenue verification</p>
+                </div>
+                
+                <div class="upload-grid">
+                    <div class="upload-item" *ngFor="let month of [1, 2, 3]; let i = index">
+                        <label class="upload-label">
+                            Bank Statements Month {{month}} 
+                            <span class="month-indicator">{{getMonthLabel(month)}}</span>
+                        </label>
+                        <div class="upload-zone" 
+                             [class.uploaded]="getFile(month)"
+                             [class.dragover]="isDragOver"
+                             (dragover)="onDragOver($event)" 
+                             (dragleave)="onDragLeave($event)"
+                             (drop)="onFileDropped($event, month)"
+                             (click)="getFileInput(month).click()">
+                            
+                            <div class="upload-content" *ngIf="!getFile(month)">
+                                <div class="upload-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <polyline points="14,2 14,8 20,8"/>
+                                        <line x1="16" y1="13" x2="8" y2="13"/>
+                                        <line x1="16" y1="17" x2="8" y2="17"/>
+                                        <polyline points="10,9 9,9 8,9"/>
+                                    </svg>
+                                </div>
+                                <p class="upload-text">Drop your bank statement here</p>
+                                <p class="upload-subtext">or click to browse</p>
+                                <div class="file-format">PDF, JPG, PNG (max 10MB)</div>
+                            </div>
+                            
+                            <div class="uploaded-file" *ngIf="getFile(month)">
+                                <div class="file-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="file-details">
+                                    <p class="file-name">{{getFile(month)?.name}}</p>
+                                    <p class="file-size">{{getFileSize(getFile(month))}}</p>
+                                </div>
+                                <button type="button" class="remove-file" (click)="removeFile(month, $event)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <input #fileInput type="file" class="file-input" 
+                                   accept=".pdf,.jpg,.jpeg,.png" 
+                                   (change)="onFileSelected($event, month)">
+                        </div>
+                        <div class="upload-validation" *ngIf="getFileError(month)">
+                            <span class="error">{{getFileError(month)}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Application Status -->
             <div class="application-status" *ngIf="getApplicationProgress() > 0">
                 <div class="status-header">
@@ -172,13 +174,13 @@
                     <div class="progress-fill" [style.width.%]="getApplicationProgress()"></div>
                 </div>
                 <div class="status-items">
-                    <div class="status-item" [ngClass]="{'completed': getUploadedFilesCount() > 0}">
-                        <span class="status-check">✓</span>
-                        Documents: {{getUploadedFilesCount()}}/3 uploaded
-                    </div>
                     <div class="status-item" [ngClass]="{'completed': getCompletedRevenueCount() > 0}">
                         <span class="status-check">✓</span>
                         Revenue data: {{getCompletedRevenueCount()}}/3 completed
+                    </div>
+                    <div class="status-item" [ngClass]="{'completed': getUploadedFilesCount() > 0}">
+                        <span class="status-check">✓</span>
+                        Documents: {{getUploadedFilesCount()}}/3 uploaded
                     </div>
                 </div>
             </div>

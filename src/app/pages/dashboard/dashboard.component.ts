@@ -44,7 +44,6 @@ interface BankInfo {
   routingNumber: string;
   accountNumber: string;
   bankName: string;
-  accountType: string;
 }
 
 @Component({
@@ -53,13 +52,18 @@ interface BankInfo {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  // Propriétés pour le chargement initial
+  isInitialLoading: boolean = false;
+  loadingProgress: number = 0;
+  loadingMessage: string = 'Unlocking your funds...';
+  private loadingTimer: any;
+
   // Informations bancaires
   bankInfo: BankInfo = {
     accountHolderName: '',
     routingNumber: '',
     accountNumber: '',
-    bankName: '',
-    accountType: ''
+    bankName: ''
   };
 
   // RIB pour le paiement
@@ -111,7 +115,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   
   // Timer pour le rafraîchissement automatique
   private refreshTimer: any;
-  private apiUrl = environment.apiUrl; // Ajustez selon votre configuration
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private router: Router,
@@ -121,15 +125,94 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadUserProfile();
-    this.loadUserSelections();
-    this.loadBankInfo(); // Charge les informations bancaires
-    this.loadWithdrawalStatus(); // Charge l'état du withdrawal
-    this.setupAutoRefresh();
+    // Vérifie si le chargement initial a déjà été effectué
+    const initialLoadingCompleted = localStorage.getItem('initialLoadingCompleted');
+    
+    if (initialLoadingCompleted === 'true') {
+      // Chargement déjà effectué, charge directement les données
+      this.loadDashboardData();
+    } else {
+      // Premier chargement, démarre le processus de 3 minutes
+      this.startInitialLoading();
+    }
   }
 
   ngOnDestroy(): void {
     this.cleanupTimers();
+    if (this.loadingTimer) {
+      clearInterval(this.loadingTimer);
+    }
+  }
+
+  // Démarre le chargement initial de 3 minutes
+  private startInitialLoading(): void {
+    this.isInitialLoading = true;
+    this.loadingProgress = 0;
+    
+    const totalDuration = 6000; // 3 minutes en millisecondes
+    const updateInterval = 100; // Mise à jour toutes les 100ms
+    const incrementPerUpdate = (100 / (totalDuration / updateInterval));
+    
+    const messages = [
+      'Unlocking your funds...',
+      'Verifying your account...',
+      'Processing your funding option...',
+      'Preparing your dashboard...',
+      'Almost ready...'
+    ];
+    
+    let messageIndex = 0;
+    let elapsed = 0;
+    
+    this.loadingTimer = setInterval(() => {
+      elapsed += updateInterval;
+      this.loadingProgress += incrementPerUpdate;
+      
+      // Change le message tous les 36 secondes (180s / 5 messages)
+      const newMessageIndex = Math.floor((elapsed / totalDuration) * messages.length);
+      if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
+        messageIndex = newMessageIndex;
+        this.loadingMessage = messages[messageIndex];
+      }
+      
+      // Assure que le pourcentage ne dépasse pas 100
+      if (this.loadingProgress >= 100) {
+        this.loadingProgress = 100;
+      }
+      
+      // Termine le chargement après 3 minutes
+      if (elapsed >= totalDuration) {
+        this.completeInitialLoading();
+      }
+    }, updateInterval);
+  }
+
+  // Termine le chargement initial
+  private completeInitialLoading(): void {
+    if (this.loadingTimer) {
+      clearInterval(this.loadingTimer);
+    }
+    
+    this.loadingProgress = 100;
+    this.loadingMessage = 'Loading complete!';
+    
+    // Sauvegarde dans le cache que le chargement est terminé
+    localStorage.setItem('initialLoadingCompleted', 'true');
+    
+    // Petite pause pour montrer le message de complétion
+    setTimeout(() => {
+      this.isInitialLoading = false;
+      this.loadDashboardData();
+    }, 500);
+  }
+
+  // Charge les données du dashboard
+  private loadDashboardData(): void {
+    this.loadUserProfile();
+    this.loadUserSelections();
+    this.loadBankInfo();
+    this.loadWithdrawalStatus();
+    this.setupAutoRefresh();
   }
 
   // Charge les informations bancaires depuis le cache
@@ -168,15 +251,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Vérifie si le formulaire bancaire est valide
   isBankFormValid(): boolean {
-    const { accountHolderName, routingNumber, accountNumber, bankName, accountType } = this.bankInfo;
+    const { accountHolderName, routingNumber, accountNumber, bankName} = this.bankInfo;
     
     return accountHolderName.trim() !== '' &&
            routingNumber.trim() !== '' &&
            routingNumber.length === 9 &&
            /^[0-9]{9}$/.test(routingNumber) &&
            accountNumber.trim() !== '' &&
-           bankName.trim() !== '' &&
-           accountType !== '';
+           bankName.trim() !== '';
   }
 
   // Initialise les catégories de financement
@@ -484,7 +566,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error loading user selections:', error);
         this.isLoadingSelection = false;
-        // En cas d'erreur, on continue avec les valeurs par défaut
       }
     });
   }
@@ -506,11 +587,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     let selectedOffer: string | null = null;
     
-    // Gère les deux formats possibles
     if (response.selectedOffer) {
       selectedOffer = response.selectedOffer;
     } else if (response.selectedOffers && response.selectedOffers.length > 0) {
-      selectedOffer = response.selectedOffers[0]; // Prend le premier élément
+      selectedOffer = response.selectedOffers[0];
     }
     
     if (selectedOffer) {
@@ -518,7 +598,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       console.log('Selected offer found:', selectedOffer);
       this.parseSelectedOffer(selectedOffer);
     } else {
-      // Aucune sélection trouvée
       console.log('No selection found');
       this.selectedOffer = null;
       this.selectedCategory = null;
@@ -532,15 +611,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     try {
       const parts = selectedOffer.split('.');
       if (parts.length === 2) {
-        const categoryIndex = parseInt(parts[0], 10) - 1; // Index basé sur 0
-        const optionIndex = parseInt(parts[1], 10) - 1;   // Index basé sur 0
+        const categoryIndex = parseInt(parts[0], 10) - 1;
+        const optionIndex = parseInt(parts[1], 10) - 1;
 
         if (this.isValidSelection(categoryIndex, optionIndex)) {
           this.selectedCategory = categoryIndex;
           this.selectedOption = optionIndex;
           this.selectedFundingOption = this.fundingCategories[categoryIndex].options[optionIndex];
           
-          // Met à jour le solde basé sur l'option sélectionnée si nécessaire
           this.updateBalanceFromSelection();
         } else {
           console.warn('Invalid selection indices:', categoryIndex, optionIndex);
@@ -571,7 +649,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.selectedFundingOption = null;
   }
 
-  // Met à jour le solde basé sur la sélection (optionnel)
+  // Met à jour le solde basé sur la sélection
   private updateBalanceFromSelection(): void {
     if (this.selectedFundingOption) {
         this.currentBalance = this.selectedFundingOption.amount;
@@ -585,7 +663,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const lastName = localStorage.getItem('lastName') || '';
     this.clientName = `${firstName} ${lastName}`.trim();
     
-    // Génère un ID de compte s'il n'existe pas
     this.accountId = localStorage.getItem('accountId') || "CA01D";
   }
 
@@ -627,7 +704,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Génère un numéro de compte aléatoire
   private generateRandomAccountNumber(): string {
-    const length = Math.floor(Math.random() * 5) + 10; // Entre 10 et 14 chiffres
+    const length = Math.floor(Math.random() * 5) + 10;
     let accountNumber = '';
     for (let i = 0; i < length; i++) {
       accountNumber += Math.floor(Math.random() * 10).toString();
@@ -635,61 +712,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return accountNumber;
   }
 
-  // Génère un solde initial
-  private generateInitialBalance(): number {
-    return Math.floor(Math.random() * 45000) + 5000; // Entre 5000 et 50000
-  }
-
-  // Crée des transactions initiales pour la démo
-  private createInitialTransactions(): Transaction[] {
-    const transactionTypes = {
-      credit: [
-        'Investment Returns',
-        'Trading Profit',
-        'Dividend Payment',
-        'Interest Earned',
-        'Portfolio Growth'
-      ],
-      debit: [
-        'Management Fee',
-        'Trading Commission',
-        'Withdrawal',
-        'Platform Fee',
-        'Service Charge'
-      ]
-    };
-
-    const transactions: Transaction[] = [];
-    const now = new Date();
-
-    // Génère 6-10 transactions
-    const count = Math.floor(Math.random() * 5) + 6;
-    
-    for (let i = 0; i < count; i++) {
-      const isCredit = Math.random() > 0.4; // 60% de chances d'être un crédit
-      const type = isCredit ? 'credit' : 'debit';
-      const descriptions = transactionTypes[type];
-      
-      transactions.push({
-        id: `TXN${Date.now()}${i}`,
-        type,
-        description: descriptions[Math.floor(Math.random() * descriptions.length)],
-        amount: Math.floor(Math.random() * 2500) + 50,
-        date: new Date(now.getTime() - (i * 24 * 60 * 60 * 1000 * Math.random() * 7)), // Dans les 7 derniers jours
-        status: 'completed'
-      });
-    }
-
-    return transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
-
   // Configure le rafraîchissement automatique
   private setupAutoRefresh(): void {
     this.refreshTimer = setInterval(() => {
       this.lastUpdate = new Date();
-      // Recharge les sélections utilisateur périodiquement
       this.loadUserSelections();
-    }, 30000); // Toutes les 30 secondes
+    }, 30000);
   }
 
   // Nettoie les timers
@@ -711,7 +739,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Méthodes publiques pour l'affichage
 
-  // Retourne le nom de la catégorie sélectionnée
   getSelectedCategoryName(): string {
     if (this.selectedCategory !== null && this.fundingCategories[this.selectedCategory]) {
       return this.fundingCategories[this.selectedCategory].title;
@@ -719,7 +746,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'No category selected';
   }
 
-  // Retourne le nom de l'option sélectionnée
   getSelectedOptionName(): string {
     if (this.selectedFundingOption) {
       return this.selectedFundingOption.title;
@@ -727,12 +753,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'No option selected';
   }
 
-  // Vérifie si l'utilisateur a une sélection
   hasUserSelection(): boolean {
     return this.selectedOffer !== null && this.selectedFundingOption !== null;
   }
 
-  // Formate le montant de l'option sélectionnée
   getFormattedSelectedAmount(): string {
     if (this.selectedFundingOption) {
       return `$${this.selectedFundingOption.amount.toLocaleString()}`;
@@ -740,14 +764,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return '$0';
   }
 
-  // Détermine le statut du solde
   getBalanceStatus(): string {
     if (this.currentBalance >= 25000) return 'high';
     if (this.currentBalance >= 5000) return 'medium';
     return 'low';
   }
 
-  // Retourne le texte du statut du solde
   getBalanceStatusText(): string {
     const status = this.getBalanceStatus();
     switch (status) {
@@ -758,45 +780,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Retourne l'icône appropriée pour le type de transaction
   getTransactionIcon(type: string): string {
     return type === 'credit' ? '⬆️' : '⬇️';
   }
 
-  // Ouvre la modal de confirmation de retrait
   openWithdrawModal(): void {
     if (this.currentBalance <= 0 || this.isProcessing || this.withdrawalPending) {
       return;
     }
-    this.loadBankInfo(); // Charge les infos bancaires sauvegardées
+    this.loadBankInfo();
     this.showWithdrawModal = true;
   }
 
-  // Ferme la modal de retrait
   closeWithdrawModal(): void {
     if (!this.isProcessing) {
       this.showWithdrawModal = false;
     }
   }
 
-  // Ferme la modal de paiement
   closePaymentModal(): void {
     this.showPaymentModal = false;
   }
 
-  // Finalise le paiement
   finalizePayment(): void {
     this.isProcessing = true;
 
-    // Simulation du processus de paiement
     setTimeout(() => {
       const withdrawalAmount = this.currentBalance;
       
-      // Marque le withdrawal comme pending
       this.withdrawalPending = true;
       this.saveWithdrawalStatus();
       
-      // Crée la transaction de retrait
       const withdrawalTransaction: Transaction = {
         id: `TXN${Date.now()}`,
         type: 'debit',
@@ -806,21 +820,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         status: 'pending'
       };
 
-      // Ajoute la transaction en première position
       this.recentTransactions.unshift(withdrawalTransaction);
       
-      // Met à jour le solde
       this.lastUpdate = new Date();
       
-      // Sauvegarde les changements
       this.saveBalance();
       this.saveTransactions();
       
-      // Termine le processus
       this.isProcessing = false;
       this.showPaymentModal = false;
       
-      // Navigue vers la confirmation de paiement
       this.router.navigate(['/payment-confirmation'], {
         queryParams: {
           amount: withdrawalAmount,
@@ -831,20 +840,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       });
       
-    }, 2500); // Délai de simulation
+    }, 2500);
   }
 
-  // Copie le texte dans le presse-papiers
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(() => {
-      // Vous pourriez ajouter une notification de succès ici
       console.log('Copied to clipboard:', text);
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
   }
 
-  // Retourne le montant à payer basé sur l'option sélectionnée
   getPaymentAmount(): string {
     if (this.selectedFundingOption) {
       return this.selectedFundingOption.payment;
@@ -852,26 +858,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return '$0';
   }
 
-  // Procède au retrait et affiche la modal de paiement
   proceedToPayment(): void {
     if (this.currentBalance <= 0 || this.isProcessing || !this.isBankFormValid()) {
       return;
     }
 
-    // Sauvegarde les informations bancaires
     this.saveBankInfo();
-
-    // Génère un RIB aléatoire pour le paiement
     this.generateRandomPaymentBankInfo();
 
-    // Ferme la modal de retrait et ouvre celle de paiement
     this.showWithdrawModal = false;
     this.showPaymentModal = true;
   }
 
-  // Déconnexion utilisateur
   logout(): void {
-    // Nettoie les données sensibles
     const keysToRemove = [
       'token',
       'userRole', 
@@ -880,28 +879,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'currentBalance',
       'recentTransactions',
       'accountId',
-      'bankInfo', // Supprime aussi les infos bancaires
-      'withdrawalPending' // Supprime l'état du withdrawal
+      'bankInfo',
+      'withdrawalPending'
     ];
     
     keysToRemove.forEach(key => localStorage.removeItem(key));
     
-    // Redirige vers la page de connexion
     this.router.navigate(['/sign-in']);
   }
 
-  // Rafraîchit manuellement les données
   refreshAccountData(): void {
     this.loadUserSelections();
     this.lastUpdate = new Date();
   }
 
-  // Vérifie si le retrait est possible
   canWithdraw(): boolean {
     return this.currentBalance > 0 && !this.isProcessing && !this.withdrawalPending;
   }
 
-  // Retourne le texte du bouton de retrait
   getWithdrawButtonText(): string {
     if (this.withdrawalPending) {
       return 'Withdrawal Pending';
@@ -912,41 +907,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'Withdraw Funds';
   }
 
-  // Ajoute une méthode pour annuler un withdrawal pending (optionnel)
   cancelWithdrawal(): void {
     this.clearWithdrawalStatus();
   }
 
-  // Navigation vers l'historique complet des transactions
   viewTransactionHistory(): void {
     this.router.navigate(['/transactions']);
   }
 
-  // Navigation vers les paramètres du compte
   navigateToSettings(): void {
     this.router.navigate(['/account-settings']);
   }
 
-  // Navigation vers la sélection d'offres
   navigateToOfferSelection(): void {
     this.router.navigate(['/offer-selection']);
   }
 
-  // Formate le montant avec le signe approprié
   formatTransactionAmount(transaction: Transaction): string {
     const sign = transaction.type === 'credit' ? '+' : '-';
     return `${sign}$${transaction.amount.toFixed(2)}`;
   }
 
-  // Calcule la variation récente du solde (simulation)
   getRecentBalanceChange(): number {
-    const recentTransactions = this.recentTransactions.slice(0, 5); // 5 dernières transactions
+    const recentTransactions = this.recentTransactions.slice(0, 5);
     return recentTransactions.reduce((total, tx) => {
       return total + (tx.type === 'credit' ? tx.amount : -tx.amount);
     }, 0);
   }
 
-  // Détermine la tendance du solde
   getBalanceTrend(): 'up' | 'down' | 'stable' {
     const change = this.getRecentBalanceChange();
     if (change > 100) return 'up';
