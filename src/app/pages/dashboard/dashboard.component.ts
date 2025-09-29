@@ -810,7 +810,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.recentTransactions.unshift(withdrawalTransaction);
       
       // Met à jour le solde
-      this.currentBalance = 0;
       this.lastUpdate = new Date();
       
       // Sauvegarde les changements
