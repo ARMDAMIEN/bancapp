@@ -137,16 +137,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Vérifie si le chargement initial a déjà été effectué
-    const initialLoadingCompleted = localStorage.getItem('initialLoadingCompleted');
-    
-    if (initialLoadingCompleted === 'true') {
       // Chargement déjà effectué, charge directement les données
-      this.loadDashboardData();
-    } else {
-      // Premier chargement, démarre le processus de 3 minutes
-      this.startInitialLoading();
-    }
+      this.loadSignatureStatus();
   }
 
   ngOnDestroy(): void {
@@ -266,8 +258,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.hasSigned = response.hasSigned;
-          console.log('Signature status loaded:', this.hasSigned);
-          this.isLoadingSignatureStatus = false;
+          const initialLoadingCompleted = localStorage.getItem('initialLoadingCompleted');
+          if (this.hasSigned && initialLoadingCompleted !== 'true') {
+          // L'utilisateur a signé ET le loading n'a jamais été fait
+          console.log('🎬 Starting initial loading animation...');
+          this.startInitialLoading();
+        } else if (this.hasSigned && initialLoadingCompleted === 'true') {
+          console.log('⚡ Loading completed previously, loading dashboard...');
+          this.loadDashboardData();
+        } else {
+          console.log('⚠️ User has not signed yet');
+        } 
+        this.isLoadingSignatureStatus = false; 
         },
         error: (error) => {
           console.error('Failed to load signature status:', error);
