@@ -1,15 +1,23 @@
 <div class="dashboard-container">
-    <!-- Initial Loading Screen -->
     <div class="initial-loading-overlay" *ngIf="isInitialLoading">
-        <div class="loading-container">
-            <div class="loading-icon">💰</div>
-            <h2 class="loading-title">{{loadingMessage}}</h2>
-            <div class="loading-bar-container">
-                <div class="loading-bar" [style.width.%]="loadingProgress"></div>
-            </div>
-            <p class="loading-percentage">{{loadingProgress | number:'1.0-0'}}%</p>
+    <div class="loading-container" [class.celebrating]="isCelebrating">
+        <div class="loading-icon" [class.celebrating]="isCelebrating">
+            {{ isCelebrating ? '🎉' : '💰' }}
+        </div>
+        <h2 class="loading-title">{{ loadingMessage }}</h2>
+        <div class="loading-bar-container" *ngIf="!isCelebrating">
+            <div class="loading-bar" [style.width.%]="loadingProgress"></div>
+        </div>
+        <p class="loading-percentage" *ngIf="!isCelebrating">
+            {{ loadingProgress | number:'1.0-0' }}%
+        </p>
+        
+        <!-- Confettis pour la célébration -->
+        <div class="confetti-container" *ngIf="isCelebrating">
+            <div class="confetti" *ngFor="let i of confettiArray"></div>
         </div>
     </div>
+</div>
 
     <!-- Main Content -->
     <div class="dashboard-content" *ngIf="!isInitialLoading">

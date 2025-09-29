@@ -60,7 +60,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Propriétés pour le chargement initial
   isInitialLoading: boolean = false;
   loadingProgress: number = 0;
+  isCelebrating = false;
   loadingMessage: string = 'Unlocking your funds...';
+  confettiArray = Array(50).fill(0); // Pour générer 50 confettis
+
   private loadingTimer: any;
 
   // Informations bancaires
@@ -153,13 +156,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Démarre le chargement initial de 3 minutes
   private startInitialLoading(): void {
     this.isInitialLoading = true;
+    this.isCelebrating = false;
     this.loadingProgress = 0;
     
-    const totalDuration = 6000; 
-    const updateInterval = 100; // Mise à jour toutes les 100ms
+    const totalDuration = 60000; 
+    const updateInterval = 100;
     const incrementPerUpdate = (100 / (totalDuration / updateInterval));
     
     const messages = [
@@ -177,27 +180,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
       elapsed += updateInterval;
       this.loadingProgress += incrementPerUpdate;
       
-      // Change le message tous les 36 secondes (180s / 5 messages)
       const newMessageIndex = Math.floor((elapsed / totalDuration) * messages.length);
       if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
         messageIndex = newMessageIndex;
         this.loadingMessage = messages[messageIndex];
       }
       
-      // Assure que le pourcentage ne dépasse pas 100
       if (this.loadingProgress >= 100) {
         this.loadingProgress = 100;
       }
       
-      // Termine le chargement après 3 minutes
       if (elapsed >= totalDuration) {
-        this.completeInitialLoading();
+        this.startCelebration();
       }
     }, updateInterval);
   }
 
+  // Lance l'animation de célébration
+  private startCelebration(): void {
+    clearInterval(this.loadingTimer);
+    this.isCelebrating = true;
+    this.loadingMessage = '🎊 Success! Welcome to your dashboard! 🎊';
+    
+    // Termine après 2.5 secondes de célébration
+    setTimeout(() => {
+      this.completeInitialLoading();
+    }, 2500);
+  }
+
   // Termine le chargement initial
   private completeInitialLoading(): void {
+  
+
     if (this.loadingTimer) {
       clearInterval(this.loadingTimer);
     }
@@ -210,6 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     // Petite pause pour montrer le message de complétion
     setTimeout(() => {
+      this.isCelebrating = false;
       this.isInitialLoading = false;
       this.loadDashboardData();
     }, 500);
