@@ -21,21 +21,48 @@
 .login-visual {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--primary-medium) 0%, var(--primary-dark) 100%);
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.login-visual::after {
+.login-visual-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.login-visual-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg, 
+        rgba(26, 34, 56, 0.7) 0%, 
+        rgba(45, 48, 71, 0.6) 50%,
+        rgba(30, 30, 36, 0.7) 100%
+    );
+    pointer-events: none;
+}
+
+.login-visual-overlay::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 70%;
-    height: 70%;
+    width: 60%;
+    height: 60%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(circle, var(--primary-accent) 0%, rgba(14, 246, 204, 0) 70%);
-    opacity: 0.1;
-    filter: blur(40px);
+    background: radial-gradient(
+        circle, 
+        rgba(49, 130, 206, 0.2) 0%, 
+        rgba(49, 130, 206, 0) 70%
+    );
+    filter: blur(50px);
 }
 
 /* Section droite */
