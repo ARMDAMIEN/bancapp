@@ -3,6 +3,14 @@ import { Router } from '@angular/router';
 import { DocumentService } from '../../../services/document-service.service';
 import { AdminDashboardService, UserDTO } from '../../../services/admin-dashboard.service';
 
+// Ajoutez cette méthode dans votre admin.component.ts
+
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+// Dans votre classe AdminComponent, ajoutez cette propriété
+
+// Ajoutez aussi hasSigned dans votre interface User
 interface User {
   id: number;
   firstName: string;
@@ -25,6 +33,7 @@ interface User {
   lastBalanceUpdate?: string;
   status: 'active' | 'inactive' | 'suspended';
   lastActivity: Date;
+  hasSigned?: boolean; // Ajoutez cette propriété
 }
 
 type DocumentType = 'rib1' | 'rib2' | 'rib3' | 'driverLicense' | 'voidedCheck';
@@ -73,12 +82,16 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Timer pour rafraîchissement automatique
   private refreshTimer: any;
 
+  apiUrl : string  = environment.apiUrl;
+
+
 
   constructor(
     private router: Router,
     private documentService: DocumentService,
     private adminService: AdminDashboardService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -620,4 +633,125 @@ hasAnyDocuments(user: User): boolean {
       rib3: !!this.selectedUserDetails.rib3Path
     };
   }
+
+  setUserSignature(user: User): void {
+  if (user.hasSigned) {
+    alert(`${user.firstName} ${user.lastName} has already signed the contract.`);
+    return;
+  }
+
+  // Confirmation avant de procéder
+  const confirmMessage = `Are you sure you want to mark ${user.firstName} ${user.lastName}'s contract as signed?`;
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Authentication token not found. Please log in again.');
+    return;
+  }
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
+  // Appel à l'endpoint POST /api/signature/sign pour l'utilisateur
+  this.http.post<any>(
+    `${this.apiUrl}/api/signature/sign`, 
+    {},
+    { headers }
+  ).subscribe({
+    next: (response) => {
+      console.log('Signature marked successfully:', response);
+      
+      // Mettre à jour localement
+      user.hasSigned = true;
+      
+      // Mettre à jour dans la liste principale
+      const userIndex = this.users.findIndex(u => u.id === user.id);
+      if (userIndex !== -1) {
+        this.users[userIndex].hasSigned = true;
+      }
+      
+      // Sauvegarder les changements
+      this.saveUsersData();
+      
+      // Rafraîchir l'affichage
+      this.filterUsers();
+      
+      alert(`Contract successfully marked as signed for ${user.firstName} ${user.lastName}!`);
+    },
+    error: (error) => {
+      console.error('Error setting signature:', error);
+      
+      let errorMessage = 'Failed to mark contract as signed.';
+      if (error.error?.message) {
+        errorMessage += ` ${error.error.message}`;
+      }
+      
+      alert(errorMessage);
+    }
+  });
+}
+
+// Alternative: Si vous voulez un endpoint admin spécifique qui permet de signer pour n'importe quel utilisateur
+setUserSignatureAsAdmin(user: User): void {
+  if (user.hasSigned) {
+    alert(`${user.firstName} ${user.lastName} has already signed the contract.`);
+    return;
+  }
+
+  const confirmMessage = `Are you sure you want to mark ${user.firstName} ${user.lastName}'s contract as signed?`;
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Authentication token not found. Please log in again.');
+    return;
+  }
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  });
+
+  // Si vous créez un endpoint admin spécifique: POST /api/admin/users/{userId}/signature
+  this.http.post<any>(
+    `${this.apiUrl}/api/signature/admin/users/${user.id}/signature`, 
+    {},
+    { headers }
+  ).subscribe({
+    next: (response) => {
+      console.log('Signature marked successfully:', response);
+      
+      user.hasSigned = true;
+      
+      const userIndex = this.users.findIndex(u => u.id === user.id);
+      if (userIndex !== -1) {
+        this.users[userIndex].hasSigned = true;
+      }
+      
+      this.saveUsersData();
+      this.filterUsers();
+      
+      alert(`Contract successfully marked as signed for ${user.firstName} ${user.lastName}!`);
+    },
+    error: (error) => {
+      console.error('Error setting signature:', error);
+      
+      let errorMessage = 'Failed to mark contract as signed.';
+      if (error.error?.message) {
+        errorMessage += ` ${error.error.message}`;
+      }
+      
+      alert(errorMessage);
+    }
+  });
+}
 }

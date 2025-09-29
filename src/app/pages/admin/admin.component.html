@@ -45,6 +45,7 @@
                             <th>Balance</th>
                             <th>Status</th>
                             <th>Last Activity</th>
+                            <th>Signature</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -69,6 +70,11 @@
                             <td>
                                 <span class="status-badge" [ngClass]="user.status">{{user.status}}</span>
                             </td>
+                            <td>
+                                <span class="signature-badge" [ngClass]="user.hasSigned ? 'signed' : 'not-signed'">
+                                    {{user.hasSigned ? '✓ Signed' : '✗ Not Signed'}}
+                                </span>
+                            </td>
                             <td class="last-activity">{{user.lastActivity | date:'short'}}</td>
                             <td>
                                 <div class="action-buttons">
@@ -80,6 +86,11 @@
                                         (click)="openFundsModal(user, 'remove')" [disabled]="user.accountBalance <= 0"
                                         title="Remove Funds">
                                         -
+                                    </button>
+                                    <button type="button" class="action-btn signature-btn"
+                                        (click)="setUserSignatureAsAdmin(user)" [disabled]="user.hasSigned"
+                                        [title]="user.hasSigned ? 'Already Signed' : 'Mark as Signed'">
+                                        ✍️
                                     </button>
                                     <button type="button" class="action-btn view-details"
                                         (click)="viewUserDetails(user)" title="View Details">
@@ -310,64 +321,66 @@
 
             <!-- Documents Section -->
             <!-- Documents Section -->
-<div class="detail-section">
-    <h4 class="section-title">User Documents</h4>
-    
-    <!-- Check if user has any documents -->
-    <div *ngIf="hasAnyDocuments(selectedUserDetails!); else noDocuments">
-        <p class="documents-uploaded" *ngIf="selectedUserDetails?.documentsUploadDate">
-            Documents uploaded on: {{selectedUserDetails?.documentsUploadDate | date:'medium'}}
-        </p>
-        
-        <!-- RIB Documents -->
-        <div class="document-category" *ngIf="hasRibDocuments(selectedUserDetails!)">
-            <h5 class="category-title">RIB Documents</h5>
-            <div class="document-list">
-                <div class="document-item" *ngIf="selectedUserDetails?.rib1Path">
-                    <span class="doc-name">RIB Month 1</span>
-                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib1')">
-                        Download
-                    </button>
+            <div class="detail-section">
+                <h4 class="section-title">User Documents</h4>
+
+                <!-- Check if user has any documents -->
+                <div *ngIf="hasAnyDocuments(selectedUserDetails!); else noDocuments">
+                    <p class="documents-uploaded" *ngIf="selectedUserDetails?.documentsUploadDate">
+                        Documents uploaded on: {{selectedUserDetails?.documentsUploadDate | date:'medium'}}
+                    </p>
+
+                    <!-- RIB Documents -->
+                    <div class="document-category" *ngIf="hasRibDocuments(selectedUserDetails!)">
+                        <h5 class="category-title">RIB Documents</h5>
+                        <div class="document-list">
+                            <div class="document-item" *ngIf="selectedUserDetails?.rib1Path">
+                                <span class="doc-name">RIB Month 1</span>
+                                <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib1')">
+                                    Download
+                                </button>
+                            </div>
+                            <div class="document-item" *ngIf="selectedUserDetails?.rib2Path">
+                                <span class="doc-name">RIB Month 2</span>
+                                <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib2')">
+                                    Download
+                                </button>
+                            </div>
+                            <div class="document-item" *ngIf="selectedUserDetails?.rib3Path">
+                                <span class="doc-name">RIB Month 3</span>
+                                <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib3')">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Identity Documents -->
+                    <div class="document-category" *ngIf="hasIdentityDocuments(selectedUserDetails!)">
+                        <h5 class="category-title">Identity Documents</h5>
+                        <div class="document-list">
+                            <div class="document-item" *ngIf="selectedUserDetails?.driverLicensePath">
+                                <span class="doc-name">Driver License</span>
+                                <button class="download-btn"
+                                    (click)="downloadDocument(selectedUserDetails!, 'driverLicense')">
+                                    Download
+                                </button>
+                            </div>
+                            <div class="document-item" *ngIf="selectedUserDetails?.voidedCheckPath">
+                                <span class="doc-name">Voided Check</span>
+                                <button class="download-btn"
+                                    (click)="downloadDocument(selectedUserDetails!, 'voidedCheck')">
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="document-item" *ngIf="selectedUserDetails?.rib2Path">
-                    <span class="doc-name">RIB Month 2</span>
-                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib2')">
-                        Download
-                    </button>
-                </div>
-                <div class="document-item" *ngIf="selectedUserDetails?.rib3Path">
-                    <span class="doc-name">RIB Month 3</span>
-                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'rib3')">
-                        Download
-                    </button>
-                </div>
+
+                <ng-template #noDocuments>
+                    <p class="no-documents">No documents uploaded yet</p>
+                </ng-template>
             </div>
-        </div>
-        
-        <!-- Identity Documents -->
-        <div class="document-category" *ngIf="hasIdentityDocuments(selectedUserDetails!)">
-            <h5 class="category-title">Identity Documents</h5>
-            <div class="document-list">
-                <div class="document-item" *ngIf="selectedUserDetails?.driverLicensePath">
-                    <span class="doc-name">Driver License</span>
-                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'driverLicense')">
-                        Download
-                    </button>
-                </div>
-                <div class="document-item" *ngIf="selectedUserDetails?.voidedCheckPath">
-                    <span class="doc-name">Voided Check</span>
-                    <button class="download-btn" (click)="downloadDocument(selectedUserDetails!, 'voidedCheck')">
-                        Download
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <ng-template #noDocuments>
-        <p class="no-documents">No documents uploaded yet</p>
-    </ng-template>
-</div>
         </div>
 
         <div class="modal-actions">

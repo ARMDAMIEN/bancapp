@@ -39,6 +39,11 @@ interface UserSelectionResponse {
   message?: string;
 }
 
+interface SignatureStatusResponse {
+  hasSigned: boolean;
+  email: string;
+}
+
 interface BankInfo {
   accountHolderName: string;
   routingNumber: string;
@@ -79,6 +84,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Données utilisateur
   clientName: string = '';
   accountId: string = '';
+  
+  // État de signature
+  hasSigned: boolean = false;
+  isLoadingSignatureStatus: boolean = false;
   
   // Informations de solde
   currentBalance: number = 0;
@@ -149,7 +158,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isInitialLoading = true;
     this.loadingProgress = 0;
     
-    const totalDuration = 6000; // 3 minutes en millisecondes
+    const totalDuration = 6000; 
     const updateInterval = 100; // Mise à jour toutes les 100ms
     const incrementPerUpdate = (100 / (totalDuration / updateInterval));
     
@@ -212,7 +221,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadUserSelections();
     this.loadBankInfo();
     this.loadWithdrawalStatus();
+    this.loadSignatureStatus();
     this.setupAutoRefresh();
+  }
+
+  // Charge le statut de signature de l'utilisateur
+  private loadSignatureStatus(): void {
+    this.isLoadingSignatureStatus = true;
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No authentication token found');
+      this.isLoadingSignatureStatus = false;
+      return;
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    this.http.get<SignatureStatusResponse>(`${this.apiUrl}/api/signature/status`, { headers })
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading signature status:', error);
+          return of({ hasSigned: false, email: '' });
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.hasSigned = response.hasSigned;
+          console.log('Signature status loaded:', this.hasSigned);
+          this.isLoadingSignatureStatus = false;
+        },
+        error: (error) => {
+          console.error('Failed to load signature status:', error);
+          this.hasSigned = false;
+          this.isLoadingSignatureStatus = false;
+        }
+      });
   }
 
   // Charge les informations bancaires depuis le cache
@@ -717,6 +764,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.refreshTimer = setInterval(() => {
       this.lastUpdate = new Date();
       this.loadUserSelections();
+      this.loadSignatureStatus();
     }, 30000);
   }
 
@@ -890,6 +938,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   refreshAccountData(): void {
     this.loadUserSelections();
+    this.loadSignatureStatus();
     this.lastUpdate = new Date();
   }
 
@@ -940,5 +989,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (change > 100) return 'up';
     if (change < -100) return 'down';
     return 'stable';
+  }
+
+  // Méthodes utilitaires pour la signature
+  hasUserSigned(): boolean {
+    return this.hasSigned;
+  }
+
+  getSignatureStatusText(): string {
+    if (this.isLoadingSignatureStatus) {
+      return 'Loading...';
+    }
+    return this.hasSigned ? 'Signed' : 'Not Signed';
+  }
+
+  getSignatureStatusClass(): string {
+    return this.hasSigned ? 'signed' : 'not-signed';
   }
 }
