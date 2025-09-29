@@ -1,4 +1,4 @@
-/* CSS amélioré pour la page de financement - remplacer dans styles.css */
+/* CSS page de financement - Style bancaire traditionnel */
 
 .funding-container {
     min-height: calc(100vh - 72px);
@@ -10,15 +10,16 @@
 .funding-header {
     text-align: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    border-bottom: 1px solid var(--border-light);
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-medium);
 }
 
 .page-title {
     font-size: 32px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0 0 12px 0;
+    letter-spacing: -0.3px;
 }
 
 .page-subtitle {
@@ -28,6 +29,7 @@
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.6;
 }
 
 /* Progress Steps */
@@ -57,21 +59,24 @@
     font-weight: 600;
     font-size: 14px;
     transition: all 0.3s ease;
+    border: 2px solid var(--border-medium);
 }
 
 .step.completed .step-circle {
     background-color: var(--success-green);
     color: white;
+    border-color: var(--success-green);
 }
 
 .step.active .step-circle {
-    background-color: var(--primary-accent);
+    background-color: var(--primary-dark);
     color: white;
-    box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.2);
+    border-color: var(--primary-dark);
+    box-shadow: var(--shadow-medium);
 }
 
 .step.pending .step-circle {
-    background-color: var(--border-medium);
+    background-color: var(--bg-primary);
     color: var(--text-muted);
 }
 
@@ -82,14 +87,14 @@
 }
 
 .step.active .step-label {
-    color: var(--primary-accent);
+    color: var(--primary-dark);
     font-weight: 600;
 }
 
 .step-connector {
     width: 60px;
     height: 2px;
-    background-color: var(--border-light);
+    background-color: var(--border-medium);
     margin-bottom: 24px;
 }
 
@@ -108,26 +113,28 @@
 /* Enhanced Sections */
 .funding-section {
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
+    border: 2px solid var(--border-medium);
+    border-radius: 8px;
     padding: 32px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-soft);
     transition: all 0.3s ease;
 }
 
 .funding-section:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-accent);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-dark);
 }
 
 .section-header {
     margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .section-title {
     font-size: 24px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0 0 8px 0;
     display: flex;
     align-items: center;
@@ -136,6 +143,7 @@
 
 .title-icon {
     font-size: 28px;
+    color: var(--primary-accent);
 }
 
 .section-subtitle {
@@ -173,39 +181,41 @@
     color: var(--text-muted);
     background-color: var(--bg-secondary);
     padding: 2px 8px;
-    border-radius: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
 }
 
 .upload-zone {
     height: 160px;
     border: 2px dashed var(--border-medium);
-    border-radius: 12px;
+    border-radius: 8px;
     background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
 }
 
 .upload-zone:hover {
-    border-color: var(--primary-accent);
-    background-color: rgba(49, 130, 206, 0.05);
+    border-color: var(--primary-dark);
+    background-color: var(--bg-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(49, 130, 206, 0.15);
+    box-shadow: var(--shadow-soft);
 }
 
 .upload-zone.dragover {
-    border-color: var(--primary-accent);
-    background-color: rgba(49, 130, 206, 0.1);
-    box-shadow: 0 0 0 4px rgba(49, 130, 206, 0.1);
+    border-color: var(--primary-dark);
+    background-color: var(--primary-light);
+    box-shadow: var(--shadow-medium);
 }
 
 .upload-zone.uploaded {
     border-color: var(--success-green);
-    background-color: rgba(56, 161, 105, 0.05);
+    border-style: solid;
+    background-color: var(--bg-primary);
 }
 
 .upload-content {
@@ -239,10 +249,11 @@
 .file-format {
     font-size: 11px;
     color: var(--text-muted);
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: 4px;
     display: inline-block;
+    border: 1px solid var(--border-light);
 }
 
 .uploaded-file {
@@ -299,7 +310,7 @@
 }
 
 .remove-file:hover {
-    background-color: #c53030;
+    background-color: var(--primary-dark);
     transform: scale(1.1);
 }
 
@@ -350,6 +361,19 @@
     padding-left: 36px;
     font-size: 16px;
     font-weight: 500;
+    width: 100%;
+    height: 48px;
+    border: 2px solid var(--border-medium);
+    border-radius: 6px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.revenue-input:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(27, 58, 82, 0.1);
 }
 
 .input-helper {
@@ -358,11 +382,18 @@
     font-style: italic;
 }
 
+.input-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
 /* Enhanced Summary Card */
 .revenue-summary-card {
-    background: linear-gradient(135deg, rgba(49, 130, 206, 0.05), rgba(76, 154, 255, 0.05));
-    border: 1px solid rgba(49, 130, 206, 0.2);
-    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-medium);
+    border-radius: 8px;
     padding: 24px;
     margin-top: 20px;
 }
@@ -372,17 +403,20 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
 }
 
 .summary-title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0;
 }
 
 .summary-icon {
     font-size: 24px;
+    color: var(--primary-accent);
 }
 
 .summary-grid {
@@ -395,6 +429,10 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding: 12px;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
 }
 
 .summary-label {
@@ -410,7 +448,7 @@
 }
 
 .summary-value.total {
-    color: var(--primary-accent);
+    color: var(--primary-dark);
 }
 
 .summary-value.average {
@@ -418,13 +456,13 @@
 }
 
 .summary-value.projected {
-    color: var(--warning-amber);
+    color: var(--primary-accent);
 }
 
 .revenue-trend {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(49, 130, 206, 0.2);
+    border-top: 1px solid var(--border-light);
 }
 
 .trend-indicator {
@@ -450,8 +488,8 @@
 /* Application Status */
 .application-status {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
+    border: 2px solid var(--border-medium);
+    border-radius: 8px;
     padding: 24px;
 }
 
@@ -472,7 +510,7 @@
 .progress-percentage {
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-accent);
+    color: var(--primary-dark);
 }
 
 .progress-bar {
@@ -482,11 +520,12 @@
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 16px;
+    border: 1px solid var(--border-medium);
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-accent), #4c9aff);
+    background-color: var(--primary-dark);
     border-radius: 4px;
     transition: width 0.5s ease-out;
 }
@@ -552,42 +591,31 @@
     height: 56px;
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, var(--primary-accent), #4c9aff);
+    background-color: var(--primary-dark);
     color: white;
-    border: none;
-    border-radius: 12px;
+    border: 2px solid var(--primary-dark);
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     position: relative;
     overflow: hidden;
-}
-
-.submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
+    box-shadow: var(--shadow-soft);
 }
 
 .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(49, 130, 206, 0.4);
-}
-
-.submit-btn:hover:not(:disabled)::before {
-    left: 100%;
+    box-shadow: var(--shadow-medium);
+    background-color: var(--primary-medium);
 }
 
 .submit-btn:disabled {
-    background: var(--text-muted);
+    background-color: var(--border-medium);
+    border-color: var(--border-medium);
+    color: var(--text-muted);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -608,9 +636,9 @@
 
 /* Enhanced Error Message */
 .error-message-card {
-    background-color: rgba(229, 62, 62, 0.05);
-    border: 1px solid rgba(229, 62, 62, 0.2);
-    border-radius: 12px;
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--error-red);
+    border-radius: 8px;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -620,6 +648,7 @@
 
 .error-icon {
     font-size: 24px;
+    color: var(--error-red);
     flex-shrink: 0;
 }
 
@@ -725,16 +754,9 @@
     transition: transform 0.3s ease;
 }
 
-.revenue-item:hover .currency-input {
-    border-color: var(--primary-accent);
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-}
-
-/* Focus states */
-.revenue-input:focus {
-    outline: none;
-    border-color: var(--primary-accent);
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+.revenue-item:hover .revenue-input {
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 3px rgba(27, 58, 82, 0.08);
 }
 
 /* Loading states */
@@ -750,12 +772,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background-color: var(--bg-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.input-label, .revenue-input {
-    color: white;
 }

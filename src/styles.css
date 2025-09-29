@@ -10,45 +10,49 @@
     height: 100%;
     }
 
-    /* Palette de couleurs - Design bancaire professionnel */
-    :root {
-        /* Couleurs principales */
-        --primary-dark: #1A2238;        /* Bleu profond principal */
-        --primary-medium: #2D3047;      /* Indigo foncé */
-        --primary-light: #4A5568;       /* Gris-bleu pour éléments moyens */
-        --primary-accent: #3182CE;      /* Bleu professionnel pour accents */
-        
-        /* Couleurs secondaires */
-        --secondary-charcoal: #1E1E24;  /* Gris foncé pour conteneurs */
-        --secondary-light: #F7FAFC;     /* Gris très clair */
-        --secondary-medium: #E2E8F0;    /* Gris moyen pour bordures */
-        
-        /* Couleurs fonctionnelles */
-        --success-green: #38A169;       /* Vert discret pour succès */
-        --error-red: #E53E3E;           /* Rouge pour erreurs */
-        --warning-amber: #D69E2E;       /* Ambre pour avertissements */
-        --info-blue: #3182CE;           /* Bleu info */
-        
-        /* Variables d'interface */
-        --bg-primary: var(--primary-dark);
-        --bg-secondary: var(--secondary-charcoal);
-        --bg-card: rgba(45, 48, 71, 0.8);
-        --bg-overlay: rgba(26, 34, 56, 0.95);
-        
-        --text-primary: var(--secondary-light);
-        --text-secondary: rgba(247, 250, 252, 0.75);
-        --text-muted: rgba(247, 250, 252, 0.5);
-        --text-accent: var(--primary-accent);
-        
-        --border-light: rgba(247, 250, 252, 0.15);
-        --border-medium: rgba(247, 250, 252, 0.25);
-        --border-accent: rgba(49, 130, 206, 0.3);
-        
-        /* Effets et ombres */
-        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.15);
-        --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.25);
-        --glow-accent: 0 0 10px rgba(49, 130, 206, 0.2);
-    }   
+    /* Palette de couleurs - Design bancaire traditionnel (tons clairs) */
+:root {
+    /* Couleurs principales - Inspiration banque classique */
+    --primary-dark: #1B3A52;           /* Bleu marine profond (pour headers/accents) */
+    --primary-medium: #2C5F7C;         /* Bleu ardoise */
+    --primary-light: #E8EEF2;          /* Bleu très pâle */
+    --primary-accent: #8B7355;         /* Brun doré subtil */
+    
+    /* Couleurs secondaires - Dominance blanche */
+    --secondary-charcoal: #3A3A3E;     /* Gris foncé (texte) */
+    --secondary-light: #FFFFFF;        /* Blanc pur */
+    --secondary-medium: #E5E5E5;       /* Gris clair pour bordures */
+    --secondary-cream: #FAFAF8;        /* Blanc cassé léger */
+    
+    /* Couleurs fonctionnelles - Plus sobres */
+    --success-green: #1B3A52;          /* Vert forêt discret */
+    --error-red: #B85450;              /* Rouge brique */
+    --warning-amber: #C19A6B;          /* Ocre doré */
+    --info-blue: #5B8FA3;              /* Bleu gris */
+    
+    /* Variables d'interface - Fond blanc dominant */
+    --bg-primary: var(--secondary-light);        /* Blanc comme fond principal */
+    --bg-secondary: var(--secondary-cream);      /* Blanc cassé pour alternance */
+    --bg-card: var(--secondary-light);           /* Cartes blanches */
+    --bg-overlay: rgba(255, 255, 255, 0.98);     /* Overlay blanc */
+    --bg-header: var(--primary-dark);            /* Header bleu marine */
+    
+    --text-primary: var(--secondary-charcoal);   /* Texte foncé sur fond clair */
+    --text-secondary: rgba(58, 58, 62, 0.75);
+    --text-muted: rgba(58, 58, 62, 0.50);
+    --text-accent: var(--primary-dark);          /* Bleu marine pour accents */
+    --text-gold: var(--primary-accent);          /* Doré pour éléments premium */
+    
+    --border-light: rgba(0, 0, 0, 0.08);
+    --border-medium: rgba(0, 0, 0, 0.15);
+    --border-accent: rgba(27, 58, 82, 0.25);
+    
+    /* Effets et ombres - Très subtils sur fond blanc */
+    --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.10);
+    --shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --glow-accent: 0 0 0 1px rgba(27, 58, 82, 0.1);
+}
 
    /* Reset global pour éliminer les bordures blanches */
 * {

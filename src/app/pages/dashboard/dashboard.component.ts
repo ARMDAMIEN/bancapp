@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadingProgress: number = 0;
   isCelebrating = false;
   loadingMessage: string = 'Unlocking your funds...';
-  confettiArray = Array(50).fill(0); // Pour générer 50 confettis
+  confettiArray = Array(50).fill(0);
 
   private loadingTimer: any;
 
@@ -88,9 +88,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   clientName: string = '';
   accountId: string = '';
   
-  // État de signature
-  hasSigned: boolean = false;
-  isLoadingSignatureStatus: boolean = false;
+  // État de signature - IMPORTANT: null au départ pour gérer le chargement
+  hasSigned: boolean | null = null;
+  isLoadingSignatureStatus: boolean = true;
   
   // Informations de solde
   currentBalance: number = 0;
@@ -137,8 +137,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-      // Chargement déjà effectué, charge directement les données
-      this.loadSignatureStatus();
+    // On charge d'abord le statut de signature
+    this.loadSignatureStatus();
   }
 
   ngOnDestroy(): void {
@@ -188,22 +188,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }, updateInterval);
   }
 
-  // Lance l'animation de célébration
   private startCelebration(): void {
     clearInterval(this.loadingTimer);
     this.isCelebrating = true;
     this.loadingMessage = '🎊 Success! Welcome to your dashboard! 🎊';
     
-    // Termine après 2.5 secondes de célébration
     setTimeout(() => {
       this.completeInitialLoading();
     }, 2500);
   }
 
-  // Termine le chargement initial
   private completeInitialLoading(): void {
-  
-
     if (this.loadingTimer) {
       clearInterval(this.loadingTimer);
     }
@@ -211,10 +206,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadingProgress = 100;
     this.loadingMessage = 'Loading complete!';
     
-    // Sauvegarde dans le cache que le chargement est terminé
     localStorage.setItem('initialLoadingCompleted', 'true');
     
-    // Petite pause pour montrer le message de complétion
     setTimeout(() => {
       this.isCelebrating = false;
       this.isInitialLoading = false;
@@ -222,23 +215,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }, 500);
   }
 
-  // Charge les données du dashboard
   private loadDashboardData(): void {
     this.loadUserProfile();
     this.loadUserSelections();
     this.loadBankInfo();
     this.loadWithdrawalStatus();
-    this.loadSignatureStatus();
     this.setupAutoRefresh();
   }
 
-  // Charge le statut de signature de l'utilisateur
   private loadSignatureStatus(): void {
     this.isLoadingSignatureStatus = true;
     
     const token = localStorage.getItem('token');
     if (!token) {
       console.warn('No authentication token found');
+      this.hasSigned = false;
       this.isLoadingSignatureStatus = false;
       return;
     }
@@ -257,19 +248,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) => {
+          // On met à jour hasSigned AVANT tout traitement
           this.hasSigned = response.hasSigned;
+          this.isLoadingSignatureStatus = false;
+          
           const initialLoadingCompleted = localStorage.getItem('initialLoadingCompleted');
+          
           if (this.hasSigned && initialLoadingCompleted !== 'true') {
-          // L'utilisateur a signé ET le loading n'a jamais été fait
-          console.log('🎬 Starting initial loading animation...');
-          this.startInitialLoading();
-        } else if (this.hasSigned && initialLoadingCompleted === 'true') {
-          console.log('⚡ Loading completed previously, loading dashboard...');
-          this.loadDashboardData();
-        } else {
-          console.log('⚠️ User has not signed yet');
-        } 
-        this.isLoadingSignatureStatus = false; 
+            console.log('🎬 Starting initial loading animation...');
+            this.startInitialLoading();
+          } else if (this.hasSigned && initialLoadingCompleted === 'true') {
+            console.log('⚡ Loading completed previously, loading dashboard...');
+            this.loadDashboardData();
+          } else {
+            console.log('⚠️ User has not signed yet');
+          }
         },
         error: (error) => {
           console.error('Failed to load signature status:', error);
@@ -279,7 +272,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Charge les informations bancaires depuis le cache
   private loadBankInfo(): void {
     const savedBankInfo = localStorage.getItem('bankInfo');
     if (savedBankInfo) {
@@ -291,29 +283,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Sauvegarde les informations bancaires dans le cache
   private saveBankInfo(): void {
     localStorage.setItem('bankInfo', JSON.stringify(this.bankInfo));
   }
 
-  // Charge l'état du withdrawal depuis le cache
   private loadWithdrawalStatus(): void {
     const withdrawalStatus = localStorage.getItem('withdrawalPending');
     this.withdrawalPending = withdrawalStatus === 'true';
   }
 
-  // Sauvegarde l'état du withdrawal
   private saveWithdrawalStatus(): void {
     localStorage.setItem('withdrawalPending', this.withdrawalPending.toString());
   }
 
-  // Remet à zéro l'état du withdrawal
   private clearWithdrawalStatus(): void {
     this.withdrawalPending = false;
     localStorage.removeItem('withdrawalPending');
   }
 
-  // Vérifie si le formulaire bancaire est valide
   isBankFormValid(): boolean {
     const { accountHolderName, routingNumber, accountNumber, bankName} = this.bankInfo;
     
@@ -325,7 +312,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
            bankName.trim() !== '';
   }
 
-  // Initialise les catégories de financement
   private initializeFundingCategories(): void {
     this.fundingCategories = [
       {
@@ -606,7 +592,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     ];
   }
 
-  // Charge les sélections utilisateur depuis l'API
   private loadUserSelections(): void {
     this.isLoadingSelection = true;
     
@@ -634,7 +619,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Appel API pour récupérer les sélections utilisateur
   private getUserSelections(headers: HttpHeaders): Observable<UserSelectionResponse> {
     return this.http.get<UserSelectionResponse>(`${this.apiUrl}/offers/user-selections`, { headers })
       .pipe(
@@ -645,7 +629,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
   }
 
-  // Traite la réponse de l'API
   private handleUserSelectionResponse(response: UserSelectionResponse): void {
     console.log('Handling response:', response);
     
@@ -670,7 +653,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Parse le format X.Y de selectedOffer
   private parseSelectedOffer(selectedOffer: string): void {
     try {
       const parts = selectedOffer.split('.');
@@ -698,7 +680,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Vérifie si la sélection est valide
   private isValidSelection(categoryIndex: number, optionIndex: number): boolean {
     return categoryIndex >= 0 && 
            categoryIndex < this.fundingCategories.length &&
@@ -706,14 +687,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
            optionIndex < this.fundingCategories[categoryIndex].options.length;
   }
 
-  // Remet à zéro la sélection
   private resetSelection(): void {
     this.selectedCategory = null;
     this.selectedOption = null;
     this.selectedFundingOption = null;
   }
 
-  // Met à jour le solde basé sur la sélection
   private updateBalanceFromSelection(): void {
     if (this.selectedFundingOption) {
         this.currentBalance = this.selectedFundingOption.amount;
@@ -721,7 +700,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Charge le profil utilisateur
   private loadUserProfile(): void {
     const firstName = localStorage.getItem('firstName') || 'User';
     const lastName = localStorage.getItem('lastName') || '';
@@ -730,7 +708,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.accountId = localStorage.getItem('accountId') || "CA01D";
   }
 
-  // Génère un RIB aléatoire pour le paiement
   private generateRandomPaymentBankInfo(): void {
     const banks = [
       { name: 'Chase Bank', swift: 'CHASUS33' },
@@ -761,12 +738,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  // Génère un numéro de routage aléatoire valide
   private generateRandomRoutingNumber(): string {
     return Math.floor(100000000 + Math.random() * 900000000).toString();
   }
 
-  // Génère un numéro de compte aléatoire
   private generateRandomAccountNumber(): string {
     const length = Math.floor(Math.random() * 5) + 10;
     let accountNumber = '';
@@ -776,28 +751,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return accountNumber;
   }
 
-  // Configure le rafraîchissement automatique
   private setupAutoRefresh(): void {
     this.refreshTimer = setInterval(() => {
       this.lastUpdate = new Date();
       this.loadUserSelections();
-      this.loadSignatureStatus();
+      // Ne pas recharger le statut de signature en refresh auto
+      // pour éviter les problèmes de race condition
     }, 30000);
   }
 
-  // Nettoie les timers
   private cleanupTimers(): void {
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
     }
   }
 
-  // Sauvegarde le solde
   private saveBalance(): void {
     localStorage.setItem('currentBalance', this.currentBalance.toString());
   }
 
-  // Sauvegarde les transactions
   private saveTransactions(): void {
     localStorage.setItem('recentTransactions', JSON.stringify(this.recentTransactions));
   }
@@ -1010,7 +982,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Méthodes utilitaires pour la signature
   hasUserSigned(): boolean {
-    return this.hasSigned;
+    return this.hasSigned === true;
   }
 
   getSignatureStatusText(): string {
@@ -1022,5 +994,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getSignatureStatusClass(): string {
     return this.hasSigned ? 'signed' : 'not-signed';
+  }
+  
+  // Méthode helper pour le template
+  isSignatureStatusLoaded(): boolean {
+    return this.hasSigned !== null;
   }
 }

@@ -1,4 +1,4 @@
-/* CSS amélioré pour la page d'analyse financière - Design professionnel simplifié */
+/* CSS page d'analyse financière - Style bancaire traditionnel */
 
 .analysis-container {
     min-height: calc(100vh - 72px);
@@ -9,14 +9,14 @@
 .analysis-header {
     text-align: center;
     padding: 48px 24px;
-    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    border-bottom: 1px solid var(--border-light);
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid var(--border-medium);
 }
 
 .page-title {
     font-size: 28px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0 0 12px 0;
     letter-spacing: -0.02em;
 }
@@ -63,11 +63,11 @@
     left: 50%;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, var(--primary-accent), #4c9aff);
+    background-color: var(--primary-dark);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     animation: pulse-core 2s ease-in-out infinite;
-    box-shadow: var(--glow-accent);
+    box-shadow: var(--shadow-medium);
 }
 
 .loading-title {
@@ -90,11 +90,12 @@
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 12px;
+    border: 1px solid var(--border-medium);
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-accent), #4c9aff);
+    background-color: var(--primary-dark);
     border-radius: 3px;
     transition: width 0.5s ease-out;
 }
@@ -117,19 +118,19 @@
     gap: 12px;
     padding: 12px 16px;
     background-color: var(--bg-card);
-    border-radius: 8px;
+    border-radius: 6px;
     border-left: 3px solid var(--border-light);
     transition: all 0.3s ease;
 }
 
 .step-item.active {
-    border-left-color: var(--primary-accent);
-    background-color: rgba(49, 130, 206, 0.08);
+    border-left-color: var(--primary-dark);
+    background-color: var(--primary-light);
 }
 
 .step-item.completed {
     border-left-color: var(--success-green);
-    background-color: rgba(56, 161, 105, 0.08);
+    background-color: var(--bg-secondary);
 }
 
 .step-icon {
@@ -147,7 +148,7 @@
 }
 
 .step-item.active .step-icon {
-    background-color: var(--primary-accent);
+    background-color: var(--primary-dark);
     color: white;
 }
 
@@ -185,32 +186,32 @@
     gap: 32px;
 }
 
-/* Section de catégorie simplifiée */
+/* Section de catégorie */
 .category-section {
     background-color: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
+    border: 2px solid var(--border-medium);
+    border-radius: 8px;
     padding: 24px;
     box-shadow: var(--shadow-soft);
     transition: all 0.3s ease;
 }
 
 .category-section:hover {
-    border-color: var(--border-accent);
-    box-shadow: var(--shadow-strong);
+    border-color: var(--primary-dark);
+    box-shadow: var(--shadow-medium);
 }
 
 .category-header {
     text-align: center;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light);
 }
 
 .category-title {
     font-size: 20px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0 0 8px 0;
 }
 
@@ -226,22 +227,22 @@
     padding: 4px 12px;
     background-color: var(--primary-accent);
     color: white;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
 }
 
-/* Grille d'options simplifiée */
+/* Grille d'options */
 .options-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
 }
 
-/* Cartes d'options épurées */
+/* Cartes d'options */
 .option-card {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-medium);
     border-radius: 8px;
     padding: 20px;
     cursor: pointer;
@@ -250,15 +251,15 @@
 }
 
 .option-card:hover {
-    border-color: var(--border-accent);
+    border-color: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-soft);
 }
 
 .option-card.selected {
-    border-color: var(--primary-accent);
-    background-color: rgba(49, 130, 206, 0.08);
-    box-shadow: var(--glow-accent);
+    border-color: var(--primary-dark);
+    background-color: var(--primary-light);
+    box-shadow: var(--shadow-medium);
 }
 
 .option-header {
@@ -284,23 +285,28 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-left: 8px;
+    border: 1px solid;
 }
 
 .option-badge.mca { 
-    background-color: rgba(229, 62, 62, 0.15); 
+    background-color: var(--bg-primary);
     color: var(--error-red); 
+    border-color: var(--error-red);
 }
 .option-badge.guarantee { 
-    background-color: rgba(214, 158, 46, 0.15); 
+    background-color: var(--bg-primary);
     color: var(--warning-amber); 
+    border-color: var(--warning-amber);
 }
 .option-badge.injection { 
-    background-color: rgba(56, 161, 105, 0.15); 
+    background-color: var(--bg-primary);
     color: var(--success-green); 
+    border-color: var(--success-green);
 }
 .option-badge.longterm { 
-    background-color: rgba(49, 130, 206, 0.15); 
-    color: var(--primary-accent); 
+    background-color: var(--bg-primary);
+    color: var(--primary-dark); 
+    border-color: var(--primary-dark);
 }
 
 .option-amount {
@@ -311,7 +317,7 @@
 .amount {
     font-size: 28px;
     font-weight: 700;
-    color: var(--primary-accent);
+    color: var(--primary-dark);
     display: block;
     line-height: 1;
 }
@@ -324,12 +330,13 @@
     display: block;
 }
 
-/* Informations financières simplifiées */
+/* Informations financières */
 .option-payback {
     background-color: var(--bg-primary);
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 12px;
+    border: 1px solid var(--border-light);
 }
 
 .payback-info,
@@ -364,8 +371,8 @@
 }
 
 .payment-info {
-    background-color: rgba(56, 161, 105, 0.1);
-    border: 1px solid rgba(56, 161, 105, 0.2);
+    background-color: var(--bg-primary);
+    border: 2px solid var(--success-green);
     border-radius: 6px;
     padding: 12px;
     text-align: center;
@@ -426,13 +433,13 @@
     background-color: var(--success-green);
     color: white;
     padding: 4px 8px;
-    border-radius: 12px;
+    border-radius: 4px;
     font-size: 10px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 2px;
-    box-shadow: 0 2px 4px rgba(56, 161, 105, 0.3);
+    box-shadow: var(--shadow-soft);
 }
 
 /* =========================
@@ -441,8 +448,8 @@
 
 .selection-summary {
     background-color: var(--bg-card);
-    border: 1px solid var(--border-accent);
-    border-radius: 12px;
+    border: 2px solid var(--primary-dark);
+    border-radius: 8px;
     padding: 24px;
     margin: 32px 24px;
     max-width: 1200px;
@@ -453,7 +460,7 @@
 .summary-title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0 0 20px 0;
     text-align: center;
 }
@@ -471,13 +478,13 @@
     justify-content: space-between;
     padding: 12px;
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--border-medium);
     border-radius: 6px;
     transition: all 0.3s ease;
 }
 
 .selected-option:hover {
-    border-color: var(--border-accent);
+    border-color: var(--primary-dark);
 }
 
 .selected-option-info {
@@ -506,7 +513,7 @@
 .selected-amount {
     font-size: 16px;
     font-weight: 700;
-    color: var(--primary-accent);
+    color: var(--primary-dark);
 }
 
 .selected-payment {
@@ -533,12 +540,12 @@
 }
 
 .remove-selection:hover {
-    background-color: #c53030;
+    background-color: var(--primary-dark);
     transform: scale(1.1);
 }
 
 .summary-total {
-    border-top: 1px solid var(--border-light);
+    border-top: 2px solid var(--border-light);
     padding-top: 16px;
     text-align: center;
 }
@@ -559,7 +566,7 @@
 .total-value {
     font-size: 24px;
     font-weight: 700;
-    color: var(--primary-accent);
+    color: var(--primary-dark);
 }
 
 /* =========================
@@ -580,26 +587,28 @@
     height: 44px;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: 6px;
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
 .primary-btn {
-    background-color: var(--primary-accent);
+    background-color: var(--primary-dark);
     color: white;
-    border: 1px solid var(--primary-accent);
-}
-
-.primary-btn:hover:not(:disabled) {
-    background-color: #2c5aa0;
-    transform: translateY(-1px);
+    border: 2px solid var(--primary-dark);
     box-shadow: var(--shadow-soft);
 }
 
+.primary-btn:hover:not(:disabled) {
+    background-color: var(--primary-medium);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+}
+
 .primary-btn:disabled {
-    background-color: var(--text-muted);
-    border-color: var(--text-muted);
+    background-color: var(--border-medium);
+    border-color: var(--border-medium);
+    color: var(--text-muted);
     cursor: not-allowed;
     opacity: 0.6;
 }
@@ -607,12 +616,12 @@
 .secondary-btn {
     background-color: transparent;
     color: var(--text-secondary);
-    border: 1px solid var(--border-medium);
+    border: 2px solid var(--border-medium);
 }
 
 .secondary-btn:hover {
     background-color: var(--bg-secondary);
-    border-color: var(--border-accent);
+    border-color: var(--primary-dark);
     color: var(--text-primary);
 }
 
@@ -637,11 +646,11 @@
 
 .modal-content {
     background-color: var(--bg-primary);
-    border-radius: 12px;
+    border-radius: 8px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-strong);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-medium);
     animation: modalSlideIn 0.3s ease-out;
 }
 
@@ -661,7 +670,7 @@
 .modal-title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--primary-dark);
     margin: 0;
 }
 
@@ -694,14 +703,15 @@
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background-color: rgba(49, 130, 206, 0.08);
-    border: 1px solid var(--border-accent);
-    border-radius: 8px;
+    background-color: var(--primary-light);
+    border: 2px solid var(--primary-dark);
+    border-radius: 6px;
     margin-bottom: 20px;
 }
 
 .overview-icon {
     font-size: 24px;
+    color: var(--primary-accent);
     flex-shrink: 0;
 }
 
@@ -737,7 +747,7 @@
 
 .confirmation-option {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-light);
     border-radius: 6px;
     padding: 16px;
 }
@@ -757,12 +767,13 @@
 }
 
 .option-category-badge {
-    background-color: rgba(49, 130, 206, 0.15);
-    color: var(--primary-accent);
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
     padding: 2px 6px;
-    border-radius: 8px;
+    border-radius: 4px;
     font-size: 9px;
     font-weight: 600;
+    border: 1px solid var(--border-medium);
 }
 
 .option-key-details {
@@ -778,11 +789,13 @@
     padding: 6px;
     background-color: var(--bg-primary);
     border-radius: 4px;
+    border: 1px solid var(--border-light);
 }
 
 .detail-icon {
     font-size: 12px;
     flex-shrink: 0;
+    color: var(--primary-accent);
 }
 
 .detail-info {
@@ -812,8 +825,8 @@
 .confirmation-notice {
     display: flex;
     gap: 8px;
-    background-color: rgba(214, 158, 46, 0.08);
-    border: 1px solid rgba(214, 158, 46, 0.2);
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--warning-amber);
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 20px;
@@ -821,6 +834,7 @@
 
 .notice-icon {
     font-size: 16px;
+    color: var(--warning-amber);
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -853,6 +867,7 @@
     border-radius: 6px;
     padding: 16px;
     margin-bottom: 20px;
+    border: 1px solid var(--border-light);
 }
 
 .steps-title {
@@ -877,7 +892,7 @@
 .step-number {
     width: 20px;
     height: 20px;
-    background-color: var(--primary-accent);
+    background-color: var(--primary-dark);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -927,16 +942,18 @@
 .confirm-btn {
     background-color: var(--success-green);
     color: white;
-    border: 1px solid var(--success-green);
+    border: 2px solid var(--success-green);
 }
 
 .confirm-btn:hover:not(:disabled) {
-    background-color: #2f855a;
+    background-color: var(--primary-medium);
+    border-color: var(--primary-medium);
 }
 
 .confirm-btn:disabled {
-    background-color: var(--text-muted);
-    border-color: var(--text-muted);
+    background-color: var(--border-medium);
+    border-color: var(--border-medium);
+    color: var(--text-muted);
     cursor: not-allowed;
 }
 
