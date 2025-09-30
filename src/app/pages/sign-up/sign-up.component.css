@@ -134,8 +134,8 @@
 }
 
 .img {
-    max-width: 450px;
-    max-height: 130px;
+    max-width: 500px;
+    max-height: 170px;
     width: auto;
     height: auto;
     object-fit: contain;

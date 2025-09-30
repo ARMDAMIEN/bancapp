@@ -7,13 +7,7 @@
   <nav class="navigation">
     <ul class="nav-items">
       <ng-container *ngFor="let item of navItems">
-        <li class="nav-item" [ngClass]="{ 'active': isActive(item.path) }" 
-            *ngIf="shouldShowNavItem(item)">
-          <a [routerLink]="item.path">
-            <i class="nav-icon" [ngClass]="item.icon"></i>
-            <span class="nav-label">{{ item.label }}</span>
-          </a>
-        </li>
+        <img src="/assets/images/logo-blanc-sans-texte.png" class="logo">
       </ng-container>
     </ul>
   </nav>

@@ -51,7 +51,7 @@ export class SignInComponent implements OnInit {
         if (data.isAdmin) {
           localStorage.setItem('userRole', 'ADMIN');
         }
-        this.errorHandler.redirectTo("funding");
+        this.errorHandler.redirectTo("dashboard");
       },
       error => {
         console.log('error while login ' + +JSON.stringify(error));
