@@ -19,6 +19,8 @@ import { AnalyseOfferComponent } from './pages/analyse-offer/analyse-offer.compo
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
 import { DocumentsSuppComponent } from './pages/documents-supp/documents-supp.component';
+import { SignatureRequiredComponent } from './pages/signature-required/signature-required.component';
+import { FundingUnlockedComponent } from './pages/funding-unlocked/funding-unlocked.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +36,9 @@ import { DocumentsSuppComponent } from './pages/documents-supp/documents-supp.co
     AnalyseOfferComponent,
     DashboardComponent,
     AdminComponent,
-    DocumentsSuppComponent
+    DocumentsSuppComponent,
+    SignatureRequiredComponent,
+    FundingUnlockedComponent
   ],
   imports: [
     BrowserModule,

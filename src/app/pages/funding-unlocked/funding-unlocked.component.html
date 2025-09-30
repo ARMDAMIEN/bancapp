@@ -1,0 +1,74 @@
+<div class="funding-unlocked-container">
+  <!-- Loading Animation -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="loading-icon">💰</div>
+      <h2 class="loading-title">Processing Your Funding...</h2>
+      <div class="loading-bar-container">
+        <div class="loading-bar" [style.width.%]="loadingProgress"></div>
+      </div>
+      <p class="loading-percentage">{{ loadingProgress | number:'1.0-0' }}%</p>
+    </div>
+  </div>
+
+  <!-- Celebration Screen -->
+  <div class="celebration-overlay" *ngIf="isCelebrating && !showContent">
+    <div class="celebration-content">
+      <div class="celebration-icon">🎉</div>
+      <h2 class="celebration-title">Success!</h2>
+      <p class="celebration-subtitle">Your funding has been unlocked</p>
+      
+      <!-- Confetti Animation -->
+      <div class="confetti-container">
+        <div class="confetti" *ngFor="let i of confettiArray"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="unlocked-content" *ngIf="showContent">
+    <div class="unlocked-card">
+      <div class="success-badge">
+        <span class="badge-icon">✓</span>
+        <span class="badge-text">Funding Unlocked</span>
+      </div>
+
+      <h1 class="main-title">Congratulations!</h1>
+      <p class="main-subtitle">Your funding has been successfully unlocked and is now available</p>
+
+      <div class="amount-display">
+        <div class="amount-label">Available Amount</div>
+        <div class="amount-value">{{ getFormattedAmount() }}</div>
+      </div>
+
+      <div class="funding-details" *ngIf="selectedFundingOption">
+        <div class="detail-row">
+          <span class="detail-label">Funding Type:</span>
+          <span class="detail-value">{{ selectedFundingOption.title }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Structure:</span>
+          <span class="detail-value">{{ selectedFundingOption.structure }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Term:</span>
+          <span class="detail-value">{{ selectedFundingOption.term }}</span>
+        </div>
+      </div>
+
+      <div class="action-section">
+        <button type="button" class="dashboard-btn" (click)="proceedToDashboard()">
+          <span class="btn-icon">📊</span>
+          <span>Access My Dashboard</span>
+        </button>
+      </div>
+
+      <div class="info-message">
+        <div class="info-icon">ℹ️</div>
+        <p class="info-text">
+          You can now access your dashboard to manage your funds, view transactions, and process withdrawals.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

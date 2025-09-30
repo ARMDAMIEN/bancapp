@@ -19,36 +19,36 @@
                 <div class="progress-indicator">
                     <div class="step" [ngClass]="{ 'active': currentStep === 1, 'completed': currentStep > 1 }">
                         <div class="step-number">1</div>
-                        <span class="step-label">Personal Info</span>
+                        <span class="step-label">Basic Info</span>
                     </div>
                     <div class="step-divider" [ngClass]="{ 'active': currentStep > 1 }"></div>
                     <div class="step" [ngClass]="{ 'active': currentStep === 2 }">
                         <div class="step-number">2</div>
-                        <span class="step-label">Business Info</span>
+                        <span class="step-label">Detailed Info</span>
                     </div>
                 </div>
 
-                <!-- ÉTAPE 1: Personal Information -->
+                <!-- ÉTAPE 1: Basic Information -->
                 <div class="step-content" *ngIf="currentStep === 1">
                     <div class="form-header">
-                        <h1 class="welcome-text">Personal Information</h1>
-                        <p class="form-subtitle">Let's start with your personal details</p>
+                        <h1 class="welcome-text">Create Your Account</h1>
+                        <p class="form-subtitle">Let's start with the basics</p>
                     </div>
 
-                    <form class="form" #personalInfoForm="ngForm">
+                    <form class="form" #step1Form="ngForm">
                         <div class="form-row">
                             <div class="form-item half-width">
                                 <label for="firstName" class="input-label">First Name</label>
-                                <input type="text" id="firstName" class="input" name="firstName" [(ngModel)]="firstName"
-                                    required #firstNameRef="ngModel">
+                                <input type="text" id="firstName" class="input" name="firstName" 
+                                    [(ngModel)]="firstName" required #firstNameRef="ngModel">
                                 <span class="error" *ngIf="firstNameRef.errors?.['required'] && firstNameRef.touched">
                                     First name is required
                                 </span>
                             </div>
                             <div class="form-item half-width">
                                 <label for="lastName" class="input-label">Last Name</label>
-                                <input type="text" id="lastName" class="input" name="lastName" [(ngModel)]="lastName"
-                                    required #lastNameRef="ngModel">
+                                <input type="text" id="lastName" class="input" name="lastName" 
+                                    [(ngModel)]="lastName" required #lastNameRef="ngModel">
                                 <span class="error" *ngIf="lastNameRef.errors?.['required'] && lastNameRef.touched">
                                     Last name is required
                                 </span>
@@ -56,31 +56,32 @@
                         </div>
 
                         <div class="form-item">
-                            <label for="ssn" class="input-label">Social Security Number</label>
-                            <input type="text" id="ssn" class="input" name="ssn" placeholder="XXX-XX-XXXX"
-                                [(ngModel)]="ssn" required pattern="^[0-9]{3}-[0-9]{2}-[0-9]{4}$" maxlength="11"
-                                #ssnRef="ngModel">
-                            <span class="error" *ngIf="ssnRef.errors?.['required'] && ssnRef.touched">
-                                SSN is required
-                            </span>
-                            <span class="error" *ngIf="ssnRef.errors?.['pattern'] && ssnRef.touched">
-                                Please enter a valid SSN format (XXX-XX-XXXX)
+                            <label for="companyName" class="input-label">Company Name</label>
+                            <input type="text" id="companyName" class="input" name="companyName" 
+                                [(ngModel)]="companyName" required #companyNameRef="ngModel">
+                            <span class="error" *ngIf="companyNameRef.errors?.['required'] && companyNameRef.touched">
+                                Company name is required
                             </span>
                         </div>
 
                         <div class="form-item">
-                            <label for="dateOfBirth" class="input-label">Date of Birth</label>
-                            <input type="date" id="dateOfBirth" class="input" name="dateOfBirth"
-                                [(ngModel)]="dateOfBirth" required #dobRef="ngModel" lang="en-US">
-                            <span class="error" *ngIf="dobRef.errors?.['required'] && dobRef.touched">
-                                Date of birth is required
+                            <label for="phoneNumber" class="input-label">Phone Number</label>
+                            <input type="tel" id="phoneNumber" class="input" name="phoneNumber" 
+                                placeholder="(XXX) XXX-XXXX" [(ngModel)]="phoneNumber" 
+                                (input)="formatPhoneNumber($event)" required maxlength="14"
+                                pattern="^\(\d{3}\) \d{3}-\d{4}$" #phoneRef="ngModel">
+                            <span class="error" *ngIf="phoneRef.errors?.['required'] && phoneRef.touched">
+                                Phone number is required
+                            </span>
+                            <span class="error" *ngIf="phoneRef.errors?.['pattern'] && phoneRef.touched">
+                                Please enter a valid phone number (XXX) XXX-XXXX
                             </span>
                         </div>
 
                         <div class="form-item">
                             <label for="email" class="input-label">Email Address</label>
-                            <input type="email" id="email" class="input" name="email" [(ngModel)]="email" required email
-                                #emailRef="ngModel">
+                            <input type="email" id="email" class="input" name="email" 
+                                [(ngModel)]="email" required email #emailRef="ngModel">
                             <span class="error" *ngIf="emailRef.errors?.['required'] && emailRef.touched">
                                 Email is required
                             </span>
@@ -91,8 +92,8 @@
 
                         <div class="form-item">
                             <label for="password" class="input-label">Password</label>
-                            <input type="password" id="password" class="input" name="password" [(ngModel)]="password"
-                                required minlength="8" #passwordRef="ngModel">
+                            <input type="password" id="password" class="input" name="password" 
+                                [(ngModel)]="password" required minlength="8" #passwordRef="ngModel">
                             <span class="error" *ngIf="passwordRef.errors?.['required'] && passwordRef.touched">
                                 Password is required
                             </span>
@@ -105,8 +106,7 @@
                             <label for="confirmPassword" class="input-label">Confirm Password</label>
                             <input type="password" id="confirmPassword" class="input" name="confirmPassword"
                                 [(ngModel)]="confirmPassword" required #confirmPasswordRef="ngModel">
-                            <span class="error"
-                                *ngIf="confirmPasswordRef.errors?.['required'] && confirmPasswordRef.touched">
+                            <span class="error" *ngIf="confirmPasswordRef.errors?.['required'] && confirmPasswordRef.touched">
                                 Please confirm your password
                             </span>
                         </div>
@@ -120,24 +120,90 @@
                                 Back to Login
                             </button>
                             <button type="button" class="form-btn primary-btn"
-                                [disabled]="!personalInfoForm.valid || passwordMismatch()" (click)="nextStep()">
+                                [disabled]="!step1Form.valid || passwordMismatch()" (click)="nextStep()">
                                 Next Step
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- ÉTAPE 2: Business Information -->
+                <!-- ÉTAPE 2: Detailed Information -->
                 <div class="step-content" *ngIf="currentStep === 2">
                     <div class="form-header">
-                        <h1 class="welcome-text">Business Information</h1>
-                        <p class="form-subtitle">Tell us about your business</p>
+                        <h1 class="welcome-text">Additional Details</h1>
+                        <p class="form-subtitle">Complete your registration</p>
                     </div>
 
-                    <!-- Intégration du BusinessInfoComponent -->
-                    <app-business-info (formSubmit)="onFinalSubmit($event)" (formError)="onBusinessFormError($event)"
-                        (goBack)="previousStep()">
-                    </app-business-info>
+                    <form class="form" #step2Form="ngForm">
+                        <div class="form-item">
+                            <label for="dateOfBirth" class="input-label">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" class="input" name="dateOfBirth"
+                                [(ngModel)]="dateOfBirth" required #dobRef="ngModel" lang="en-US">
+                            <span class="error" *ngIf="dobRef.errors?.['required'] && dobRef.touched">
+                                Date of birth is required
+                            </span>
+                            <span class="error" *ngIf="dateOfBirth && !isValidAge() && dobRef.touched">
+                                You must be at least 18 years old
+                            </span>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="companyCreationDate" class="input-label">Company Creation Date</label>
+                            <input type="date" id="companyCreationDate" class="input" name="companyCreationDate"
+                                [(ngModel)]="companyCreationDate" required #companyDateRef="ngModel" lang="en-US">
+                            <span class="error" *ngIf="companyDateRef.errors?.['required'] && companyDateRef.touched">
+                                Company creation date is required
+                            </span>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="companyAddress" class="input-label">Company Address</label>
+                            <input type="text" id="companyAddress" class="input" name="companyAddress"
+                                placeholder="Street, City, State, ZIP" [(ngModel)]="companyAddress" 
+                                required #addressRef="ngModel">
+                            <span class="error" *ngIf="addressRef.errors?.['required'] && addressRef.touched">
+                                Company address is required
+                            </span>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="einNumber" class="input-label">EIN Number (Tax ID)</label>
+                            <input type="text" id="einNumber" class="input" name="einNumber" 
+                                placeholder="XX-XXXXXXX" [(ngModel)]="einNumber" 
+                                (input)="formatEIN($event)" required maxlength="10"
+                                pattern="^[0-9]{2}-[0-9]{7}$" #einRef="ngModel">
+                            <span class="error" *ngIf="einRef.errors?.['required'] && einRef.touched">
+                                EIN number is required
+                            </span>
+                            <span class="error" *ngIf="einRef.errors?.['pattern'] && einRef.touched">
+                                Please enter a valid EIN format (XX-XXXXXXX)
+                            </span>
+                        </div>
+
+                        <div class="form-item">
+                            <label for="ssn" class="input-label">Social Security Number</label>
+                            <input type="text" id="ssn" class="input" name="ssn" 
+                                placeholder="XXX-XX-XXXX" [(ngModel)]="ssn" 
+                                (input)="formatSSN($event)" required maxlength="11"
+                                pattern="^[0-9]{3}-[0-9]{2}-[0-9]{4}$" #ssnRef="ngModel">
+                            <span class="error" *ngIf="ssnRef.errors?.['required'] && ssnRef.touched">
+                                SSN is required
+                            </span>
+                            <span class="error" *ngIf="ssnRef.errors?.['pattern'] && ssnRef.touched">
+                                Please enter a valid SSN format (XXX-XX-XXXX)
+                            </span>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="form-btn secondary-btn" (click)="previousStep()">
+                                Previous Step
+                            </button>
+                            <button type="button" class="form-btn primary-btn"
+                                [disabled]="!step2Form.valid || !isValidAge()" (click)="onFinalSubmit()">
+                                Complete Registration
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Message d'erreur global -->

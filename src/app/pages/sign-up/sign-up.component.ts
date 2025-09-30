@@ -11,56 +11,51 @@ import { ErrorHandlerService } from '../../../services/errorHandlerService';
   styleUrl: './sign-up.component.css'
 })
 export class SignUpComponent implements OnInit {
-  // Step 1 - Personal Information (Template-driven form)
+  // STEP 1 - Basic Information
   firstName: string = "";
   lastName: string = "";
-  ssn: string = "";
-  dateOfBirth: string = "";
+  companyName: string = "";
+  phoneNumber: string = "";
   email: string = "";
   password: string = "";
   confirmPassword: string = "";
   
+  // STEP 2 - Detailed Information
+  dateOfBirth: string = "";
+  companyCreationDate: string = "";
+  companyAddress: string = "";
+  einNumber: string = "";
+  ssn: string = "";
+  
   // UI State
   currentStep: number = 1;
   errorMessage: string = "";
-  
-  // Forms (gardé pour compatibilité si nécessaire)
-  personalInfoForm: FormGroup;
-  businessInfoForm: FormGroup;
 
   constructor(
     private authService: AuthService, 
     private errorHandlerService: ErrorHandlerService,
     private router: Router
-  ) {
-    // Garder les FormGroup pour une éventuelle migration future
-    this.personalInfoForm = new FormGroup({
-      firstName: new FormControl('', [Validators.required]),
-      lastName: new FormControl('', [Validators.required]),
-      ssn: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]{3}-[0-9]{2}-[0-9]{4}$/)]),
-      dateOfBirth: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-      confirmPassword: new FormControl('', [Validators.required])
-    });
-
-    this.businessInfoForm = new FormGroup({
-      companyName: new FormControl('', [Validators.required]),
-      companyCreationDate: new FormControl('', [Validators.required]),
-      einNumber: new FormControl('', [Validators.required, Validators.pattern(/^[0-9]{2}-[0-9]{7}$/)])
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.errorMessage = this.errorHandlerService.getErrorMessage();
-    this.setupSSNFormatting();
+  }
+
+  // Phone number formatting
+  formatPhoneNumber(event: any): void {
+    let value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length >= 7) {
+      value = '(' + value.slice(0, 3) + ') ' + value.slice(3, 6) + '-' + value.slice(6, 10);
+    } else if (value.length >= 4) {
+      value = '(' + value.slice(0, 3) + ') ' + value.slice(3, 6);
+    } else if (value.length >= 1) {
+      value = '(' + value.slice(0, 3);
+    }
+    this.phoneNumber = value;
+    event.target.value = value;
   }
 
   // SSN formatting (auto-add dashes)
-  setupSSNFormatting(): void {
-    // Cette méthode peut être appelée depuis le template avec (input)="formatSSN($event)"
-  }
-
   formatSSN(event: any): void {
     let value = event.target.value.replace(/\D/g, ''); // Remove non-digits
     if (value.length >= 6) {
@@ -69,6 +64,16 @@ export class SignUpComponent implements OnInit {
       value = value.slice(0, 3) + '-' + value.slice(3, 5);
     }
     this.ssn = value;
+    event.target.value = value;
+  }
+
+  // EIN formatting
+  formatEIN(event: any): void {
+    let value = event.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length >= 3) {
+      value = value.slice(0, 2) + '-' + value.slice(2, 9);
+    }
+    this.einNumber = value;
     event.target.value = value;
   }
 
@@ -95,8 +100,7 @@ export class SignUpComponent implements OnInit {
   // Step navigation
   nextStep(): void {
     if (this.currentStep === 1) {
-      // Validation avant de passer à l'étape 2
-      if (this.isPersonalInfoValidForTemplate() && !this.passwordMismatch()) {
+      if (this.isStep1Valid() && !this.passwordMismatch()) {
         this.currentStep = 2;
         this.errorMessage = "";
       } else {
@@ -116,20 +120,33 @@ export class SignUpComponent implements OnInit {
     this.router.navigate(['/sign-in']);
   }
 
-  // Validation pour le template-driven form de l'étape 1
-  private isPersonalInfoValidForTemplate(): boolean {
+  // Validation Step 1
+  private isStep1Valid(): boolean {
     return !!(
       this.firstName && 
       this.lastName && 
-      this.ssn && 
-      this.dateOfBirth && 
+      this.companyName &&
+      this.phoneNumber &&
       this.email && 
       this.password && 
       this.confirmPassword &&
-      this.isValidAge() &&
       this.isValidEmail(this.email) &&
-      this.isValidSSN(this.ssn) &&
+      this.isValidPhoneNumber(this.phoneNumber) &&
       this.passwordValidator(this.password)
+    );
+  }
+
+  // Validation Step 2
+  private isStep2Valid(): boolean {
+    return !!(
+      this.dateOfBirth &&
+      this.companyCreationDate &&
+      this.companyAddress &&
+      this.einNumber &&
+      this.ssn &&
+      this.isValidAge() &&
+      this.isValidEIN(this.einNumber) &&
+      this.isValidSSN(this.ssn)
     );
   }
 
@@ -139,41 +156,74 @@ export class SignUpComponent implements OnInit {
     return emailPattern.test(email);
   }
 
+  // Validation du numéro de téléphone
+  private isValidPhoneNumber(phone: string): boolean {
+    const phonePattern = /^\(\d{3}\) \d{3}-\d{4}$/;
+    return phonePattern.test(phone);
+  }
+
   // Validation du SSN
   private isValidSSN(ssn: string): boolean {
     const ssnPattern = /^[0-9]{3}-[0-9]{2}-[0-9]{4}$/;
     return ssnPattern.test(ssn);
   }
 
-  // Gestion de la soumission finale du formulaire complet (appelée par BusinessInfoComponent)
-  onFinalSubmit(businessData: any): void {
-    // Validation finale avant soumission
+  // Validation de l'EIN
+  private isValidEIN(ein: string): boolean {
+    const einPattern = /^[0-9]{2}-[0-9]{7}$/;
+    return einPattern.test(ein);
+  }
+
+  // Age validation (must be 18+)
+  isValidAge(): boolean {
+    if (!this.dateOfBirth) return false;
+    
+    const today = new Date();
+    const birthDate = new Date(this.dateOfBirth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1 >= 18;
+    }
+    
+    return age >= 18;
+  }
+
+  // Soumission finale du formulaire
+  onFinalSubmit(): void {
+    // Validation finale
+    if (!this.isStep2Valid()) {
+      this.errorMessage = "Please fill in all required fields correctly.";
+      return;
+    }
+
     if (!this.passwordValidator(this.password)) {
       this.errorMessage = "Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character.";
-      this.onBusinessFormError(this.errorMessage);
       return;
     }
 
     if (!this.isValidAge()) {
       this.errorMessage = "You must be at least 18 years old to register.";
-      this.onBusinessFormError(this.errorMessage);
       return;
     }
 
-    // Combiner les données des deux étapes
+    // Préparer les données complètes
     const completeRegistrationData = {
-      // Données personnelles (étape 1)
+      // Step 1
       firstName: this.firstName,
       lastName: this.lastName,
-      ssn: this.ssn,
-      dateOfBirth: this.dateOfBirth,
+      companyName: this.companyName,
+      phoneNumber: this.phoneNumber,
       email: this.email,
       password: this.password,
       
-      // Données business (étape 2) - mapper les noms de propriétés
-      companyName: businessData.businessName,
-      companyCreationDate: businessData.foundingDate,
-      einNumber: businessData.ein
+      // Step 2
+      dateOfBirth: this.dateOfBirth,
+      companyCreationDate: this.companyCreationDate,
+      companyAddress: this.companyAddress,
+      einNumber: this.einNumber,
+      ssn: this.ssn
     };
 
     console.log('Données complètes d\'inscription:', completeRegistrationData);
@@ -195,21 +245,14 @@ export class SignUpComponent implements OnInit {
           error: (error) => {
             console.log('Error while login: ' + JSON.stringify(error));
             this.errorMessage = "Login failed after registration. Please try logging in manually.";
-            this.onBusinessFormError(this.errorMessage);
           }
         });
       },
       error: (error) => {
         console.error('Error on signup: ' + JSON.stringify(error));
         this.errorMessage = error.message || "Registration failed. Please try again.";
-        this.onBusinessFormError(this.errorMessage);
       }
     });
-  }
-
-  // Méthode pour gérer les erreurs du BusinessInfoComponent
-  onBusinessFormError(error: string): void {
-    this.errorMessage = error;
   }
 
   // Social login methods
@@ -221,45 +264,8 @@ export class SignUpComponent implements OnInit {
     this.authService.initiateLoginMicrosfoft();
   }
 
-  // Legacy method support (for backward compatibility)
-  redirectTo(url: string): void {
-    this.errorHandlerService.redirectTo(url);
-  }
-
-  // Form validation helpers (gardés pour compatibilité)
-  isPersonalInfoValid(): boolean {
-    return this.personalInfoForm.valid && !this.passwordMismatch();
-  }
-
-  isBusinessInfoValid(): boolean {
-    return this.businessInfoForm.valid;
-  }
-
-  // Age validation (must be 18+)
-  isValidAge(): boolean {
-    if (!this.dateOfBirth) return false;
-    
-    const today = new Date();
-    const birthDate = new Date(this.dateOfBirth);
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      return age - 1 >= 18;
-    }
-    
-    return age >= 18;
-  }
-
   // Méthode pour nettoyer les erreurs
   clearError(): void {
     this.errorMessage = "";
-  }
-
-  // Méthode legacy pour l'ancienne logique (si nécessaire)
-  onSignUp(): void {
-    // Cette méthode est maintenant gérée par onFinalSubmit()
-    // Gardée pour compatibilité
-    console.warn('onSignUp() is deprecated, use onFinalSubmit() instead');
   }
 }

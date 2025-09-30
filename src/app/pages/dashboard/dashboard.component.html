@@ -1,204 +1,140 @@
 <div class="dashboard-container">
-    <div class="initial-loading-overlay" *ngIf="isInitialLoading">
-    <div class="loading-container" [class.celebrating]="isCelebrating">
-        <div class="loading-icon" [class.celebrating]="isCelebrating">
-            {{ isCelebrating ? '🎉' : '💰' }}
-        </div>
-        <h2 class="loading-title">{{ loadingMessage }}</h2>
-        <div class="loading-bar-container" *ngIf="!isCelebrating">
-            <div class="loading-bar" [style.width.%]="loadingProgress"></div>
-        </div>
-        <p class="loading-percentage" *ngIf="!isCelebrating">
-            {{ loadingProgress | number:'1.0-0' }}%
-        </p>
-        
-        <!-- Confettis pour la célébration -->
-        <div class="confetti-container" *ngIf="isCelebrating">
-            <div class="confetti" *ngFor="let i of confettiArray"></div>
-        </div>
-    </div>
-</div>
-
     <!-- Main Content -->
-    <div class="dashboard-content" *ngIf="!isInitialLoading">
-        
-        <!-- Signature Required Section - Shown when not signed -->
-        <div class="signature-required-container" *ngIf="!hasSigned && !isLoadingSignatureStatus">
-            <div class="signature-card">
-                <div class="signature-icon">✉️</div>
-                <h2 class="signature-title">Signature Required</h2>
-                <p class="signature-message">
-                    You have received a contract document by email that requires your signature to unlock access to your funding.
-                </p>
-                <div class="signature-details">
-                    <div class="detail-item">
-                        <span class="detail-icon">📧</span>
-                        <span class="detail-text">Check your email inbox for the contract</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-icon">✍️</span>
-                        <span class="detail-text">Sign the document electronically</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-icon">🔓</span>
-                        <span class="detail-text">Access your funding once signed</span>
+    <div class="dashboard-content">
+        <!-- Account Overview -->
+        <div class="account-overview">
+            <h2 class="section-title">Account Overview</h2>
+
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <div class="balance-header">
+                    <h3 class="balance-title">Available Balance</h3>
+                    <div class="balance-status" [ngClass]="getBalanceStatus()">
+                        {{getBalanceStatusText()}}
                     </div>
                 </div>
-                <div class="signature-footer">
-                    <p class="footer-text">Once you've signed the contract, refresh this page to access your dashboard.</p>
-                    <button type="button" class="refresh-btn" (click)="refreshAccountData()">
-                        <span class="btn-icon">🔄</span>
-                        Refresh Status
+
+                <div class="balance-amount">
+                    <span class="currency">$</span>
+                    <span class="amount">{{currentBalance | number:'1.2-2'}}</span>
+                </div>
+
+                <div class="balance-info">
+                    <div class="info-item">
+                        <span class="info-label">Last update:</span>
+                        <span class="info-value">{{lastUpdate | date:'short'}}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Account ID:</span>
+                        <span class="info-value">{{accountId}}</span>
+                    </div>
+                </div>
+
+                <!-- Withdraw Button Section -->
+                <div class="balance-actions">
+                    <!-- Message de withdrawal pending -->
+                    <div class="withdrawal-pending-notice" *ngIf="withdrawalPending">
+                        <div class="pending-icon">⏳</div>
+                        <div class="pending-text">
+                            <span class="pending-title">Withdrawal In Progress</span>
+                            <span class="pending-subtitle">Your withdrawal is being processed and should complete within 1-3 business days.</span>
+                        </div>
+                    </div>
+
+                    <!-- Bouton de retrait -->
+                    <button type="button" class="withdraw-btn"
+                        [ngClass]="{'pending': withdrawalPending, 'disabled': !canWithdraw()}"
+                        [disabled]="!canWithdraw() || isProcessing" (click)="openWithdrawModal()">
+                        <span class="btn-icon" *ngIf="!withdrawalPending">💳</span>
+                        <span class="btn-icon" *ngIf="withdrawalPending">⏳</span>
+                        {{getWithdrawButtonText()}}
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Loading Signature Status -->
-        <div class="signature-loading" *ngIf="isLoadingSignatureStatus">
-            <div class="loading-content">
-                <div class="spinner"></div>
-                <p class="loading-text">Checking signature status...</p>
-            </div>
-        </div>
+        <!-- User Selection Section -->
+        <div class="user-selection-section m-t-20">
+            <h3 class="section-title">Your Selected Funding Option</h3>
 
-        <!-- Dashboard Content - Only shown when signed -->
-        <div class="signed-dashboard-content" *ngIf="hasSigned && !isLoadingSignatureStatus">
-            <!-- Account Overview -->
-            <div class="account-overview">
-                <h2 class="section-title">Account Overview</h2>
-
-                <!-- Balance Card -->
-                <div class="balance-card">
-                    <div class="balance-header">
-                        <h3 class="balance-title">Available Balance</h3>
-                        <div class="balance-status" [ngClass]="getBalanceStatus()">
-                            {{getBalanceStatusText()}}
-                        </div>
-                    </div>
-
-                    <div class="balance-amount">
-                        <span class="currency">$</span>
-                        <span class="amount">{{currentBalance | number:'1.2-2'}}</span>
-                    </div>
-
-                    <div class="balance-info">
-                        <div class="info-item">
-                            <span class="info-label">Last update:</span>
-                            <span class="info-value">{{lastUpdate | date:'short'}}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Account ID:</span>
-                            <span class="info-value">{{accountId}}</span>
-                        </div>
-                    </div>
-
-                    <!-- Withdraw Button Section -->
-                    <div class="balance-actions">
-                        <!-- Message de withdrawal pending -->
-                        <div class="withdrawal-pending-notice" *ngIf="withdrawalPending">
-                            <div class="pending-icon">⏳</div>
-                            <div class="pending-text">
-                                <span class="pending-title">Withdrawal In Progress</span>
-                                <span class="pending-subtitle">Your withdrawal is being processed and should complete within 1-3 business days.</span>
-                            </div>
-                        </div>
-
-                        <!-- Bouton de retrait -->
-                        <button type="button" class="withdraw-btn"
-                            [ngClass]="{'pending': withdrawalPending, 'disabled': !canWithdraw()}"
-                            [disabled]="!canWithdraw() || isProcessing" (click)="openWithdrawModal()">
-                            <span class="btn-icon" *ngIf="!withdrawalPending">💳</span>
-                            <span class="btn-icon" *ngIf="withdrawalPending">⏳</span>
-                            {{getWithdrawButtonText()}}
-                        </button>
-                    </div>
+            <!-- Loading State -->
+            <div class="selection-card loading-card" *ngIf="isLoadingSelection">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Loading your selection...</p>
                 </div>
             </div>
 
-            <!-- User Selection Section -->
-            <div class="user-selection-section m-t-20">
-                <h3 class="section-title">Your Selected Funding Option</h3>
-
-                <!-- Loading State -->
-                <div class="selection-card loading-card" *ngIf="isLoadingSelection">
-                    <div class="loading-content">
-                        <div class="spinner"></div>
-                        <p class="loading-text">Loading your selection...</p>
-                    </div>
+            <!-- No Selection State -->
+            <div class="selection-card empty-card" *ngIf="!isLoadingSelection && !hasUserSelection()">
+                <div class="empty-content">
+                    <div class="empty-icon">📋</div>
+                    <h4 class="empty-title">No Funding Option Selected</h4>
+                    <p class="empty-text">You haven't selected a funding option yet. Browse our available options to get started.</p>
+                    <button type="button" class="form-btn primary-btn" (click)="navigateToOfferSelection()">
+                        <span class="btn-icon">🔍</span>
+                        Browse Options
+                    </button>
                 </div>
+            </div>
 
-                <!-- No Selection State -->
-                <div class="selection-card empty-card" *ngIf="!isLoadingSelection && !hasUserSelection()">
-                    <div class="empty-content">
-                        <div class="empty-icon">📋</div>
-                        <h4 class="empty-title">No Funding Option Selected</h4>
-                        <p class="empty-text">You haven't selected a funding option yet. Browse our available options to get started.</p>
-                        <button type="button" class="form-btn primary-btn" (click)="navigateToOfferSelection()">
-                            <span class="btn-icon">🔍</span>
-                            Browse Options
+            <!-- Selected Option Display -->
+            <div class="selection-card selected-card" *ngIf="!isLoadingSelection && hasUserSelection()">
+                <div class="selection-header">
+                    <div class="selection-badge" [ngClass]="selectedFundingOption?.type">
+                        {{selectedFundingOption?.badge}}
+                    </div>
+                    <div class="selection-actions">
+                        <button type="button" class="action-btn change-btn" (click)="navigateToOfferSelection()" title="Change Selection">
+                            <span class="btn-icon">🔄</span>
+                            Change
                         </button>
                     </div>
                 </div>
 
-                <!-- Selected Option Display -->
-                <div class="selection-card selected-card" *ngIf="!isLoadingSelection && hasUserSelection()">
-                    <div class="selection-header">
-                        <div class="selection-badge" [ngClass]="selectedFundingOption?.type">
-                            {{selectedFundingOption?.badge}}
+                <div class="selection-content">
+                    <h4 class="selection-title">{{selectedFundingOption?.title}}</h4>
+                    <p class="selection-category">{{getSelectedCategoryName()}}</p>
+
+                    <div class="selection-amount">
+                        <span class="amount-label">Funding Amount</span>
+                        <span class="amount-value">{{getFormattedSelectedAmount()}}</span>
+                    </div>
+
+                    <div class="selection-details">
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <span class="detail-label">Structure:</span>
+                                <span class="detail-value">{{selectedFundingOption?.structure}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Term:</span>
+                                <span class="detail-value">{{selectedFundingOption?.term}}</span>
+                            </div>
                         </div>
-                        <div class="selection-actions">
-                            <button type="button" class="action-btn change-btn" (click)="navigateToOfferSelection()" title="Change Selection">
-                                <span class="btn-icon">🔄</span>
-                                Change
-                            </button>
+
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <span class="detail-label">Payment:</span>
+                                <span class="detail-value">{{selectedFundingOption?.payment}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Frequency:</span>
+                                <span class="detail-value">{{selectedFundingOption?.frequency}}</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-row" *ngIf="selectedFundingOption && selectedFundingOption.payback && selectedFundingOption.payback > 0">
+                            <div class="detail-item full-width">
+                                <span class="detail-label">Total Payback:</span>
+                                <span class="detail-value highlight">${{selectedFundingOption?.payback | number:'1.0-0'}}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="selection-content">
-                        <h4 class="selection-title">{{selectedFundingOption?.title}}</h4>
-                        <p class="selection-category">{{getSelectedCategoryName()}}</p>
-
-                        <div class="selection-amount">
-                            <span class="amount-label">Funding Amount</span>
-                            <span class="amount-value">{{getFormattedSelectedAmount()}}</span>
-                        </div>
-
-                        <div class="selection-details">
-                            <div class="detail-row">
-                                <div class="detail-item">
-                                    <span class="detail-label">Structure:</span>
-                                    <span class="detail-value">{{selectedFundingOption?.structure}}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Term:</span>
-                                    <span class="detail-value">{{selectedFundingOption?.term}}</span>
-                                </div>
-                            </div>
-
-                            <div class="detail-row">
-                                <div class="detail-item">
-                                    <span class="detail-label">Payment:</span>
-                                    <span class="detail-value">{{selectedFundingOption?.payment}}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Frequency:</span>
-                                    <span class="detail-value">{{selectedFundingOption?.frequency}}</span>
-                                </div>
-                            </div>
-
-                            <div class="detail-row" *ngIf="selectedFundingOption && selectedFundingOption.payback && selectedFundingOption.payback > 0">
-                                <div class="detail-item full-width">
-                                    <span class="detail-label">Total Payback:</span>
-                                    <span class="detail-value highlight">${{selectedFundingOption?.payback | number:'1.0-0'}}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="selection-id">
-                            <span class="id-label">Selection ID:</span>
-                            <span class="id-value">{{selectedOffer}}</span>
-                        </div>
+                    <div class="selection-id">
+                        <span class="id-label">Selection ID:</span>
+                        <span class="id-value">{{selectedOffer}}</span>
                     </div>
                 </div>
             </div>
@@ -206,7 +142,7 @@
     </div>
 
     <!-- Withdraw Confirmation Modal -->
-    <div class="modal-overlay" *ngIf="showWithdrawModal && hasSigned" (click)="closeWithdrawModal()">
+    <div class="modal-overlay" *ngIf="showWithdrawModal" (click)="closeWithdrawModal()">
         <div class="modal-content" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h3 class="modal-title">Withdraw Funds</h3>
@@ -299,7 +235,7 @@
     </div>
 
     <!-- Payment Modal -->
-    <div class="modal-overlay" *ngIf="showPaymentModal && hasSigned" (click)="closePaymentModal()">
+    <div class="modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
         <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h3 class="modal-title">Payment Instructions</h3>
@@ -442,145 +378,3 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Signature Required Styles */
-.signature-required-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh;
-    padding: 2rem;
-}
-
-.signature-card {
-    background: var(--bg-card, rgba(45, 48, 71, 0.8));
-    border: 1px solid var(--border-light, rgba(247, 250, 252, 0.15));
-    border-radius: 16px;
-    padding: 3rem;
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-    box-shadow: var(--shadow-strong, 0 8px 32px rgba(0, 0, 0, 0.25));
-}
-
-.signature-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-.signature-title {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--text-primary, #F7FAFC);
-    margin-bottom: 1rem;
-}
-
-.signature-message {
-    font-size: 1.1rem;
-    color: var(--text-secondary, rgba(247, 250, 252, 0.75));
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-.signature-details {
-    background: var(--bg-secondary, #1E1E24);
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-}
-
-.signature-details .detail-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-light, rgba(247, 250, 252, 0.15));
-}
-
-.signature-details .detail-item:last-child {
-    border-bottom: none;
-}
-
-.detail-icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.detail-text {
-    color: var(--text-secondary, rgba(247, 250, 252, 0.75));
-    font-size: 1rem;
-    text-align: left;
-}
-
-.signature-footer {
-    margin-top: 2rem;
-}
-
-.footer-text {
-    color: var(--text-muted, rgba(247, 250, 252, 0.5));
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-}
-
-.refresh-btn {
-    background: var(--primary-accent, #3182CE);
-    color: var(--text-primary, #F7FAFC);
-    border: none;
-    border-radius: 8px;
-    padding: 0.875rem 2rem;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.refresh-btn:hover {
-    background: #2C5282;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
-}
-
-.refresh-btn .btn-icon {
-    font-size: 1.2rem;
-}
-
-.signature-loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 50vh;
-}
-
-.signature-loading .loading-content {
-    text-align: center;
-}
-
-.signature-loading .spinner {
-    width: 48px;
-    height: 48px;
-    border: 4px solid var(--border-light, rgba(247, 250, 252, 0.15));
-    border-top-color: var(--primary-accent, #3182CE);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.signature-loading .loading-text {
-    color: var(--text-secondary, rgba(247, 250, 252, 0.75));
-    font-size: 1rem;
-}
-</style>

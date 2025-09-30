@@ -15,7 +15,6 @@ export class HeaderComponent implements OnInit {
   
   // Définition des items de navigation
   navItems = [
-    { path: '/dashboard', label: 'Customer portal', icon: 'deposit-icon', adminOnly: false },
     { path: '/admin', label: 'Admin', icon: 'deposit-icon', adminOnly: true }
   ];
 

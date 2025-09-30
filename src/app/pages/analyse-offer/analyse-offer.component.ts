@@ -142,18 +142,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
           payment: '≈ $18.6K/mo',
           frequency: 'Monthly',
           features: []
-        },
-        {
-          title: '10-Year Long Term',
-          badge: 'Long Term',
-          type: 'long',
-          amount: 2000000,
-          structure: 'Fixed loan',
-          payback: 0,
-          term: '10 years @10% APR',
-          payment: '≈ $26.4K/mo',
-          frequency: 'Monthly',
-          features: []
         }
       ]
     },
@@ -195,18 +183,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
           payback: 2660000,
           term: '72 months',
           payment: '≈ $36.9K/mo',
-          frequency: 'Monthly',
-          features: []
-        },
-        {
-          title: '10-Year Long Term',
-          badge: 'Long Term',
-          type: 'long',
-          amount: 3000000,
-          structure: 'Fixed loan',
-          payback: 0,
-          term: '10 years @10% APR',
-          payment: '≈ $39.6K/mo',
           frequency: 'Monthly',
           features: []
         }
@@ -252,18 +228,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
           payment: '≈ $55K/mo',
           frequency: 'Monthly',
           features: []
-        },
-        {
-          title: '10-Year Long Term',
-          badge: 'Long Term',
-          type: 'long',
-          amount: 5000000,
-          structure: 'Fixed loan',
-          payback: 0,
-          term: '10 years @10% APR',
-          payment: '≈ $66K/mo',
-          frequency: 'Monthly',
-          features: []
         }
       ]
     },
@@ -307,18 +271,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
           payment: '≈ $73.3K/mo',
           frequency: 'Monthly',
           features: []
-        },
-        {
-          title: '10-Year Long Term',
-          badge: 'Long Term',
-          type: 'long',
-          amount: 7000000,
-          structure: 'Fixed loan',
-          payback: 0,
-          term: '10 years @10% APR',
-          payment: '≈ $92K/mo',
-          frequency: 'Monthly',
-          features: []
         }
       ]
     },
@@ -360,18 +312,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
           payback: 6600000,
           term: '72 months',
           payment: '≈ $91.6K/mo',
-          frequency: 'Monthly',
-          features: []
-        },
-        {
-          title: '10-Year Long Term',
-          badge: 'Long Term',
-          type: 'long',
-          amount: 10000000,
-          structure: 'Fixed loan',
-          payback: 0,
-          term: '10 years @10% APR',
-          payment: '≈ $132K/mo',
           frequency: 'Monthly',
           features: []
         }

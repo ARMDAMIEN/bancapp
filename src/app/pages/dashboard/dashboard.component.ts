@@ -39,11 +39,6 @@ interface UserSelectionResponse {
   message?: string;
 }
 
-interface SignatureStatusResponse {
-  hasSigned: boolean;
-  email: string;
-}
-
 interface BankInfo {
   accountHolderName: string;
   routingNumber: string;
@@ -57,15 +52,6 @@ interface BankInfo {
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  // Propriétés pour le chargement initial
-  isInitialLoading: boolean = false;
-  loadingProgress: number = 0;
-  isCelebrating = false;
-  loadingMessage: string = 'Unlocking your funds...';
-  confettiArray = Array(50).fill(0);
-
-  private loadingTimer: any;
-
   // Informations bancaires
   bankInfo: BankInfo = {
     accountHolderName: '',
@@ -88,10 +74,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   clientName: string = '';
   accountId: string = '';
   
-  // État de signature - IMPORTANT: null au départ pour gérer le chargement
-  hasSigned: boolean | null = null;
-  isLoadingSignatureStatus: boolean = true;
-  
   // Informations de solde
   currentBalance: number = 0;
   lastUpdate: Date = new Date();
@@ -105,18 +87,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   
   // Transactions
   recentTransactions: Transaction[] = [];
-
-  // Propriétés pour les remboursements
-  totalReimbursed: number = 0;
-  reimbursementCount: number = 0;
-  lastReimbursementDate: Date | null = null;
-  averageReimbursement: number = 0;
-  reimbursementTrend: {
-    type: 'positive' | 'negative' | 'neutral';
-    icon: string;
-    text: string;
-    percentage: number;
-  } | null = null;
 
   // Sélection utilisateur et options de financement
   selectedOffer: string | null = null;
@@ -137,82 +107,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // On charge d'abord le statut de signature
-    this.loadSignatureStatus();
+    this.loadDashboardData();
   }
 
   ngOnDestroy(): void {
     this.cleanupTimers();
-    if (this.loadingTimer) {
-      clearInterval(this.loadingTimer);
-    }
-  }
-
-  private startInitialLoading(): void {
-    this.isInitialLoading = true;
-    this.isCelebrating = false;
-    this.loadingProgress = 0;
-    
-    const totalDuration = 60000; 
-    const updateInterval = 100;
-    const incrementPerUpdate = (100 / (totalDuration / updateInterval));
-    
-    const messages = [
-      'Unlocking your funds...',
-      'Verifying your account...',
-      'Processing your funding option...',
-      'Preparing your dashboard...',
-      'Almost ready...'
-    ];
-    
-    let messageIndex = 0;
-    let elapsed = 0;
-    
-    this.loadingTimer = setInterval(() => {
-      elapsed += updateInterval;
-      this.loadingProgress += incrementPerUpdate;
-      
-      const newMessageIndex = Math.floor((elapsed / totalDuration) * messages.length);
-      if (newMessageIndex !== messageIndex && newMessageIndex < messages.length) {
-        messageIndex = newMessageIndex;
-        this.loadingMessage = messages[messageIndex];
-      }
-      
-      if (this.loadingProgress >= 100) {
-        this.loadingProgress = 100;
-      }
-      
-      if (elapsed >= totalDuration) {
-        this.startCelebration();
-      }
-    }, updateInterval);
-  }
-
-  private startCelebration(): void {
-    clearInterval(this.loadingTimer);
-    this.isCelebrating = true;
-    this.loadingMessage = '🎊 Success! Welcome to your dashboard! 🎊';
-    
-    setTimeout(() => {
-      this.completeInitialLoading();
-    }, 2500);
-  }
-
-  private completeInitialLoading(): void {
-    if (this.loadingTimer) {
-      clearInterval(this.loadingTimer);
-    }
-    
-    this.loadingProgress = 100;
-    this.loadingMessage = 'Loading complete!';
-    
-    localStorage.setItem('initialLoadingCompleted', 'true');
-    
-    setTimeout(() => {
-      this.isCelebrating = false;
-      this.isInitialLoading = false;
-      this.loadDashboardData();
-    }, 500);
   }
 
   private loadDashboardData(): void {
@@ -221,55 +120,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadBankInfo();
     this.loadWithdrawalStatus();
     this.setupAutoRefresh();
-  }
-
-  private loadSignatureStatus(): void {
-    this.isLoadingSignatureStatus = true;
-    
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No authentication token found');
-      this.hasSigned = false;
-      this.isLoadingSignatureStatus = false;
-      return;
-    }
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-
-    this.http.get<SignatureStatusResponse>(`${this.apiUrl}/api/signature/status`, { headers })
-      .pipe(
-        catchError((error) => {
-          console.error('Error loading signature status:', error);
-          return of({ hasSigned: false, email: '' });
-        })
-      )
-      .subscribe({
-        next: (response) => {
-          // On met à jour hasSigned AVANT tout traitement
-          this.hasSigned = response.hasSigned;
-          this.isLoadingSignatureStatus = false;
-          
-          const initialLoadingCompleted = localStorage.getItem('initialLoadingCompleted');
-          
-          if (this.hasSigned && initialLoadingCompleted !== 'true') {
-            console.log('🎬 Starting initial loading animation...');
-            this.startInitialLoading();
-          } else if (this.hasSigned && initialLoadingCompleted === 'true') {
-            console.log('⚡ Loading completed previously, loading dashboard...');
-            this.loadDashboardData();
-          } else {
-            console.log('⚠️ User has not signed yet');
-          }
-        },
-        error: (error) => {
-          console.error('Failed to load signature status:', error);
-          this.hasSigned = false;
-          this.isLoadingSignatureStatus = false;
-        }
-      });
   }
 
   private loadBankInfo(): void {
@@ -354,18 +204,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             payment: '≈ $18.6K/mo',
             frequency: 'Monthly',
             features: []
-          },
-          {
-            title: '10-Year Long Term',
-            badge: 'Long Term',
-            type: 'long',
-            amount: 2000000,
-            structure: 'Fixed loan',
-            payback: 0,
-            term: '10 years @10% APR',
-            payment: '≈ $26.4K/mo',
-            frequency: 'Monthly',
-            features: []
           }
         ]
       },
@@ -407,18 +245,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             payback: 2660000,
             term: '72 months',
             payment: '≈ $36.9K/mo',
-            frequency: 'Monthly',
-            features: []
-          },
-          {
-            title: '10-Year Long Term',
-            badge: 'Long Term',
-            type: 'long',
-            amount: 3000000,
-            structure: 'Fixed loan',
-            payback: 0,
-            term: '10 years @10% APR',
-            payment: '≈ $39.6K/mo',
             frequency: 'Monthly',
             features: []
           }
@@ -464,18 +290,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             payment: '≈ $55K/mo',
             frequency: 'Monthly',
             features: []
-          },
-          {
-            title: '10-Year Long Term',
-            badge: 'Long Term',
-            type: 'long',
-            amount: 5000000,
-            structure: 'Fixed loan',
-            payback: 0,
-            term: '10 years @10% APR',
-            payment: '≈ $66K/mo',
-            frequency: 'Monthly',
-            features: []
           }
         ]
       },
@@ -519,18 +333,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             payment: '≈ $73.3K/mo',
             frequency: 'Monthly',
             features: []
-          },
-          {
-            title: '10-Year Long Term',
-            badge: 'Long Term',
-            type: 'long',
-            amount: 7000000,
-            structure: 'Fixed loan',
-            payback: 0,
-            term: '10 years @10% APR',
-            payment: '≈ $92K/mo',
-            frequency: 'Monthly',
-            features: []
           }
         ]
       },
@@ -572,18 +374,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             payback: 6600000,
             term: '72 months',
             payment: '≈ $91.6K/mo',
-            frequency: 'Monthly',
-            features: []
-          },
-          {
-            title: '10-Year Long Term',
-            badge: 'Long Term',
-            type: 'long',
-            amount: 10000000,
-            structure: 'Fixed loan',
-            payback: 0,
-            term: '10 years @10% APR',
-            payment: '≈ $132K/mo',
             frequency: 'Monthly',
             features: []
           }
@@ -755,8 +545,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.refreshTimer = setInterval(() => {
       this.lastUpdate = new Date();
       this.loadUserSelections();
-      // Ne pas recharger le statut de signature en refresh auto
-      // pour éviter les problèmes de race condition
     }, 30000);
   }
 
@@ -927,7 +715,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   refreshAccountData(): void {
     this.loadUserSelections();
-    this.loadSignatureStatus();
     this.lastUpdate = new Date();
   }
 
@@ -978,26 +765,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (change > 100) return 'up';
     if (change < -100) return 'down';
     return 'stable';
-  }
-
-  // Méthodes utilitaires pour la signature
-  hasUserSigned(): boolean {
-    return this.hasSigned === true;
-  }
-
-  getSignatureStatusText(): string {
-    if (this.isLoadingSignatureStatus) {
-      return 'Loading...';
-    }
-    return this.hasSigned ? 'Signed' : 'Not Signed';
-  }
-
-  getSignatureStatusClass(): string {
-    return this.hasSigned ? 'signed' : 'not-signed';
-  }
-  
-  // Méthode helper pour le template
-  isSignatureStatusLoaded(): boolean {
-    return this.hasSigned !== null;
   }
 }
