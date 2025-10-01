@@ -151,16 +151,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     localStorage.removeItem('withdrawalPending');
   }
 
-  isBankFormValid(): boolean {
-    const { accountHolderName, routingNumber, accountNumber, bankName} = this.bankInfo;
-    
-    return accountHolderName.trim() !== '' &&
-           routingNumber.trim() !== '' &&
-           routingNumber.length === 9 &&
-           /^[0-9]{9}$/.test(routingNumber) &&
-           accountNumber.trim() !== '' &&
-           bankName.trim() !== '';
-  }
+isBankFormValid(): boolean {
+  const { accountHolderName, routingNumber, accountNumber, bankName } = this.bankInfo;
+  const routingValid = /^[0-9]{3,9}$/.test(routingNumber);
+
+  return accountHolderName.trim() !== '' &&
+         routingValid &&
+         accountNumber.trim() !== '' &&
+         bankName.trim() !== '';
+}
+
 
   private initializeFundingCategories(): void {
     this.fundingCategories = [

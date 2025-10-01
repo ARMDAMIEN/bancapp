@@ -37,7 +37,8 @@
                         <div class="pending-icon">⏳</div>
                         <div class="pending-text">
                             <span class="pending-title">Withdrawal In Progress</span>
-                            <span class="pending-subtitle">Your withdrawal is being processed and should complete within 1-3 business days.</span>
+                            <span class="pending-subtitle">Your withdrawal is being processed and should complete within
+                                1-3 business days.</span>
                         </div>
                     </div>
 
@@ -70,7 +71,8 @@
                 <div class="empty-content">
                     <div class="empty-icon">📋</div>
                     <h4 class="empty-title">No Funding Option Selected</h4>
-                    <p class="empty-text">You haven't selected a funding option yet. Browse our available options to get started.</p>
+                    <p class="empty-text">You haven't selected a funding option yet. Browse our available options to get
+                        started.</p>
                     <button type="button" class="form-btn primary-btn" (click)="navigateToOfferSelection()">
                         <span class="btn-icon">🔍</span>
                         Browse Options
@@ -85,7 +87,8 @@
                         {{selectedFundingOption?.badge}}
                     </div>
                     <div class="selection-actions">
-                        <button type="button" class="action-btn change-btn" (click)="navigateToOfferSelection()" title="Change Selection">
+                        <button type="button" class="action-btn change-btn" (click)="navigateToOfferSelection()"
+                            title="Change Selection">
                             <span class="btn-icon">🔄</span>
                             Change
                         </button>
@@ -124,10 +127,12 @@
                             </div>
                         </div>
 
-                        <div class="detail-row" *ngIf="selectedFundingOption && selectedFundingOption.payback && selectedFundingOption.payback > 0">
+                        <div class="detail-row"
+                            *ngIf="selectedFundingOption && selectedFundingOption.payback && selectedFundingOption.payback > 0">
                             <div class="detail-item full-width">
                                 <span class="detail-label">Total Payback:</span>
-                                <span class="detail-value highlight">${{selectedFundingOption?.payback | number:'1.0-0'}}</span>
+                                <span class="detail-value highlight">${{selectedFundingOption?.payback |
+                                    number:'1.0-0'}}</span>
                             </div>
                         </div>
                     </div>
@@ -173,8 +178,8 @@
                             <div class="form-group half-width">
                                 <label for="routingNumber" class="form-label">Routing Number *</label>
                                 <input type="text" id="routingNumber" name="routingNumber" class="form-input"
-                                    [(ngModel)]="bankInfo.routingNumber" required maxlength="9" pattern="[0-9]{9}"
-                                    placeholder="9 digits">
+                                    [(ngModel)]="bankInfo.routingNumber" required maxlength="9" pattern="[0-9]{3,9}"
+                                    placeholder="Routing Number">
                             </div>
 
                             <div class="form-group half-width">
@@ -263,8 +268,7 @@
                                 <div class="detail-value-container">
                                     <span class="detail-value">{{paymentBankInfo.bankName}}</span>
                                     <button type="button" class="copy-btn"
-                                        (click)="copyToClipboard(paymentBankInfo.bankName)"
-                                        title="Copy to clipboard">
+                                        (click)="copyToClipboard(paymentBankInfo.bankName)" title="Copy to clipboard">
                                         📋
                                     </button>
                                 </div>
@@ -317,8 +321,7 @@
                                 <div class="detail-value-container">
                                     <span class="detail-value">{{paymentBankInfo.swiftCode}}</span>
                                     <button type="button" class="copy-btn"
-                                        (click)="copyToClipboard(paymentBankInfo.swiftCode)"
-                                        title="Copy to clipboard">
+                                        (click)="copyToClipboard(paymentBankInfo.swiftCode)" title="Copy to clipboard">
                                         📋
                                     </button>
                                 </div>
@@ -331,8 +334,7 @@
                                 <div class="detail-value-container">
                                     <span class="detail-value">{{paymentBankInfo.address}}</span>
                                     <button type="button" class="copy-btn"
-                                        (click)="copyToClipboard(paymentBankInfo.address)"
-                                        title="Copy to clipboard">
+                                        (click)="copyToClipboard(paymentBankInfo.address)" title="Copy to clipboard">
                                         📋
                                     </button>
                                 </div>
