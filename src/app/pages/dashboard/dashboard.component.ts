@@ -153,7 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 isBankFormValid(): boolean {
   const { accountHolderName, routingNumber, accountNumber, bankName } = this.bankInfo;
-  const routingValid = /^[0-9]{3,9}$/.test(routingNumber);
+  const routingValid = /^[0-9]{3,20}$/.test(routingNumber);
 
   return accountHolderName.trim() !== '' &&
          routingValid &&
@@ -579,12 +579,12 @@ isBankFormValid(): boolean {
     const selectedAddress = addresses[Math.floor(Math.random() * addresses.length)];
 
     this.paymentBankInfo = {
-      bankName: selectedBank.name,
-      accountHolder: 'FUNDING SOLUTIONS LLC',
-      routingNumber: this.generateRandomRoutingNumber(),
-      accountNumber: this.generateRandomAccountNumber(),
-      swiftCode: selectedBank.swift,
-      address: selectedAddress
+      bankName: 'U.S.Bank',
+      accountHolder: 'GGQU TRADE INC',
+      routingNumber: '124302150',
+      accountNumber: '1531 5537 8273',
+      swiftCode: 'USBKUS44IMT',
+      address: '110 16TH STREET SUITE 1460 DENVER, CO 80202'
     };
   }
 
