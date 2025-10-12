@@ -147,16 +147,16 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
   }
 
   proceedToDashboard(): void {
-    // Transition to DASHBOARD step
+    // Transition to DASHBOARD step first
     this.stepService.transitionTo(FUNDING_STEPS.DASHBOARD).subscribe({
       next: () => {
-        console.log('Step transitioned to DASHBOARD');
-        // Rediriger vers le dashboard
+        console.log('Step transitioned to DASHBOARD successfully');
+        // Navigate to dashboard after step is updated
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        console.error('Failed to update step:', error);
-        // Navigate anyway - user has completed all steps
+        console.error('Failed to transition to DASHBOARD:', error);
+        // Still navigate - dashboard will handle the transition
         this.router.navigate(['/dashboard']);
       }
     });

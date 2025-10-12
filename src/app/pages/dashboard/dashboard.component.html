@@ -20,17 +20,25 @@
 
             <!-- Balance Card -->
             <div class="balance-card">
-                <div class="balance-header">
-                    <h3 class="balance-title">Available Balance</h3>
-                    <div class="balance-status" [ngClass]="getBalanceStatus()">
-                        {{getBalanceStatusText()}}
-                    </div>
+                <!-- Loading State -->
+                <div class="balance-loading" *ngIf="isLoadingSelection">
+                    <div class="loading-spinner-small"></div>
+                    <p class="loading-text-small">Loading balance...</p>
                 </div>
 
-                <div class="balance-amount">
-                    <span class="currency">$</span>
-                    <span class="amount">{{currentBalance | number:'1.2-2'}}</span>
-                </div>
+                <!-- Balance Content -->
+                <div class="balance-content" *ngIf="!isLoadingSelection">
+                    <div class="balance-header">
+                        <h3 class="balance-title">Available Balance</h3>
+                        <div class="balance-status" [ngClass]="getBalanceStatus()">
+                            {{getBalanceStatusText()}}
+                        </div>
+                    </div>
+
+                    <div class="balance-amount">
+                        <span class="currency">$</span>
+                        <span class="amount">{{currentBalance | number:'1.2-2'}}</span>
+                    </div>
 
                 <div class="balance-info">
                     <div class="info-item">
@@ -73,6 +81,7 @@
                         <span class="btn-icon" *ngIf="isWithdrawalPending()">⏳</span>
                         {{getWithdrawButtonText()}}
                     </button>
+                </div>
                 </div>
             </div>
         </div>

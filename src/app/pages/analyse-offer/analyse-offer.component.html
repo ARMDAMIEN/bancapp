@@ -19,9 +19,15 @@
 
     <!-- Results Section -->
     <div class="results-section">
+        <!-- Loading State -->
+        <div class="loading-categories" *ngIf="isLoadingCategories">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading financing options...</p>
+        </div>
+
         <!-- Categories Display with Ordering -->
-        <div class="categories-container">
-            <div class="category-section" 
+        <div class="categories-container" *ngIf="!isLoadingCategories">
+            <div class="category-section"
                  *ngFor="let categoryItem of getOrderedCategories(); let i = index"
                  [class.recommended-category]="categoryItem.isRecommended">
                 

@@ -86,6 +86,9 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
   // Banking option from admin
   adminBankingOption: BankingOptionDTO | null = null;
 
+  // Loading state
+  isLoadingCategories: boolean = true;
+
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -95,8 +98,8 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCachedRevenueData();
-    this.loadAdminBankingOption();
     this.determineRecommendedCategory();
+    this.loadAdminBankingOption();
   }
 
   ngOnDestroy(): void {
@@ -138,6 +141,7 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
   // Load admin banking option and inject into recommended category
   private loadAdminBankingOption(): void {
     console.log('Loading admin banking option...');
+    this.isLoadingCategories = true;
 
     this.bankingOptionService.getBankingOption().subscribe({
       next: (response) => {
@@ -150,9 +154,14 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
         } else {
           console.log('No admin banking option available yet');
         }
+
+        // Mark loading as complete
+        this.isLoadingCategories = false;
       },
       error: (error) => {
         console.error('Error loading admin banking option:', error);
+        // Still show categories even if admin option fails to load
+        this.isLoadingCategories = false;
       }
     });
   }

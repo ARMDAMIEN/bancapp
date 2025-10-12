@@ -120,10 +120,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Verify user is on DASHBOARD step
     const currentStep = this.stepService.getCurrentStep();
 
-    if (currentStep !== FUNDING_STEPS.DASHBOARD) {
+    // Allow access if user is at DASHBOARD or FUNDING_UNLOCKED (transition in progress)
+    if (currentStep !== FUNDING_STEPS.DASHBOARD && currentStep !== FUNDING_STEPS.FUNDING_UNLOCKED) {
       console.warn('User not on dashboard step, redirecting...');
       // Redirect based on current step
       this.redirectToCurrentStep(currentStep);
+      return;
+    }
+
+    // If user is at FUNDING_UNLOCKED, automatically transition to DASHBOARD
+    if (currentStep === FUNDING_STEPS.FUNDING_UNLOCKED) {
+      console.log('User at FUNDING_UNLOCKED, transitioning to DASHBOARD...');
+      this.stepService.transitionTo(FUNDING_STEPS.DASHBOARD).subscribe({
+        next: () => {
+          console.log('Successfully transitioned to DASHBOARD');
+          this.initializeSubstep();
+        },
+        error: (error) => {
+          console.error('Failed to transition to DASHBOARD:', error);
+          // Continue anyway, user has completed all required steps
+          this.initializeSubstep();
+        }
+      });
       return;
     }
 
@@ -239,22 +257,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private handleUserSelectionResponse(response: UserSelectionResponse): void {
-    console.log('Handling response:', response);
-    
+    console.log('📊 Handling user selection response:', response);
+
     let selectedOffer: string | null = null;
-    
+
     if (response.selectedOffer) {
       selectedOffer = response.selectedOffer;
     } else if (response.selectedOffers && response.selectedOffers.length > 0) {
       selectedOffer = response.selectedOffers[0];
     }
-    
+
     if (selectedOffer) {
       this.selectedOffer = selectedOffer;
-      console.log('Selected offer found:', selectedOffer);
+      console.log('✅ Selected offer found:', selectedOffer);
       this.parseSelectedOffer(selectedOffer);
+
+      // Ensure balance is set from the selected option (override any profile balance)
+      if (this.selectedFundingOption) {
+        this.currentBalance = this.selectedFundingOption.amount;
+        console.log('💰 Balance forced from selected option after parsing:', this.currentBalance);
+      }
     } else {
-      console.log('No selection found');
+      console.log('❌ No selection found');
       this.selectedOffer = null;
       this.selectedCategory = null;
       this.selectedOption = null;
@@ -305,7 +329,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private updateBalanceFromSelection(): void {
     if (this.selectedFundingOption) {
         this.currentBalance = this.selectedFundingOption.amount;
+        console.log('✅ Balance updated from selected funding option:', this.currentBalance);
         this.saveBalance();
+    } else {
+        console.warn('⚠️ No selected funding option available to update balance');
     }
   }
 
@@ -317,9 +344,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.companyName = profile.companyName || '';
         this.clientName = `${this.firstName} ${this.lastName}`.trim();
 
-        // Update balance from profile if available
-        if (profile.accountBalance !== null && profile.accountBalance !== undefined) {
-          this.currentBalance = profile.accountBalance;
+        // Only update balance from profile if we don't have a selected funding option
+        // The selected funding option balance takes priority
+        if (!this.selectedFundingOption) {
+          if (profile.accountBalance !== null && profile.accountBalance !== undefined) {
+            this.currentBalance = profile.accountBalance;
+            console.log('Balance set from user profile:', this.currentBalance);
+          }
+        } else {
+          console.log('Balance from selected option takes priority, skipping profile balance');
         }
 
         // Update last update time if available
