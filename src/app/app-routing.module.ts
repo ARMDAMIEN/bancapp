@@ -15,6 +15,9 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { DocumentsSuppComponent } from './pages/documents-supp/documents-supp.component';
 import { SignatureRequiredComponent } from './pages/signature-required/signature-required.component';
 import { FundingUnlockedComponent } from './pages/funding-unlocked/funding-unlocked.component';
+import { HumanValidationPendingComponent } from './pages/human-validation-pending/human-validation-pending.component';
+import { AiCalculatingComponent } from './pages/ai-calculating/ai-calculating.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 const routes: Routes = [
   // Routes accessibles sans authentification
@@ -31,32 +34,45 @@ const routes: Routes = [
     component: LayoutComponent,
     children: [
       {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
+
+      // Route for ai calculating
+      {
+        path: 'ai-calculating',
+        component: AiCalculatingComponent
+      },
       
+      // Route pour human validation pending
+      {
+        path: 'human-validation-pending',
+        component: HumanValidationPendingComponent
+      },
+
       // Route pour signature requise
       {
-        path: 'signature-required', 
+        path: 'signature-required',
         component: SignatureRequiredComponent,
         canActivate: [SignatureGuardService]
       },
-      
+
       // Route pour funding unlocked (première visite)
       {
-        path: 'funding-unlocked', 
+        path: 'funding-unlocked',
         component: FundingUnlockedComponent,
         canActivate: [SignatureGuardService]
       },
-      
+
       // Dashboard et autres routes protégées
       {
-        path: 'dashboard', 
+        path: 'dashboard',
         component: DashboardComponent,
         canActivate: [SignatureGuardService]
       },
-      
+
       {path: 'funding', component: FundingComponent},
       {path: 'analyseOffer', component: AnalyseOfferComponent},
       {path: 'documentSupp', component: DocumentsSuppComponent},
-      {path: 'admin', component: AdminComponent}
+      {path: 'admin', component: AdminComponent},
+      {path: 'profile', component: ProfileComponent}
     ]
   }
 ];

@@ -3,6 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { AuthService } from '../../../services/authService';
 import { ErrorHandlerService } from '../../../services/errorHandlerService';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { StepService, FUNDING_STEPS } from '../../../services/step.service';
 
 
 @Component({
@@ -18,7 +19,13 @@ export class SignInComponent implements OnInit {
   password: string = "";
 
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private authService: AuthService, private errorHandler: ErrorHandlerService, private transferState: TransferState) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private authService: AuthService,
+    private errorHandler: ErrorHandlerService,
+    private transferState: TransferState,
+    private stepService: StepService
+  ) {
     this.signInForm = new FormGroup({
       signInMail: new FormControl(''),
       signInPass: new FormControl('')
@@ -32,8 +39,18 @@ export class SignInComponent implements OnInit {
       console.log('Running in the browser');
     }
 
+    // If user is already logged in, redirect based on their step
     if (this.authService.getToken()) {
-      this.redirectTo("onBoarding");
+      this.stepService.loadFromBackend().subscribe({
+        next: (state) => {
+          this.redirectBasedOnStep(state.currentStep);
+        },
+        error: (err) => {
+          console.error('Failed to load step:', err);
+          // Fallback redirect if can't load step
+          this.redirectTo("dashboard");
+        }
+      });
     }
 
   }
@@ -47,17 +64,57 @@ export class SignInComponent implements OnInit {
     this.authService.login(signInData).subscribe(
       data => {
         localStorage.setItem('token', data.accessToken);
-        console.log('is admin ? ' +data.isAdmin);
-        if (data.isAdmin) {
-          localStorage.setItem('userRole', 'ADMIN');
-        }
-        this.errorHandler.redirectTo("dashboard");
+
+        // Load user's step from backend and redirect accordingly
+        this.stepService.loadFromBackend().subscribe({
+          next: (state) => {
+            console.log('User current step:', state.currentStep);
+            this.redirectBasedOnStep(state.currentStep);
+          },
+          error: (err) => {
+            console.error('Failed to load step:', err);
+            // Fallback to dashboard if step loading fails
+            this.errorHandler.redirectTo("dashboard");
+          }
+        });
       },
       error => {
-        console.log('error while login ' + +JSON.stringify(error));
+        console.log('error while login ' + JSON.stringify(error));
         this.errorMessage = error.error.message;
       }
     )
+  }
+
+  private redirectBasedOnStep(currentStep: string) {
+    switch (currentStep) {
+      case FUNDING_STEPS.FUNDING_INFO:
+        this.errorHandler.redirectTo("funding");
+        break;
+      case FUNDING_STEPS.AI_CALCULATING:
+        this.errorHandler.redirectTo("analyseOffer");
+        break;
+      case FUNDING_STEPS.HUMAN_VALIDATION_PENDING:
+        this.errorHandler.redirectTo("human-validation-pending");
+        break;
+      case FUNDING_STEPS.SELECT_OPTION:
+        this.errorHandler.redirectTo("analyseOffer");
+        break;
+      case FUNDING_STEPS.DOCUMENTS_SUPP:
+        this.errorHandler.redirectTo("documentSupp");
+        break;
+      case FUNDING_STEPS.SIGNATURE_REQUIRED:
+        this.errorHandler.redirectTo("signature-required");
+        break;
+      case FUNDING_STEPS.FUNDING_UNLOCKED:
+        this.errorHandler.redirectTo("funding-unlocked");
+        break;
+      case FUNDING_STEPS.DASHBOARD:
+        this.errorHandler.redirectTo("dashboard");
+        break;
+      default:
+        // Default to funding if unknown step
+        this.errorHandler.redirectTo("funding");
+    }
   }
 
   redirectTo(url: string) {

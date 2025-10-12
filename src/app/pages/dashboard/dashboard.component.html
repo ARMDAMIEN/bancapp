@@ -1,6 +1,19 @@
 <div class="dashboard-container">
     <!-- Main Content -->
     <div class="dashboard-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="welcome-header">
+                <div class="welcome-avatar">
+                    {{ firstName.charAt(0) }}{{ lastName.charAt(0) }}
+                </div>
+                <div class="welcome-info">
+                    <h1 class="welcome-title">Welcome back, {{ firstName }} {{ lastName }}</h1>
+                    <p class="welcome-company" *ngIf="companyName">{{ companyName }}</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Account Overview -->
         <div class="account-overview">
             <h2 class="section-title">Account Overview</h2>
@@ -32,8 +45,17 @@
 
                 <!-- Withdraw Button Section -->
                 <div class="balance-actions">
+                    <!-- Message de payment pending -->
+                    <div class="withdrawal-pending-notice" *ngIf="isPaymentPending()">
+                        <div class="pending-icon">💳</div>
+                        <div class="pending-text">
+                            <span class="pending-title">Waiting for Your Payment</span>
+                            <span class="pending-subtitle">We are waiting to receive your payment. Once received, your withdrawal will be processed.</span>
+                        </div>
+                    </div>
+
                     <!-- Message de withdrawal pending -->
-                    <div class="withdrawal-pending-notice" *ngIf="withdrawalPending">
+                    <div class="withdrawal-pending-notice" *ngIf="isWithdrawalPending()">
                         <div class="pending-icon">⏳</div>
                         <div class="pending-text">
                             <span class="pending-title">Withdrawal In Progress</span>
@@ -44,10 +66,11 @@
 
                     <!-- Bouton de retrait -->
                     <button type="button" class="withdraw-btn"
-                        [ngClass]="{'pending': withdrawalPending, 'disabled': !canWithdraw()}"
+                        [ngClass]="{'pending': isWithdrawalPending() || isPaymentPending(), 'disabled': !canWithdraw()}"
                         [disabled]="!canWithdraw() || isProcessing" (click)="openWithdrawModal()">
-                        <span class="btn-icon" *ngIf="!withdrawalPending">💳</span>
-                        <span class="btn-icon" *ngIf="withdrawalPending">⏳</span>
+                        <span class="btn-icon" *ngIf="!isWithdrawalPending() && !isPaymentPending()">💳</span>
+                        <span class="btn-icon" *ngIf="isPaymentPending()">💳</span>
+                        <span class="btn-icon" *ngIf="isWithdrawalPending()">⏳</span>
                         {{getWithdrawButtonText()}}
                     </button>
                 </div>
@@ -163,39 +186,38 @@
                     </div>
                 </div>
 
-                <!-- Bank Information Form -->
-                <div class="bank-form-section">
+                <!-- Bank Information Display -->
+                <div class="bank-info-section">
                     <h4 class="form-title">Bank Account Information</h4>
-                    <form #bankForm="ngForm" class="bank-form">
-                        <div class="form-group">
-                            <label for="accountHolderName" class="form-label">Account Holder Name *</label>
-                            <input type="text" id="accountHolderName" name="accountHolderName" class="form-input"
-                                [(ngModel)]="bankInfo.accountHolderName" required
-                                placeholder="Enter full name as it appears on your account">
+
+                    <div class="bank-info-display" *ngIf="bankInfo.accountHolderName">
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Account Holder Name:</span>
+                            <span class="detail-value">{{bankInfo.accountHolderName}}</span>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group half-width">
-                                <label for="routingNumber" class="form-label">Routing Number *</label>
-                                <input type="text" id="routingNumber" name="routingNumber" class="form-input"
-                                    [(ngModel)]="bankInfo.routingNumber" required maxlength="20" pattern="[0-9]{3,20}"
-                                    placeholder="Routing Number">
+                        <div class="bank-detail-row">
+                            <div class="bank-detail-item half-width">
+                                <span class="detail-label">Routing Number:</span>
+                                <span class="detail-value">{{bankInfo.routingNumber}}</span>
                             </div>
 
-                            <div class="form-group half-width">
-                                <label for="accountNumber" class="form-label">Account Number *</label>
-                                <input type="text" id="accountNumber" name="accountNumber" class="form-input"
-                                    [(ngModel)]="bankInfo.accountNumber" required maxlength="17"
-                                    placeholder="Account number">
+                            <div class="bank-detail-item half-width">
+                                <span class="detail-label">Account Number:</span>
+                                <span class="detail-value">{{bankInfo.accountNumber}}</span>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="bankName" class="form-label">Bank Name *</label>
-                            <input type="text" id="bankName" name="bankName" class="form-input"
-                                [(ngModel)]="bankInfo.bankName" required placeholder="Bank name">
+                        <div class="bank-detail-item">
+                            <span class="detail-label">Bank Name:</span>
+                            <span class="detail-value">{{bankInfo.bankName}}</span>
                         </div>
-                    </form>
+                    </div>
+
+                    <div class="bank-info-empty" *ngIf="!bankInfo.accountHolderName">
+                        <div class="empty-icon">🏦</div>
+                        <p class="empty-text">No bank account information on file.</p>
+                    </div>
                 </div>
 
                 <div class="withdrawal-details">
@@ -228,7 +250,7 @@
                     Cancel
                 </button>
                 <button type="button" class="form-btn primary-btn" (click)="proceedToPayment()"
-                    [disabled]="isProcessing || currentBalance <= 0 || !isBankFormValid()">
+                    [disabled]="isProcessing || currentBalance <= 0 || !bankInfo.accountHolderName">
                     <span *ngIf="!isProcessing">Go to Payment</span>
                     <span *ngIf="isProcessing" class="processing-text">
                         <span class="spinner"></span>
@@ -315,7 +337,7 @@
                             </div>
                         </div>
 
-                        <div class="bank-detail-row">
+                         <!--<div class="bank-detail-row">
                             <div class="detail-group">
                                 <span class="detail-label">SWIFT Code:</span>
                                 <div class="detail-value-container">
@@ -326,7 +348,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> 
 
                         <div class="bank-detail-row">
                             <div class="detail-group">
@@ -339,7 +361,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

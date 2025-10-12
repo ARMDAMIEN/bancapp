@@ -1,0 +1,40 @@
+<div class="ai-calculating-container">
+    <div class="ai-calculating-content">
+        <div class="ai-brain-animation">
+            <div class="brain-core"></div>
+            <div class="neural-network">
+                <div class="neural-node" *ngFor="let node of neuralNodes"></div>
+            </div>
+            <div class="data-flow">
+                <div class="data-particle" *ngFor="let particle of dataParticles"></div>
+            </div>
+        </div>
+
+        <h2 class="loading-title">Analyzing Your Financial Data</h2>
+        <p class="loading-subtitle">Our AI is analyzing your bank statements to propose the best financing options</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="analysisProgress"></div>
+        </div>
+        <p class="progress-text">{{analysisProgress}}% Complete</p>
+
+        <div class="analysis-steps">
+            <div class="step-item" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+                <div class="step-icon">1</div>
+                <span>Processing bank statements</span>
+            </div>
+            <div class="step-item" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+                <div class="step-icon">2</div>
+                <span>Analyzing revenue patterns</span>
+            </div>
+            <div class="step-item" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+                <div class="step-icon">3</div>
+                <span>Risk assessment</span>
+            </div>
+            <div class="step-item" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4">
+                <div class="step-icon">4</div>
+                <span>Generating recommendations</span>
+            </div>
+        </div>
+    </div>
+</div>

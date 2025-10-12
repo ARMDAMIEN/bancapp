@@ -1,0 +1,75 @@
+<div class="validation-overlay">
+    <div class="validation-container">
+        <div class="validation-content">
+            <!-- Icon Animation -->
+            <div class="validation-icon-wrapper">
+                <div class="validation-icon">
+                    <div class="icon-circle">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                            <circle cx="40" cy="40" r="38" stroke="currentColor" stroke-width="2" stroke-dasharray="5,5" class="rotating-circle"/>
+                            <path d="M40 20 L40 35 M40 45 L40 60 M20 40 L35 40 M45 40 L60 40" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Message -->
+            <h2 class="validation-title">Human Validation Required</h2>
+            <p class="validation-subtitle">
+                Our AI has completed the initial analysis of your company revenue.
+                We now need human validation to finalize your banking options.
+            </p>
+
+            <!-- Status Info -->
+            <div class="validation-status">
+                <div class="status-item">
+                    <span class="status-icon">✓</span>
+                    <span class="status-text">AI Analysis Complete</span>
+                </div>
+                <div class="status-item" [class.pending]="validationStatus === 'pending'" [class.approved]="validationStatus === 'approved'" [class.error]="validationStatus === 'error'">
+                    <span class="status-icon">{{ validationStatus === 'approved' ? '✓' : (validationStatus === 'error' ? '⚠️' : '⏳') }}</span>
+                    <span class="status-text">
+                        {{ validationStatus === 'approved' ? 'Validation Approved!' : (validationStatus === 'error' ? 'Error Checking Status' : 'Awaiting Human Review') }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" *ngIf="errorMessage">
+                <span class="error-icon">⚠️</span>
+                <span>{{ errorMessage }}</span>
+            </div>
+
+            <!-- Wait Message -->
+            <div class="wait-message">
+                <div class="wait-icon">⏱️</div>
+                <p class="wait-text">Please wait while our team validates your information...</p>
+            </div>
+
+            <!-- Refresh Button -->
+            <button type="button" class="refresh-btn" (click)="refreshStatus()" [disabled]="isChecking">
+                <span class="refresh-icon" [class.spinning]="isChecking">↻</span>
+                <span>{{isChecking ? 'Checking Status...' : 'Refresh Status'}}</span>
+            </button>
+
+            <!-- Additional Info -->
+            <div class="info-card">
+                <div class="info-icon">💡</div>
+                <div class="info-content">
+                    <h4 class="info-title">What's happening?</h4>
+                    <p class="info-description">
+                        Our team is reviewing the AI analysis results to ensure accuracy and
+                        determine the best financing options for your business. This typically
+                        takes 15-30 minutes during business hours.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Estimated Time -->
+            <div class="estimated-time">
+                <span class="time-label">Estimated wait time:</span>
+                <span class="time-value">15-30 minutes</span>
+            </div>
+        </div>
+    </div>
+</div>

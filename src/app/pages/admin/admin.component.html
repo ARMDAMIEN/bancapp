@@ -16,6 +16,12 @@
             </div>
         </div>
 
+        <!-- Admin Banking Info -->
+        <div class="admin-banking-section">
+            <h2 class="section-title">Admin Settings</h2>
+            <app-admin-banking-info></app-admin-banking-info>
+        </div>
+
         <!-- Users Management -->
         <div class="users-section">
             <div class="section-header">
@@ -42,10 +48,11 @@
                         <tr>
                             <th>User</th>
                             <th>Email</th>
-                            <th>Balance</th>
+                            <th>Selected Offer</th>
                             <th>Status</th>
-                            <th>Last Activity</th>
+                            <th>Substep</th>
                             <th>Signature</th>
+                            <th>Last Activity</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -63,29 +70,37 @@
                             </td>
                             <td class="user-email">{{user.email}}</td>
                             <td>
-                                <span class="balance-amount" [ngClass]="getBalanceClass(user.accountBalance)">
-                                    {{user.accountBalance | currency:'EUR':'symbol':'1.2-2'}}
+                                <span class="offer-badge" *ngIf="user.selectedOffer">
+                                    {{formatOffer(user.selectedOffer)}}
+                                </span>
+                                <span class="offer-badge none" *ngIf="!user.selectedOffer">
+                                    No offer selected
                                 </span>
                             </td>
                             <td>
                                 <span class="status-badge" [ngClass]="user.status">{{user.status}}</span>
                             </td>
                             <td>
+                                <span class="substep-badge"
+                                      *ngIf="user.currentSubstep"
+                                      [ngClass]="user.currentSubstep">
+                                    {{formatSubstep(user.currentSubstep)}}
+                                </span>
+                                <span class="substep-badge none" *ngIf="!user.currentSubstep">
+                                    -
+                                </span>
+                            </td>
+                            <td>
                                 <span class="signature-badge" [ngClass]="user.hasSigned ? 'signed' : 'not-signed'">
                                     {{user.hasSigned ? '✓ Signed' : '✗ Not Signed'}}
                                 </span>
                             </td>
-                            <td class="last-activity">{{user.lastActivity | date:'short'}}</td>
+                            <td class="last-activity">{{getValidDate(user.lastActivity) | date:'short'}}</td>
                             <td>
                                 <div class="action-buttons">
-                                    <button type="button" class="action-btn add-funds"
-                                        (click)="openFundsModal(user, 'add')" title="Add Funds">
-                                        +
-                                    </button>
-                                    <button type="button" class="action-btn remove-funds"
-                                        (click)="openFundsModal(user, 'remove')" [disabled]="user.accountBalance <= 0"
-                                        title="Remove Funds">
-                                        -
+                                    <button type="button" class="action-btn bank-info"
+                                        (click)="openBankInfoModal(user)" title="Manage Bank Info">
+                                        🏦
                                     </button>
                                     <button type="button" class="action-btn signature-btn"
                                         (click)="setUserSignatureAsAdmin(user)" [disabled]="user.hasSigned"
@@ -95,6 +110,38 @@
                                     <button type="button" class="action-btn view-details"
                                         (click)="viewUserDetails(user)" title="View Details">
                                         👁️
+                                    </button>
+                                    <button type="button" class="action-btn funding-options"
+                                        (click)="openFundingOptionsModal(user)" title="Set Funding Options">
+                                        💰
+                                    </button>
+                                    <!-- Payment Status Button: Show only if user is at PAYMENT_PENDING substep -->
+                                    <button type="button" class="action-btn payment-confirm"
+                                        *ngIf="user.currentSubstep === 'payment_pending'"
+                                        (click)="confirmPaymentReceived(user)"
+                                        title="Confirm Payment Received">
+                                        💳✓
+                                    </button>
+                                    <!-- Withdrawal Complete Button: Show only if user is at WITHDRAWAL_PENDING substep -->
+                                    <button type="button" class="action-btn withdrawal-complete"
+                                        *ngIf="user.currentSubstep === 'withdrawal_pending'"
+                                        (click)="completeWithdrawal(user)"
+                                        title="Complete Withdrawal">
+                                        ⏳✓
+                                    </button>
+                                    <!-- Suspend User Button: Show if user is on dashboard and not already suspended -->
+                                    <button type="button" class="action-btn suspend-user"
+                                        *ngIf="user.currentSubstep !== 'suspended' && user.currentStep === 'dashboard'"
+                                        (click)="suspendUser(user)"
+                                        title="Suspend User Account">
+                                        🚫
+                                    </button>
+                                    <!-- Unsuspend User Button: Show only if user is suspended -->
+                                    <button type="button" class="action-btn unsuspend-user"
+                                        *ngIf="user.currentSubstep === 'suspended'"
+                                        (click)="unsuspendUser(user)"
+                                        title="Reactivate User Account">
+                                        ✅
                                     </button>
                                 </div>
                             </td>
@@ -128,107 +175,6 @@
     </div>
 </div>
 
-<!-- Funds Management Modal -->
-<div class="modal-overlay" *ngIf="showFundsModal" (click)="closeFundsModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3 class="modal-title">
-                {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}} - {{selectedUser?.firstName}}
-                {{selectedUser?.lastName}}
-            </h3>
-            <button type="button" class="modal-close" (click)="closeFundsModal()">×</button>
-        </div>
-
-        <div class="modal-body">
-            <!-- User Info -->
-            <div class="user-summary">
-                <div class="user-avatar large">
-                    {{selectedUser?.firstName?.charAt(0)}}{{selectedUser?.lastName?.charAt(0)}}</div>
-                <div class="user-summary-info">
-                    <h4 class="summary-name">{{selectedUser?.firstName}} {{selectedUser?.lastName}}</h4>
-                    <p class="summary-email">{{selectedUser?.email}}</p>
-                    <p class="summary-balance">
-                        Current Balance: <strong>{{selectedUser?.accountBalance |
-                            currency:'EUR':'symbol':'1.2-2'}}</strong>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Amount Input -->
-            <div class="amount-section">
-                <label for="fundsAmount" class="input-label">
-                    {{fundsAction === 'add' ? 'Amount to Add' : 'Amount to Remove'}}
-                </label>
-                <div class="currency-input">
-                    <input type="number" id="fundsAmount" class="input" [(ngModel)]="fundsAmount" min="0.01" step="0.01"
-                        [max]="getMaxAmount()" placeholder="0.00" #fundsAmountRef="ngModel">
-                    <span class="currency-symbol">€</span>
-                </div>
-                <div class="amount-validation" *ngIf="fundsAmountRef.invalid && fundsAmountRef.touched">
-                    <span class="error" *ngIf="fundsAmountRef.errors?.['min']">
-                        Amount must be greater than 0
-                    </span>
-                    <span class="error" *ngIf="fundsAmountRef.errors?.['max']">
-                        Amount cannot exceed current balance
-                    </span>
-                </div>
-            </div>
-
-            <!-- Reason Input -->
-            <div class="reason-section">
-                <label for="fundsReason" class="input-label">Reason (Optional)</label>
-                <textarea id="fundsReason" class="textarea" [(ngModel)]="fundsReason"
-                    placeholder="Enter reason for this transaction..." rows="3"></textarea>
-            </div>
-
-            <!-- Preview -->
-            <div class="transaction-preview" *ngIf="fundsAmount > 0">
-                <h4 class="preview-title">Transaction Preview</h4>
-                <div class="preview-details">
-                    <div class="preview-item">
-                        <span class="preview-label">Action:</span>
-                        <span class="preview-value" [ngClass]="fundsAction">
-                            {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}}
-                        </span>
-                    </div>
-                    <div class="preview-item">
-                        <span class="preview-label">Amount:</span>
-                        <span class="preview-value">{{fundsAmount | currency:'EUR':'symbol':'1.2-2'}}</span>
-                    </div>
-                    <div class="preview-item">
-                        <span class="preview-label">Current Balance:</span>
-                        <span class="preview-value">{{selectedUser?.accountBalance |
-                            currency:'EUR':'symbol':'1.2-2'}}</span>
-                    </div>
-                    <div class="preview-item total">
-                        <span class="preview-label">New Balance:</span>
-                        <span class="preview-value" [ngClass]="getNewBalanceClass()">
-                            {{getNewBalance() | currency:'EUR':'symbol':'1.2-2'}}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-actions">
-            <button type="button" class="form-btn secondary-btn" (click)="closeFundsModal()" [disabled]="isProcessing">
-                Cancel
-            </button>
-            <button type="button" class="form-btn" [ngClass]="fundsAction === 'add' ? 'success-btn' : 'danger-btn'"
-                (click)="processFundsTransaction()" [disabled]="!isValidTransaction() || isProcessing">
-                <span *ngIf="!isProcessing">
-                    {{fundsAction === 'add' ? 'Add Funds' : 'Remove Funds'}}
-                </span>
-                <span *ngIf="isProcessing" class="processing-text">
-                    <span class="spinner"></span>
-                    Processing...
-                </span>
-            </button>
-        </div>
-
-
-    </div>
-</div>
 
 <!-- User Details Modal -->
 <div class="modal-overlay" *ngIf="showUserDetailsModal" (click)="closeUserDetailsModal()">
@@ -305,7 +251,7 @@
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Last Balance Update:</span>
-                        <span class="detail-value">{{selectedUserDetails?.lastBalanceUpdate | date:'medium'}}</span>
+                        <span class="detail-value">{{formatBackendDate(selectedUserDetails?.lastBalanceUpdate) | date:'medium'}}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Status:</span>
@@ -327,7 +273,7 @@
                 <!-- Check if user has any documents -->
                 <div *ngIf="hasAnyDocuments(selectedUserDetails!); else noDocuments">
                     <p class="documents-uploaded" *ngIf="selectedUserDetails?.documentsUploadDate">
-                        Documents uploaded on: {{selectedUserDetails?.documentsUploadDate | date:'medium'}}
+                        Documents uploaded on: {{formatBackendDate(selectedUserDetails?.documentsUploadDate) | date:'medium'}}
                     </p>
 
                     <!-- RIB Documents -->
@@ -390,3 +336,189 @@
         </div>
     </div>
 </div>
+
+<!-- Funding Options Modal -->
+<div class="modal-overlay" *ngIf="showFundingOptionsModal" (click)="closeFundingOptionsModal()">
+    <div class="modal-content large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Set Funding Options - {{selectedFundingUser?.firstName}} {{selectedFundingUser?.lastName}}
+            </h3>
+            <button type="button" class="modal-close" (click)="closeFundingOptionsModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- User Info Summary -->
+            <div class="user-summary">
+                <div class="user-avatar large">
+                    {{selectedFundingUser?.firstName?.charAt(0)}}{{selectedFundingUser?.lastName?.charAt(0)}}
+                </div>
+                <div class="user-summary-info">
+                    <h4 class="summary-name">{{selectedFundingUser?.firstName}} {{selectedFundingUser?.lastName}}</h4>
+                    <p class="summary-email">{{selectedFundingUser?.email}}</p>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="funding-instructions">
+                <div class="instruction-icon">💡</div>
+                <p class="instruction-text">
+                    Create a custom banking option for this user. This option will be applied to all funding categories.
+                </p>
+            </div>
+
+            <!-- Single Banking Option Form -->
+            <div class="funding-option-form single-form">
+                <div class="form-section-title">Configure Banking Option (Applied to All Categories)</div>
+
+                <div class="form-grid">
+                    <!-- Row 1 -->
+                    <div class="form-field">
+                        <label class="field-label">Title *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.title"
+                               placeholder="e.g., Term Loan">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Badge *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.badge"
+                               placeholder="e.g., Guaranteed">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Type *</label>
+                        <select class="field-input" [(ngModel)]="customBankingOption.type">
+                            <option value="guarantee">Guaranteed</option>
+                            <option value="mca">MCA</option>
+                            <option value="capital">Capital</option>
+                            <option value="long">Long Term</option>
+                            <option value="short">Short Term</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="form-field">
+                        <label class="field-label">Amount ($) *</label>
+                        <input type="number" class="field-input"
+                               [(ngModel)]="customBankingOption.amount"
+                               placeholder="e.g., 1000000"
+                               min="0">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Structure *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.structure"
+                               placeholder="e.g., Guaranteed">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Payback ($) *</label>
+                        <input type="number" class="field-input"
+                               [(ngModel)]="customBankingOption.payback"
+                               placeholder="e.g., 1200000"
+                               min="0">
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="form-field">
+                        <label class="field-label">Term *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.term"
+                               placeholder="e.g., 60 months">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Payment *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.payment"
+                               placeholder="e.g., $20K/mo">
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">Frequency *</label>
+                        <select class="field-input" [(ngModel)]="customBankingOption.frequency">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Quarterly">Quarterly</option>
+                        </select>
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div class="form-field full-width">
+                        <label class="field-label">Delay *</label>
+                        <input type="text" class="field-input"
+                               [(ngModel)]="customBankingOption.delay"
+                               placeholder="e.g., Same day funding">
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="form-preview" *ngIf="isSingleFormValid()">
+                    <div class="preview-badge">Preview:</div>
+                    <div class="preview-details">
+                        <div class="preview-row">
+                            <span class="preview-label">{{customBankingOption.title}}</span>
+                            <span class="preview-value badge-preview">{{customBankingOption.badge}}</span>
+                        </div>
+                        <div class="preview-row">
+                            <span class="preview-label">Amount:</span>
+                            <span class="preview-value amount">{{customBankingOption.amount | currency:'USD':'symbol':'1.0-0'}}</span>
+                        </div>
+                        <div class="preview-row">
+                            <span class="preview-label">Payment:</span>
+                            <span class="preview-value">{{customBankingOption.payment}} ({{customBankingOption.frequency}})</span>
+                        </div>
+                        <div class="preview-row">
+                            <span class="preview-label">Term:</span>
+                            <span class="preview-value">{{customBankingOption.term}}</span>
+                        </div>
+                        <div class="preview-row">
+                            <span class="preview-label">Payback:</span>
+                            <span class="preview-value">{{customBankingOption.payback | currency:'USD':'symbol':'1.0-0'}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Info -->
+            <div class="categories-info">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-text">
+                    <strong>This banking option will be created for all {{fundingCategories.length}} funding categories:</strong>
+                    <ul class="categories-list">
+                        <li *ngFor="let category of fundingCategories">{{category.title}}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="form-btn secondary-btn"
+                    (click)="closeFundingOptionsModal()"
+                    [disabled]="isSavingFundingOptions">
+                Cancel
+            </button>
+            <button type="button" class="form-btn primary-btn"
+                    (click)="saveFundingOptions()"
+                    [disabled]="!isSingleFormValid() || isSavingFundingOptions">
+                <span *ngIf="!isSavingFundingOptions">Save Banking Option for All Categories</span>
+                <span *ngIf="isSavingFundingOptions" class="processing-text">
+                    <span class="spinner"></span>
+                    Saving...
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Info Modal -->
+<app-bank-info
+    [show]="showBankInfoModal"
+    [userId]="selectedBankInfoUser?.id || null"
+    (close)="closeBankInfoModal()"
+    (saved)="onBankInfoSaved($event)">
+</app-bank-info>

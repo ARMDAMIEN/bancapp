@@ -134,6 +134,15 @@
                 </button>
             </div>
         </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" [class.active]="isUploading">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Uploading documents...</div>
+                <div class="loading-subtext">Please wait while we securely upload your files</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

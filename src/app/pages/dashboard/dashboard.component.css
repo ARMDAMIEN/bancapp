@@ -5,6 +5,76 @@
     background-color: var(--bg-secondary);
 }
 
+/* Welcome Section */
+.welcome-section {
+    margin-bottom: 2rem;
+}
+
+.welcome-header {
+    background-color: var(--bg-primary);
+    border: 2px solid var(--border-medium);
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--primary-dark, #1b3a52) 0%, var(--primary-accent, #d4af37) 100%);
+}
+
+.welcome-header:hover {
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-dark);
+}
+
+.welcome-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-dark, #1b3a52) 0%, var(--primary-medium, #2a5578) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: white;
+    border: 3px solid var(--primary-light);
+    box-shadow: var(--shadow-soft);
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.welcome-info {
+    flex: 1;
+}
+
+.welcome-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.02em;
+}
+
+.welcome-company {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
 /* Header */
 .dashboard-header {
     background-color: var(--bg-primary);
@@ -785,7 +855,8 @@
 }
 
 /* Bank Form Section */
-.bank-form-section {
+.bank-form-section,
+.bank-info-section {
     margin: 1.5rem 0;
     padding: 1.5rem;
     background: var(--bg-secondary);
@@ -891,6 +962,70 @@
     background: var(--bg-primary);
     color: var(--text-primary);
     padding: 0.5rem;
+}
+
+/* Bank Info Display */
+.bank-info-display {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bank-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+}
+
+.bank-detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+}
+
+.bank-detail-item.half-width {
+    min-width: 0;
+}
+
+.bank-detail-item .detail-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bank-detail-item .detail-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.bank-info-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.bank-info-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.bank-info-empty .empty-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
 }
 
 /* Payment Modal */
@@ -1091,7 +1226,27 @@
         padding: 20px 16px;
         gap: 24px;
     }
-    
+
+    .welcome-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .welcome-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .welcome-company {
+        font-size: 1rem;
+    }
+
     .balance-card,
     .selection-card {
         padding: 24px;
@@ -1200,6 +1355,24 @@
 }
 
 @media screen and (max-width: 480px) {
+    .welcome-header {
+        padding: 1.25rem;
+    }
+
+    .welcome-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+
+    .welcome-title {
+        font-size: 1.25rem;
+    }
+
+    .welcome-company {
+        font-size: 0.9rem;
+    }
+
     .balance-card,
     .selection-card {
         padding: 20px;

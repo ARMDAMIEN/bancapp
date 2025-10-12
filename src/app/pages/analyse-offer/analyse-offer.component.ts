@@ -5,6 +5,8 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { FundingOption, FundingCategory, FUNDING_CATEGORIES } from '../../../interfaces/funding-categories';
+import { BankingOptionService, BankingOptionDTO } from '../../../services/banking-option.service';
+import { StepService, FUNDING_STEPS } from '../../../services/step.service';
 
 interface SelectedOption {
   categoryIndex: number;
@@ -47,9 +49,6 @@ interface CachedRevenueData {
 })
 export class AnalyseOfferComponent implements OnInit, OnDestroy {
 
-  // État de l'analyse
-  isAnalyzing: boolean = true;
-  analysisProgress: number = 0;
   currentStep: number = 1;
   
   // Sélections multiples -> Sélection unique
@@ -84,19 +83,23 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
   // Catégories de financement
   fundingCategories: FundingCategory[] = FUNDING_CATEGORIES;
 
+  // Banking option from admin
+  adminBankingOption: BankingOptionDTO | null = null;
+
   constructor(
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private bankingOptionService: BankingOptionService,
+    private stepService: StepService
   ) {}
 
   ngOnInit(): void {
     this.loadCachedRevenueData();
+    this.loadAdminBankingOption();
     this.determineRecommendedCategory();
-    this.startAnalysis();
   }
 
   ngOnDestroy(): void {
-    this.clearTimers();
   }
 
   // Charge les données de revenus depuis le cache
@@ -104,14 +107,14 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
     console.log('Looking for cached revenue data...');
     const cachedData = localStorage.getItem('user_average_monthly_revenue');
     console.log('Raw cached data:', cachedData);
-    
+
     if (cachedData) {
       try {
         this.cachedRevenueData = JSON.parse(cachedData);
         this.userAverageRevenue = this.cachedRevenueData?.averageMonthlyRevenue || 0;
         console.log('Parsed revenue data:', this.cachedRevenueData);
         console.log('User average revenue:', this.userAverageRevenue);
-        
+
         if (this.userAverageRevenue > 0) {
           this.showRevenueInfo = true;
           console.log('✅ Revenue info will be shown');
@@ -130,6 +133,71 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
       console.log('Trying alternative key "cached_revenues":', altCachedData);
       this.showRevenueInfo = false;
     }
+  }
+
+  // Load admin banking option and inject into recommended category
+  private loadAdminBankingOption(): void {
+    console.log('Loading admin banking option...');
+
+    this.bankingOptionService.getBankingOption().subscribe({
+      next: (response) => {
+        if (this.bankingOptionService.isBankingOption(response)) {
+          this.adminBankingOption = response;
+          console.log('Admin banking option loaded:', this.adminBankingOption);
+
+          // Inject the admin option into the recommended category at option index 1
+          this.injectAdminOptionIntoCategory();
+        } else {
+          console.log('No admin banking option available yet');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading admin banking option:', error);
+      }
+    });
+  }
+
+  // Inject admin banking option as option 2 in recommended category
+  private injectAdminOptionIntoCategory(): void {
+    if (!this.adminBankingOption) {
+      return;
+    }
+
+    // Deep clone the categories to avoid mutating the original
+    this.fundingCategories = JSON.parse(JSON.stringify(FUNDING_CATEGORIES));
+
+    // Get the recommended category
+    const recommendedCategory = this.fundingCategories[this.recommendedCategoryIndex];
+
+    // Create FundingOption from admin's BankingOptionDTO
+    const adminOption: FundingOption = {
+      title: this.adminBankingOption.title,
+      badge: this.adminBankingOption.badge,
+      type: this.adminBankingOption.type,
+      amount: this.adminBankingOption.amount,
+      structure: this.adminBankingOption.structure,
+      payback: this.adminBankingOption.payback,
+      term: `${this.adminBankingOption.term}`,
+      payment: `$${this.adminBankingOption.payment}/mo`,
+      frequency: this.adminBankingOption.frequency,
+      delay: `${this.adminBankingOption.delay}`,
+      features: []
+    };
+
+    // Replace option at index 1 (second option) with admin's option
+    if (recommendedCategory.options.length > 1) {
+      recommendedCategory.options[1] = adminOption;
+      console.log('✅ Admin option injected at position 2 in recommended category');
+    } else {
+      // If there's no second option, add it
+      recommendedCategory.options.push(adminOption);
+      console.log('✅ Admin option added as position 2 in recommended category');
+    }
+  }
+
+  // Helper to format numbers with commas
+  private formatNumber(num: number): string {
+    return new Intl.NumberFormat('en-US').format(num);
   }
 
   // Détermine la catégorie recommandée basée sur le revenu moyen mensuel
@@ -222,48 +290,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
     // Afficher toutes les catégories dans l'ordre normal si pas de données de revenus
     console.log('Returning all categories (no revenue data):', categoriesWithIndex);
     return categoriesWithIndex;
-  }
-
-  // Démarre l'analyse simulée
-  startAnalysis(): void {
-    this.isAnalyzing = true;
-    this.analysisProgress = 0;
-    this.currentStep = 1;
-
-    // Simulation du progrès
-    this.progressTimer = setInterval(() => {
-      this.analysisProgress += Math.random() * 15;
-      
-      if (this.analysisProgress >= 100) {
-        this.analysisProgress = 100;
-        this.completeAnalysis();
-      }
-    }, 500);
-
-    // Progression des étapes
-    this.stepTimer = setTimeout(() => this.currentStep = 2, 1000);
-    setTimeout(() => this.currentStep = 3, 2500);
-    setTimeout(() => this.currentStep = 4, 4000);
-    setTimeout(() => this.currentStep = 5, 5500);
-  }
-
-  // Termine l'analyse
-  completeAnalysis(): void {
-    this.clearTimers();
-    
-    setTimeout(() => {
-      this.isAnalyzing = false;
-    }, 1000);
-  }
-
-  // Nettoie les timers
-  private clearTimers(): void {
-    if (this.progressTimer) {
-      clearInterval(this.progressTimer);
-    }
-    if (this.stepTimer) {
-      clearTimeout(this.stepTimer);
-    }
   }
 
   // Sélectionne/désélectionne une option (sélection unique)
@@ -364,12 +390,6 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
   // Retour à la page précédente
   goBack(): void {
     this.router.navigate(['/funding']);
-  }
-
-  // Relancer l'analyse
-  restartAnalysis(): void {
-    this.clearSelections();
-    this.startAnalysis();
   }
 
   // Obtenir des informations de résumé pour une catégorie
@@ -502,12 +522,24 @@ export class AnalyseOfferComponent implements OnInit, OnDestroy {
         };
         
         localStorage.setItem('savedOfferSelections', JSON.stringify(localData));
-        
-        this.isProcessing = false;
-        this.showConfirmationModal = false;
-        
-        // Naviguer vers la prochaine étape
-        this.router.navigate(['/documentSupp']);
+
+        // Transition to DOCUMENTS_SUPP step
+        this.stepService.transitionTo(FUNDING_STEPS.DOCUMENTS_SUPP).subscribe({
+          next: () => {
+            console.log('Step transitioned to DOCUMENTS_SUPP');
+            this.isProcessing = false;
+            this.showConfirmationModal = false;
+            // Naviguer vers la prochaine étape (documents supplémentaires)
+            this.router.navigate(['/documentSupp']);
+          },
+          error: (stepError) => {
+            console.error('Failed to update step:', stepError);
+            this.isProcessing = false;
+            this.showConfirmationModal = false;
+            // Navigate anyway - offer was saved successfully
+            this.router.navigate(['/documentSupp']);
+          }
+        });
       },
       error: (error) => {
         console.error('Failed to save offer selection:', error);

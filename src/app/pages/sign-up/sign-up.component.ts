@@ -165,7 +165,59 @@ export class SignUpComponent implements OnInit {
   // Validation du SSN
   private isValidSSN(ssn: string): boolean {
     const ssnPattern = /^[0-9]{3}-[0-9]{2}-[0-9]{4}$/;
-    return ssnPattern.test(ssn);
+    if (!ssnPattern.test(ssn)) {
+      return false;
+    }
+
+    // Check for suspicious patterns
+    return !this.isSuspiciousSSN(ssn);
+  }
+
+  // Check for suspicious SSN patterns
+  private isSuspiciousSSN(ssn: string): boolean {
+    // Remove dashes for pattern checking
+    const cleanSSN = ssn.replace(/-/g, '');
+
+    // Pattern 1: All same digits (e.g., 111111111, 999999999)
+    const allSameDigit = /^(\d)\1{8}$/.test(cleanSSN);
+    if (allSameDigit) {
+      return true;
+    }
+
+    // Pattern 2: Sequential numbers (e.g., 123456789, 987654321)
+    const isSequentialAsc = cleanSSN === '123456789';
+    const isSequentialDesc = cleanSSN === '987654321';
+    if (isSequentialAsc || isSequentialDesc) {
+      return true;
+    }
+
+    // Pattern 3: Repeating patterns (e.g., 111222333, 123123123)
+    const repeatingPattern = /^(\d{3})\1{2}$/.test(cleanSSN);
+    if (repeatingPattern) {
+      return true;
+    }
+
+    // Pattern 4: Known invalid SSN ranges
+    const firstThree = parseInt(cleanSSN.substring(0, 3));
+    const middleTwo = parseInt(cleanSSN.substring(3, 5));
+    const lastFour = parseInt(cleanSSN.substring(5, 9));
+
+    // Invalid: 000, 666, or 900-999 in first three digits
+    if (firstThree === 0 || firstThree === 666 || firstThree >= 900) {
+      return true;
+    }
+
+    // Invalid: 00 in middle two digits
+    if (middleTwo === 0) {
+      return true;
+    }
+
+    // Invalid: 0000 in last four digits
+    if (lastFour === 0) {
+      return true;
+    }
+
+    return false;
   }
 
   // Validation de l'EIN
@@ -177,22 +229,76 @@ export class SignUpComponent implements OnInit {
   // Age validation (must be 18+)
   isValidAge(): boolean {
     if (!this.dateOfBirth) return false;
-    
+
     const today = new Date();
     const birthDate = new Date(this.dateOfBirth);
     const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
       return age - 1 >= 18;
     }
-    
+
     return age >= 18;
+  }
+
+  // Public method to check if SSN is suspicious (for UI feedback)
+  isSSNSuspicious(): boolean {
+    if (!this.ssn || this.ssn.length < 11) {
+      return false; // Don't show error until SSN is fully entered
+    }
+    return this.isSuspiciousSSN(this.ssn);
+  }
+
+  // Public method to check if SSN has correct format
+  hasValidSSNFormat(): boolean {
+    const ssnPattern = /^[0-9]{3}-[0-9]{2}-[0-9]{4}$/;
+    return ssnPattern.test(this.ssn);
+  }
+
+  // Get SSN validation error message
+  getSSNErrorMessage(): string {
+    const cleanSSN = this.ssn.replace(/-/g, '');
+
+    // Check specific patterns and return appropriate message
+    if (/^(\d)\1{8}$/.test(cleanSSN)) {
+      return "Invalid SSN: SSN cannot contain all the same digits (e.g., 999-99-9999).";
+    }
+
+    if (cleanSSN === '123456789' || cleanSSN === '987654321') {
+      return "Invalid SSN: SSN cannot be a sequential number.";
+    }
+
+    if (/^(\d{3})\1{2}$/.test(cleanSSN)) {
+      return "Invalid SSN: SSN cannot have repeating patterns.";
+    }
+
+    const firstThree = parseInt(cleanSSN.substring(0, 3));
+    if (firstThree === 0 || firstThree === 666 || firstThree >= 900) {
+      return "Invalid SSN: The first three digits are not valid.";
+    }
+
+    const middleTwo = parseInt(cleanSSN.substring(3, 5));
+    if (middleTwo === 0) {
+      return "Invalid SSN: The middle two digits cannot be 00.";
+    }
+
+    const lastFour = parseInt(cleanSSN.substring(5, 9));
+    if (lastFour === 0) {
+      return "Invalid SSN: The last four digits cannot be 0000.";
+    }
+
+    return "Please enter a valid SSN format (XXX-XX-XXXX).";
   }
 
   // Soumission finale du formulaire
   onFinalSubmit(): void {
     // Validation finale
+    if (!this.isValidSSN(this.ssn)) {
+      this.errorMessage = this.getSSNErrorMessage();
+      return;
+    }
+
     if (!this.isStep2Valid()) {
       this.errorMessage = "Please fill in all required fields correctly.";
       return;

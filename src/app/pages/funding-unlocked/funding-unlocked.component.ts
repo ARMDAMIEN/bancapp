@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { FundingOption, FundingCategory, FUNDING_CATEGORIES } from '../../../interfaces/funding-categories';
+import { StepService, FUNDING_STEPS } from '../../../services/step.service';
 
 interface UserSelectionResponse {
   selectedOffer?: string | null;
@@ -38,7 +39,8 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private stepService: StepService
   ) {
     this.fundingCategories = FUNDING_CATEGORIES;
   }
@@ -61,7 +63,7 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadingProgress = 0;
     
-    const totalDuration = 450;
+    const totalDuration = 45000;
     const updateInterval = 50;
     const incrementPerUpdate = (100 / (totalDuration / updateInterval));
     
@@ -145,11 +147,19 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
   }
 
   proceedToDashboard(): void {
-    // Marquer la première visite comme complétée
-    localStorage.setItem('hasSeenFundingUnlocked', 'true');
-    
-    // Rediriger vers le dashboard
-    this.router.navigate(['/dashboard']);
+    // Transition to DASHBOARD step
+    this.stepService.transitionTo(FUNDING_STEPS.DASHBOARD).subscribe({
+      next: () => {
+        console.log('Step transitioned to DASHBOARD');
+        // Rediriger vers le dashboard
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        console.error('Failed to update step:', error);
+        // Navigate anyway - user has completed all steps
+        this.router.navigate(['/dashboard']);
+      }
+    });
   }
 
   getFormattedAmount(): string {

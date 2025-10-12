@@ -1,0 +1,146 @@
+<!-- Button to Open Modal -->
+<button type="button" class="btn-open-modal" (click)="openModal()">
+  <span class="btn-icon">🏦</span>
+  <span class="btn-text">Manage Admin Banking Info</span>
+</button>
+
+<!-- Admin Banking Info Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <span class="icon">🏦</span>
+        Admin Banking Information
+      </h3>
+      <button type="button" class="modal-close" (click)="closeModal()" [disabled]="isSaving">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading admin banking information...</p>
+      </div>
+
+      <!-- Form -->
+      <form #adminBankForm="ngForm" class="bank-form" *ngIf="!isLoading" (ngSubmit)="onSubmit()">
+        <!-- Success Message -->
+        <div class="alert alert-success" *ngIf="successMessage">
+          <span class="alert-icon">✓</span>
+          <span class="alert-message">{{successMessage}}</span>
+        </div>
+
+        <!-- Error Message -->
+        <div class="alert alert-error" *ngIf="errorMessage">
+          <span class="alert-icon">⚠</span>
+          <span class="alert-message">{{errorMessage}}</span>
+        </div>
+
+        <!-- Account Holder Name -->
+        <div class="form-group">
+          <label for="accountHolderName" class="form-label">
+            Account Holder Name *
+          </label>
+          <input
+            type="text"
+            id="accountHolderName"
+            name="accountHolderName"
+            class="form-input"
+            [(ngModel)]="adminBankingInfo.accountHolderName"
+            required
+            placeholder="Enter full name as it appears on the account"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Routing Number and Account Number Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="routingNumber" class="form-label">
+              Routing Number *
+            </label>
+            <input
+              type="text"
+              id="routingNumber"
+              name="routingNumber"
+              class="form-input"
+              [(ngModel)]="adminBankingInfo.routingNumber"
+              required
+              maxlength="20"
+              pattern="[0-9]{3,20}"
+              placeholder="9 digits"
+              [disabled]="isSaving"
+            />
+            <span class="form-hint">Enter 9-digit routing number</span>
+          </div>
+
+          <div class="form-group">
+            <label for="accountNumber" class="form-label">
+              Account Number *
+            </label>
+            <input
+              type="text"
+              id="accountNumber"
+              name="accountNumber"
+              class="form-input"
+              [(ngModel)]="adminBankingInfo.accountNumber"
+              required
+              maxlength="17"
+              placeholder="Account number"
+              [disabled]="isSaving"
+            />
+            <span class="form-hint">Up to 17 digits</span>
+          </div>
+        </div>
+
+        <!-- Bank Name -->
+        <div class="form-group">
+          <label for="bankName" class="form-label">
+            Bank Name *
+          </label>
+          <input
+            type="text"
+            id="bankName"
+            name="bankName"
+            class="form-input"
+            [(ngModel)]="adminBankingInfo.bankName"
+            required
+            placeholder="Enter bank name"
+            [disabled]="isSaving"
+          />
+        </div>
+
+        <!-- Info Note -->
+        <div class="info-note">
+          <span class="info-icon">ℹ️</span>
+          <p class="info-text">
+            This is the admin banking information that will be used for platform transactions and fund transfers.
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeModal()"
+        [disabled]="isSaving"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="onSubmit()"
+        [disabled]="!isFormValid() || isSaving || isLoading"
+      >
+        <span *ngIf="!isSaving">Save Admin Banking Info</span>
+        <span *ngIf="isSaving" class="processing-text">
+          <span class="spinner-small"></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

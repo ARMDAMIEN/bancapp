@@ -7,15 +7,29 @@
   <nav class="navigation">
     <ul class="nav-items">
       <ng-container *ngFor="let item of navItems">
-        <img src="/assets/images/logo-blanc-sans-texte.png" class="logo">
+        <img src="/assets/images/logo-blanc-sans-texte.png" class="logo" (click)="goToDashboard()" style="cursor: pointer;" alt="CLEARGATE Logo">
       </ng-container>
     </ul>
   </nav>
   
   <div class="user-actions">
-    <button class="logout-btn" (click)="logout()">
-      <i class="logout-icon"></i>
-      <span>Logout</span>
-    </button>
+    <div class="user-menu-container">
+      <button class="user-menu-btn" (click)="toggleDropdown()">
+        <div class="user-avatar">{{ getUserInitials() }}</div>
+        <span class="dropdown-arrow" [class.open]="showDropdown">▼</span>
+      </button>
+
+      <div class="dropdown-menu" *ngIf="showDropdown">
+        <button class="dropdown-item" (click)="goToProfile()">
+          <i class="profile-icon"></i>
+          <span>Profile</span>
+        </button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item logout" (click)="logout()">
+          <i class="logout-icon"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>

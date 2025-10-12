@@ -1,0 +1,138 @@
+<div class="profile-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading your profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="errorMessage && !isLoading">
+    <div class="error-icon">⚠️</div>
+    <p class="error-message">{{ errorMessage }}</p>
+    <button class="retry-btn" (click)="loadUserProfile()">Retry</button>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="profile-content" *ngIf="userProfile && !isLoading">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-avatar-large">
+        {{ getUserInitials() }}
+      </div>
+      <div class="profile-header-info">
+        <h1 class="profile-name">{{ getFullName() }}</h1>
+        <p class="profile-email">{{ userProfile.email }}</p>
+        <span class="account-status" [ngClass]="getAccountStatusClass()">
+          {{ getAccountStatus() }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Profile Details Sections -->
+    <div class="profile-sections">
+      <!-- Personal Information -->
+      <div class="profile-section">
+        <h2 class="section-title">
+          <span class="section-icon">👤</span>
+          Personal Information
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">First Name</span>
+            <span class="info-value">{{ userProfile.firstName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Last Name</span>
+            <span class="info-value">{{ userProfile.lastName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ userProfile.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Phone Number</span>
+            <span class="info-value">{{ userProfile.phoneNumber || 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Information -->
+      <div class="profile-section" *ngIf="userProfile.companyName">
+        <h2 class="section-title">
+          <span class="section-icon">🏢</span>
+          Company Information
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Company Name</span>
+            <span class="info-value">{{ userProfile.companyName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Company Address</span>
+            <span class="info-value">{{ userProfile.companyAddress || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Company Created</span>
+            <span class="info-value">{{ formatDate(userProfile.companyCreationDate) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Selected Offer</span>
+            <span class="info-value">{{ userProfile.selectedOffer || 'None' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Information -->
+      <div class="profile-section">
+        <h2 class="section-title">
+          <span class="section-icon">📊</span>
+          Account Information
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Member Since</span>
+            <span class="info-value">{{ formatDate(userProfile.createdAt) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Last Updated</span>
+            <span class="info-value">{{ formatDate(userProfile.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Status -->
+      <div class="profile-section">
+        <h2 class="section-title">
+          <span class="section-icon">📄</span>
+          Documents Status
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">RIB Documents</span>
+            <span class="info-value status" [ngClass]="userProfile.hasAllRibDocuments ? 'complete' : 'incomplete'">
+              {{ userProfile.hasAllRibDocuments ? '✓ Complete' : '✗ Incomplete' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Identity Documents</span>
+            <span class="info-value status" [ngClass]="userProfile.hasIdentityDocuments ? 'complete' : 'incomplete'">
+              {{ userProfile.hasIdentityDocuments ? '✓ Complete' : '✗ Incomplete' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Contract Signed</span>
+            <span class="info-value status" [ngClass]="userProfile.hasSigned ? 'complete' : 'incomplete'">
+              {{ userProfile.hasSigned ? '✓ Signed' : '✗ Not Signed' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">All Documents</span>
+            <span class="info-value status" [ngClass]="userProfile.hasAllDocuments ? 'complete' : 'incomplete'">
+              {{ userProfile.hasAllDocuments ? '✓ Complete' : '✗ Incomplete' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

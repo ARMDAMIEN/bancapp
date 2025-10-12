@@ -21,6 +21,11 @@ import { AdminComponent } from './pages/admin/admin.component';
 import { DocumentsSuppComponent } from './pages/documents-supp/documents-supp.component';
 import { SignatureRequiredComponent } from './pages/signature-required/signature-required.component';
 import { FundingUnlockedComponent } from './pages/funding-unlocked/funding-unlocked.component';
+import { HumanValidationPendingComponent } from './pages/human-validation-pending/human-validation-pending.component';
+import { AiCalculatingComponent } from './pages/ai-calculating/ai-calculating.component';
+import { BankInfoComponent } from './components/bank-info/bank-info.component';
+import { AdminBankingInfoComponent } from './components/admin-banking-info/admin-banking-info.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +43,12 @@ import { FundingUnlockedComponent } from './pages/funding-unlocked/funding-unloc
     AdminComponent,
     DocumentsSuppComponent,
     SignatureRequiredComponent,
-    FundingUnlockedComponent
+    FundingUnlockedComponent,
+    HumanValidationPendingComponent,
+    AiCalculatingComponent,
+    BankInfoComponent,
+    AdminBankingInfoComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,

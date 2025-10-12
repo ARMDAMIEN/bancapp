@@ -10,6 +10,11 @@ export interface DocumentUploadResponse {
   userId: string;
 }
 
+export interface DocumentDownloadResponse {
+  downloadUrl: string;
+  documentId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -44,11 +49,11 @@ export class DocumentService {
     );
 }
 
- downloadDocument(userId: number, documentType: string): Observable<Blob> {
+ downloadDocument(userId: number, documentType: string): Observable<DocumentDownloadResponse> {
   // documentType sera juste "rib1", "rib2", ou "rib3"
-  return this.http.get(`${this.apiUrl}/documents/download/${documentType}`, {
-    params: { userId: userId.toString() },
-    responseType: 'blob'
+  // Backend now returns a presigned S3 URL instead of the file directly
+  return this.http.get<DocumentDownloadResponse>(`${this.apiUrl}/documents/download/${documentType}`, {
+    params: { userId: userId.toString() }
   }).pipe(
     catchError(this.handleError)
   );

@@ -2,15 +2,24 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { DocumentService } from '../../../services/document-service.service';
 import { AdminDashboardService, UserDTO } from '../../../services/admin-dashboard.service';
-
-// Ajoutez cette méthode dans votre admin.component.ts
-
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { FundingCategory, FUNDING_CATEGORIES } from '../../../interfaces/funding-categories';
+interface BankingOption {
+  id?: number;
+  userId: number;
+  title: string;
+  badge: string;
+  type: string;
+  amount: string;
+  structure: string;
+  payback: string;
+  term: string;
+  payment: string;
+  frequency: string;
+  delay: string;
+}
 
-// Dans votre classe AdminComponent, ajoutez cette propriété
-
-// Ajoutez aussi hasSigned dans votre interface User
 interface User {
   id: number;
   firstName: string;
@@ -33,7 +42,11 @@ interface User {
   lastBalanceUpdate?: string;
   status: 'active' | 'inactive' | 'suspended';
   lastActivity: Date;
-  hasSigned?: boolean; // Ajoutez cette propriété
+  hasSigned?: boolean;
+  bankingOption?: BankingOption | null;
+  currentStep?: string;
+  currentSubstep?: string;
+  selectedOffer?: string;
 }
 
 type DocumentType = 'rib1' | 'rib2' | 'rib3' | 'driverLicense' | 'voidedCheck';
@@ -65,24 +78,27 @@ export class AdminComponent implements OnInit, OnDestroy {
   usersPerPage: number = 10;
   totalPages: number = 1;
   
-  // Modal de gestion des fonds
-  showFundsModal: boolean = false;
-  selectedUser: User | null = null;
-  fundsAction: 'add' | 'remove' = 'add';
-  fundsAmount: number = 0;
-  fundsReason: string = '';
-  isProcessing: boolean = false;
-  
   // Modal de détails utilisateur
   showUserDetailsModal: boolean = false;
   selectedUserDetails: User | null = null;
 
+  // Bank Info Modal
+  showBankInfoModal: boolean = false;
+  selectedBankInfoUser: User | null = null;
+
   errorMessage : string = "";
-  
+
   // Timer pour rafraîchissement automatique
   private refreshTimer: any;
 
   apiUrl : string  = environment.apiUrl;
+
+  // Funding Options Modal
+  showFundingOptionsModal: boolean = false;
+  selectedFundingUser: User | null = null;
+  fundingCategories: FundingCategory[] = FUNDING_CATEGORIES;
+  customBankingOption: any = {};
+  isSavingFundingOptions: boolean = false;
 
 
 
@@ -101,6 +117,41 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.setupAutoRefresh();
   }
 
+  // Load banking options for all users
+  private loadBankingOptionsForUsers(): void {
+    this.users.forEach(user => {
+      this.loadBankingOptionForUser(user.id);
+    });
+  }
+
+  // Load banking option for a specific user
+  private loadBankingOptionForUser(userId: number): void {
+    this.http.get<any>(`${this.apiUrl}/banking-options/admin/user/${userId}`).subscribe({
+      next: (response) => {
+        // If response has a message property, it means no banking option exists
+        if (response.message) {
+          console.log(`No banking option for user ${userId}`);
+          const userIndex = this.users.findIndex(u => u.id === userId);
+          if (userIndex !== -1) {
+            this.users[userIndex].bankingOption = null;
+          }
+        } else {
+          // Banking option exists
+          console.log(`Banking option loaded for user ${userId}:`, response);
+          const userIndex = this.users.findIndex(u => u.id === userId);
+          if (userIndex !== -1) {
+            this.users[userIndex].bankingOption = response;
+          }
+        }
+        this.filterUsers();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error(`Error loading banking option for user ${userId}:`, error);
+      }
+    });
+  }
+
   ngOnDestroy(): void {
     this.cleanupTimers();
   }
@@ -116,26 +167,41 @@ export class AdminComponent implements OnInit, OnDestroy {
   private loadUsersData(): void {
     this.adminService.getAllUsers().subscribe({
       next: (response) => {
-        console.log(JSON.stringify(response))
-        this.users = response.users.map(user => ({
-          ...user,
-          status: 'active' as const, // Vous devrez ajouter ce champ dans votre backend
-          lastActivity: new Date(user.updatedAt)
-        }));
-        
+        console.log('[DEBUG] Users loaded from backend:', response);
+        this.users = response.users.map(user => {
+          const lastActivityDate = user.updatedAt ? new Date(user.updatedAt) : new Date();
+          return {
+            ...user,
+            status: 'active' as const,
+            lastActivity: isNaN(lastActivityDate.getTime()) ? new Date() : lastActivityDate
+          };
+        });
+
+        console.log('[DEBUG] Mapped users:', this.users.length);
+
         // Mettre à jour les statistiques avec les données réelles
         this.totalUsers = response.totalUsers;
         this.totalFunds = response.totalBalance;
         this.activeUsers = response.users.filter(u => u.accountBalance > 0).length;
         this.totalTransactions = response.users.length * 15; // Estimation
-        
+
         this.filterUsers();
         this.saveUsersData(); // Sauvegarder pour le cache local
+
+        console.log('[DEBUG] Filtered users:', this.filteredUsers.length);
+
+        // Load banking options for all users
+        this.loadBankingOptionsForUsers();
+
+        // Force change detection after data is loaded
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading users:', error);
         // Fallback vers les données locales en cas d'erreur
         this.loadLocalUsersData();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -144,60 +210,20 @@ export class AdminComponent implements OnInit, OnDestroy {
   private loadLocalUsersData(): void {
     const savedUsers = localStorage.getItem('adminUsersData');
     if (savedUsers) {
-      this.users = JSON.parse(savedUsers).map((user: any) => ({
-        ...user,
-        lastActivity: new Date(user.lastActivity || user.updatedAt || user.createdAt)
-      }));
-    } else {
-      this.users = this.generateSampleUsers();
-      this.saveUsersData();
-    }
+      this.users = JSON.parse(savedUsers).map((user: any) => {
+        const activityDate = new Date(user.lastActivity || user.updatedAt || user.createdAt);
+        return {
+          ...user,
+          lastActivity: isNaN(activityDate.getTime()) ? new Date() : activityDate
+        };
+      });
+    } 
     this.filterUsers();
+
+    // Force change detection
+    this.cdr.detectChanges();
   }
 
-  // Génère des utilisateurs d'exemple avec le nouveau modèle
-  private generateSampleUsers(): User[] {
-    const firstNames = ['John', 'Sarah', 'Michael', 'Emma', 'David', 'Lisa', 'Robert', 'Maria', 'James', 'Anna', 'William', 'Sophie', 'Thomas', 'Elena', 'Daniel'];
-    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson'];
-    const statuses: ('active' | 'inactive' | 'suspended')[] = ['active', 'active', 'active', 'active', 'inactive', 'suspended'];
-    
-    const users: User[] = [];
-    const userCount = Math.floor(Math.random() * 25) + 15; // 15-40 users
-    
-    for (let i = 0; i < userCount; i++) {
-      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-      const status = statuses[Math.floor(Math.random() * statuses.length)];
-      const createdDate = new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000);
-      const hasDocuments = Math.random() > 0.3; // 70% ont des documents
-      
-      users.push({
-        id: i + 1,
-        firstName,
-        lastName,
-        ssn: `${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 90 + 10)}-${Math.floor(Math.random() * 9000 + 1000)}`,
-        dateOfBirth: new Date(1970 + Math.floor(Math.random() * 35), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-        companyName: `${firstName}'s ${['Tech', 'Solutions', 'Consulting', 'Services', 'Group'][Math.floor(Math.random() * 5)]}`,
-        companyCreationDate: new Date(2010 + Math.floor(Math.random() * 14), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-        einNumber: `${Math.floor(Math.random() * 90 + 10)}-${Math.floor(Math.random() * 9000000 + 1000000)}`,
-        createdAt: createdDate.toISOString(),
-        updatedAt: new Date(createdDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-        accountBalance: Math.floor(Math.random() * 50000) + 500,
-        lastBalanceUpdate: new Date().toISOString(),
-        status,
-        lastActivity: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        
-        // Documents RIB (optionnel)
-        rib1Path: hasDocuments ? `uploads/ribs/${i + 1}/rib1_${Date.now()}.pdf` : undefined,
-        rib2Path: hasDocuments ? `uploads/ribs/${i + 1}/rib2_${Date.now()}.pdf` : undefined,
-        rib3Path: hasDocuments ? `uploads/ribs/${i + 1}/rib3_${Date.now()}.pdf` : undefined,
-        documentsUploadDate: hasDocuments ? new Date().toISOString() : undefined
-      });
-    }
-    
-    return users.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
-  }
 
   // Calcule les statistiques
   private calculateStats(): void {
@@ -229,10 +255,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Filtre les utilisateurs selon les critères
   filterUsers(): void {
     let filtered = [...this.users];
-    
+
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(user => 
+      filtered = filtered.filter(user =>
         user.firstName.toLowerCase().includes(term) ||
         user.lastName.toLowerCase().includes(term) ||
         user.email.toLowerCase().includes(term) ||
@@ -242,23 +268,22 @@ export class AdminComponent implements OnInit, OnDestroy {
         (user.einNumber && user.einNumber.includes(term))
       );
     }
-    
+
     if (this.filterStatus) {
       filtered = filtered.filter(user => user.status === this.filterStatus);
     }
-    
-    this.filteredUsers = filtered;
-    this.updatePagination();
+
+    this.updatePagination(filtered);
   }
 
   // Met à jour la pagination
-  private updatePagination(): void {
-    this.totalPages = Math.ceil(this.filteredUsers.length / this.usersPerPage);
+  private updatePagination(filtered: User[]): void {
+    this.totalPages = Math.ceil(filtered.length / this.usersPerPage);
     this.currentPage = Math.min(this.currentPage, this.totalPages || 1);
-    
+
     const startIndex = (this.currentPage - 1) * this.usersPerPage;
     const endIndex = startIndex + this.usersPerPage;
-    this.filteredUsers = this.filteredUsers.slice(startIndex, endIndex);
+    this.filteredUsers = filtered.slice(startIndex, endIndex);
   }
 
   // Change de page
@@ -276,110 +301,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     return 'low-balance';
   }
 
-  // Ouvre la modal de gestion des fonds
-  openFundsModal(user: User, action: 'add' | 'remove'): void {
-    this.selectedUser = user;
-    this.fundsAction = action;
-    this.fundsAmount = 0;
-    this.fundsReason = '';
-    this.showFundsModal = true;
+  // Opens bank info modal
+  openBankInfoModal(user: User): void {
+    this.selectedBankInfoUser = user;
+    this.showBankInfoModal = true;
   }
 
-  // Ferme la modal de gestion des fonds
-  closeFundsModal(): void {
-    if (!this.isProcessing) {
-      this.showFundsModal = false;
-      this.selectedUser = null;
-      this.fundsAmount = 0;
-      this.fundsReason = '';
-    }
+  // Closes bank info modal
+  closeBankInfoModal(): void {
+    this.showBankInfoModal = false;
+    this.selectedBankInfoUser = null;
   }
 
-  // Calcule le nouveau solde
-  getNewBalance(): number {
-    if (!this.selectedUser || !this.fundsAmount) return this.selectedUser?.accountBalance || 0;
-    
-    return this.fundsAction === 'add' 
-      ? this.selectedUser.accountBalance + this.fundsAmount
-      : this.selectedUser.accountBalance - this.fundsAmount;
-  }
-
-  // Détermine la classe CSS pour le nouveau solde
-  getNewBalanceClass(): string {
-    const newBalance = this.getNewBalance();
-    if (newBalance < 0) return 'negative-balance';
-    return this.getBalanceClass(newBalance);
-  }
-
-  // Valide la transaction
-  isValidTransaction(): boolean {
-    if (!this.selectedUser || !this.fundsAmount || this.fundsAmount <= 0) {
-      return false;
-    }
-    
-    if (this.fundsAction === 'remove') {
-      return this.fundsAmount <= this.selectedUser.accountBalance;
-    }
-    
-    return true;
-  }
-
-  // Traite la transaction de fonds via le backend
-  processFundsTransaction(): void {
-    if (!this.isValidTransaction() || !this.selectedUser) {
-      return;
-    }
-    
-    this.isProcessing = true;
-    
-    const operation = this.fundsAction === 'add' ? 'add' : 'subtract';
-    
-    this.adminService.updateUserBalance(this.selectedUser.id, this.fundsAmount, operation).subscribe({
-      next: (response) => {
-        if (this.selectedUser) {
-          // Mettre à jour les données locales avec la réponse du serveur
-          this.selectedUser.accountBalance = response.newBalance;
-          this.selectedUser.lastBalanceUpdate = response.updatedAt;
-          this.selectedUser.updatedAt = new Date().toISOString();
-          this.selectedUser.lastActivity = new Date();
-          
-          // Mettre à jour dans la liste
-          const userIndex = this.users.findIndex(u => u.id === this.selectedUser!.id);
-          if (userIndex !== -1) {
-            this.users[userIndex] = { ...this.selectedUser };
-          }
-          
-          // Log de la transaction
-          const transactionLog = {
-            userId: this.selectedUser.id,
-            action: this.fundsAction,
-            amount: this.fundsAmount,
-            oldBalance: response.oldBalance,
-            newBalance: response.newBalance,
-            reason: this.fundsReason || 'Admin adjustment',
-            timestamp: new Date(),
-            adminId: this.adminName
-          };
-          
-          console.log('Transaction processed:', transactionLog);
-          
-          // Sauvegarder et rafraîchir
-          this.saveUsersData();
-          this.calculateStats();
-          this.isProcessing = false;
-          this.closeFundsModal();
-          this.filterUsers();
-          
-          alert(`Successfully ${this.fundsAction === 'add' ? 'added' : 'removed'} €${this.fundsAmount.toFixed(2)} ${this.fundsAction === 'add' ? 'to' : 'from'} ${this.selectedUser.firstName} ${this.selectedUser.lastName}'s account.`);
-        }
-      },
-      error: (error) => {
-        console.error('Error processing transaction:', error);
-        this.errorMessage = error.message || 'Failed to process transaction. Please try again.';
-        this.isProcessing = false;
-        alert('Transaction failed: ' + this.errorMessage);
-      }
-    });
+  // Handles bank info saved event
+  onBankInfoSaved(bankInfo: any): void {
+    console.log('Bank info saved successfully:', bankInfo);
+    // Optionally show a success notification
+    // No need to reload entire user list for bank info changes
   }
 
   // Affiche les détails complets d'un utilisateur
@@ -410,7 +348,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Télécharge un document RIB
   downloadDocument(user: User, documentType: DocumentType): void {
   let documentPath: string | undefined = undefined;
-  
+
   // Récupérer le chemin du document selon le type
   switch (documentType) {
     case 'rib1':
@@ -432,24 +370,17 @@ export class AdminComponent implements OnInit, OnDestroy {
       alert('Invalid document type');
       return;
   }
-  
+
   if (documentPath) {
     this.documentService.downloadDocument(user.id, documentType).subscribe({
-      next: (blob) => {
-        // Extraire le nom du fichier du chemin ou utiliser un nom par défaut
-        const filename = documentPath!.split('/').pop() || `${documentType}_${user.firstName}_${user.lastName}.pdf`;
-        
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(url);
+      next: (response) => {
+        // Backend now returns a presigned S3 URL - open it in a new tab to download
+        window.open(response.downloadUrl, '_blank');
       },
       error: (error) => {
         console.error('Download failed:', error);
         let errorMessage = 'Failed to download document';
-        
+
         if (error.message) {
           if (error.message.includes('not found')) {
             errorMessage = 'Document not found or has been removed';
@@ -457,19 +388,19 @@ export class AdminComponent implements OnInit, OnDestroy {
             errorMessage = `Download failed: ${error.message}`;
           }
         }
-        
+
         alert(errorMessage);
       }
     });
   } else {
     const documentNames = {
       rib1: 'RIB Month 1',
-      rib2: 'RIB Month 2', 
+      rib2: 'RIB Month 2',
       rib3: 'RIB Month 3',
       driverLicense: 'Driver License',
       voidedCheck: 'Voided Check'
     };
-    
+
     alert(`No ${documentNames[documentType]} document available for this user`);
   }
 }
@@ -513,6 +444,36 @@ hasAnyDocuments(user: User): boolean {
   // Formate le SSN pour l'affichage
   formatSSN(ssn: string): string {
     return ssn.replace(/(\d{3})(\d{2})(\d{4})/, '***-**-$3');
+  }
+
+  // Vérifie et retourne une date valide
+  getValidDate(date: any): Date {
+    if (!date) return new Date();
+    const d = date instanceof Date ? date : new Date(date);
+    return isNaN(d.getTime()) ? new Date() : d;
+  }
+
+  // Convertit une date backend en format valide pour Angular date pipe
+  formatBackendDate(dateValue: any): Date | null {
+    if (!dateValue) return null;
+
+    // Si c'est déjà une Date valide
+    if (dateValue instanceof Date) {
+      return isNaN(dateValue.getTime()) ? null : dateValue;
+    }
+
+    // Si c'est un string au format "2025,9,27,14,17,42"
+    if (typeof dateValue === 'string' && dateValue.includes(',')) {
+      const parts = dateValue.split(',').map(p => parseInt(p.trim()));
+      if (parts.length >= 6) {
+        // new Date(year, monthIndex, day, hours, minutes, seconds)
+        return new Date(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+      }
+    }
+
+    // Sinon, essayer de parser comme date standard
+    const parsed = new Date(dateValue);
+    return isNaN(parsed.getTime()) ? null : parsed;
   }
 
   // Déconnexion administrateur
@@ -610,13 +571,6 @@ hasAnyDocuments(user: User): boolean {
     return this.totalUsers > 0 ? this.totalFunds / this.totalUsers : 0;
   }
 
-  // Obtient le montant maximum pour l'input
-  getMaxAmount(): number | null {
-    if (this.fundsAction === 'remove' && this.selectedUser) {
-      return this.selectedUser.accountBalance;
-    }
-    return null;
-  }
 
   // Getter qui se recalcule automatiquement
   get selectedUserHasDocuments(): boolean {
@@ -753,5 +707,231 @@ setUserSignatureAsAdmin(user: User): void {
       alert(errorMessage);
     }
   });
+}
+
+// Funding Options Modal methods
+openFundingOptionsModal(user: User): void {
+  this.selectedFundingUser = user;
+
+  // Check if user has existing banking option and pre-fill form
+  if (user.bankingOption) {
+    console.log('Pre-filling form with existing banking option:', user.bankingOption);
+    this.customBankingOption = {
+      title: user.bankingOption.title || '',
+      badge: user.bankingOption.badge || '',
+      type: user.bankingOption.type || 'guarantee',
+      amount: parseFloat(user.bankingOption.amount) || 0,
+      structure: user.bankingOption.structure || '',
+      payback: parseFloat(user.bankingOption.payback) || 0,
+      term: user.bankingOption.term || '',
+      payment: user.bankingOption.payment || '',
+      frequency: user.bankingOption.frequency || 'Monthly',
+      delay: user.bankingOption.delay || ''
+    };
+  } else {
+    // Initialize custom banking option with default values
+    this.customBankingOption = {
+      title: '',
+      badge: '',
+      type: 'guarantee',
+      amount: 0,
+      structure: '',
+      payback: 0,
+      term: '',
+      payment: '',
+      frequency: 'Monthly',
+      delay: ''
+    };
+  }
+
+  this.showFundingOptionsModal = true;
+}
+
+closeFundingOptionsModal(): void {
+  if (!this.isSavingFundingOptions) {
+    this.showFundingOptionsModal = false;
+    this.selectedFundingUser = null;
+    this.customBankingOption = {};
+  }
+}
+
+isSingleFormValid(): boolean {
+  return !!(
+    this.customBankingOption &&
+    this.customBankingOption.title &&
+    this.customBankingOption.badge &&
+    this.customBankingOption.type &&
+    this.customBankingOption.amount > 0 &&
+    this.customBankingOption.structure &&
+    this.customBankingOption.payback >= 0 &&
+    this.customBankingOption.term &&
+    this.customBankingOption.payment &&
+    this.customBankingOption.frequency &&
+    this.customBankingOption.delay
+  );
+}
+
+saveFundingOptions(): void {
+  if (!this.selectedFundingUser || !this.isSingleFormValid()) {
+    console.warn('[DEBUG] No user selected or form not valid');
+    return;
+  }
+
+  console.log('[DEBUG] Starting saveFundingOptions for user:', this.selectedFundingUser);
+  console.log('[DEBUG] Custom banking option:', this.customBankingOption);
+
+  this.isSavingFundingOptions = true;
+
+  // Build single BankingOptionDTO object
+  const dto = {
+    userId: this.selectedFundingUser!.id,
+    title: this.customBankingOption.title,
+    badge: this.customBankingOption.badge,
+    type: this.customBankingOption.type,
+    amount: this.customBankingOption.amount.toString(),
+    structure: this.customBankingOption.structure,
+    payback: this.customBankingOption.payback.toString(),
+    term: this.customBankingOption.term,
+    payment: this.customBankingOption.payment,
+    frequency: this.customBankingOption.frequency,
+    delay: this.customBankingOption.delay
+  };
+
+  console.log('[DEBUG] Created BankingOptionDTO:', dto);
+
+  const url = `${this.apiUrl}/banking-options/saveBankingOption`;
+  console.log('[DEBUG] Sending request to:', url);
+  console.log('[DEBUG] Request payload:', dto);
+
+  this.http.post<any>(url, dto).subscribe({
+    next: (response) => {
+      console.log('[DEBUG] Response:', response);
+      this.isSavingFundingOptions = false;
+
+      // Reload the banking option for this user to update the UI
+      this.loadBankingOptionForUser(this.selectedFundingUser!.id);
+
+      alert(`Funding option saved successfully for ${this.selectedFundingUser!.firstName} ${this.selectedFundingUser!.lastName}!`);
+
+      this.closeFundingOptionsModal();
+    },
+    error: (error) => {
+      console.error('[DEBUG] Error saving banking option:', error);
+      console.error('[DEBUG] Error details:', {
+        status: error.status,
+        statusText: error.statusText,
+        error: error.error,
+        message: error.message
+      });
+
+      let errorMessage = 'Failed to save funding option.';
+      if (error.error?.message) {
+        errorMessage += ` ${error.error.message}`;
+      }
+
+      this.isSavingFundingOptions = false;
+      alert(errorMessage);
+    }
+  });
+}
+
+/**
+ * Update user substep from PAYMENT_PENDING to WITHDRAWAL_PENDING
+ * This should be called after admin confirms payment has been received
+ */
+updateUserSubstep(user: User, newSubstep: string): void {
+  const confirmMessage = `Are you sure you want to update ${user.firstName} ${user.lastName}'s status to ${newSubstep.replace('_', ' ').toUpperCase()}?`;
+
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  const url = `${this.apiUrl}/api/steps/substep/user/${user.id}`;
+  const payload = { substep: newSubstep };
+
+  console.log('[DEBUG] Updating substep for user:', user.id);
+  console.log('[DEBUG] New substep:', newSubstep);
+
+  this.http.post<any>(url, payload).subscribe({
+    next: (response) => {
+      console.log('[DEBUG] Substep updated successfully:', response);
+      alert(`User substep updated to ${newSubstep.replace('_', ' ').toUpperCase()} successfully!`);
+
+      // Optionally refresh user data
+      this.loadUsersData();
+    },
+    error: (error) => {
+      console.error('[DEBUG] Error updating substep:', error);
+
+      let errorMessage = 'Failed to update user substep.';
+      if (error.error?.message) {
+        errorMessage += ` ${error.error.message}`;
+      }
+
+      alert(errorMessage);
+    }
+  });
+}
+
+/**
+ * Confirm payment received and transition user to WITHDRAWAL_PENDING
+ */
+confirmPaymentReceived(user: User): void {
+  this.updateUserSubstep(user, 'withdrawal_pending');
+}
+
+/**
+ * Mark withdrawal as complete and return user to WITHDRAWAL_AVAILABLE
+ */
+completeWithdrawal(user: User): void {
+  this.updateUserSubstep(user, 'withdrawal_available');
+}
+
+/**
+ * Suspend user account
+ */
+suspendUser(user: User): void {
+  this.updateUserSubstep(user, 'suspended');
+}
+
+/**
+ * Unsuspend user account and return to WITHDRAWAL_AVAILABLE
+ */
+unsuspendUser(user: User): void {
+  this.updateUserSubstep(user, 'withdrawal_available');
+}
+
+/**
+ * Format substep for display
+ */
+formatSubstep(substep: string): string {
+  if (!substep) return '-';
+
+  // Convert snake_case to Title Case
+  return substep
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Format selected offer for display
+ * Converts "1.2" to "Recommended #2" or "2.3" to "Popular #3"
+ */
+formatOffer(offer: string): string {
+  if (!offer) return 'No offer';
+
+  const parts = offer.split('.');
+  if (parts.length !== 2) return offer;
+
+  const categoryIndex = parseInt(parts[0], 10) - 1;
+  const optionIndex = parseInt(parts[1], 10);
+
+  if (categoryIndex >= 0 && categoryIndex < this.fundingCategories.length) {
+    const category = this.fundingCategories[categoryIndex];
+    return `${category.title} #${optionIndex}`;
+  }
+
+  return offer;
 }
 }

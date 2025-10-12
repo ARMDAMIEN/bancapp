@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { DocumentService } from '../../../services/document-service.service'; // Adaptez le chemin
+import { DocumentService } from '../../../services/document-service.service';
+import { StepService, FUNDING_STEPS } from '../../../services/step.service';
 
 @Component({
   selector: 'app-funding',
@@ -40,7 +41,8 @@ export class FundingComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    private stepService: StepService
   ) {
     // Initialiser les revenus à 0
     this.revenues.set(1, 0);
@@ -423,43 +425,57 @@ export class FundingComponent implements OnInit {
 
   // Envoi des données - Version avec upload PDF vers backend
   private sendFundingData(fundingData: any): void {
-    
+
     // 1. D'abord uploader les PDFs vers le backend
     if (this.files.size > 0) {
       this.documentService.uploadRibFiles(this.files,).subscribe({
         next: (uploadResponse) => {
           console.log('PDFs uploaded successfully:', uploadResponse);
-          
+
           // 2. Ensuite sauvegarder les données complètes avec les IDs des documents
           const completeData = {
             ...fundingData,
             documentIds: uploadResponse.documentIds,
             documentsUploaded: true,
             uploadDate: new Date().toISOString()
-          };
-          
+          }; 
+
           // Sauvegarder les métadonnées localement pour l'application
-          localStorage.setItem('fundingApplication', JSON.stringify(completeData));
-          
+          //localStorage.setItem('fundingApplication', JSON.stringify(completeData));
+
           // Sauvegarder une fois de plus la moyenne des revenus après la soumission réussie
           this.saveAverageRevenueToCache();
-          
-          // Optionnel : Envoyer aussi les métadonnées au backend
-          // this.sendMetadataToBackend(completeData);
-          
-          this.isSubmitting = false;
-          this.documentsUploaded = true;
-          this.documentIds = uploadResponse.documentIds;
-          
-          // Rediriger vers la page d'analyse
-          this.router.navigate(['/analyseOffer']);
+
+          // 3. Transition to AI_CALCULATING step after successful upload
+          this.stepService.transitionTo(FUNDING_STEPS.AI_CALCULATING).subscribe({
+            next: () => {
+              console.log('Step transitioned to AI_CALCULATING');
+
+              this.isSubmitting = false;
+              this.documentsUploaded = true;
+              //this.documentIds = uploadResponse.documentIds;
+
+              // Rediriger vers la page d'analyse
+              this.router.navigate(['/ai-calculating']);
+            },
+            error: (stepError) => {
+              console.error('Failed to update step:', stepError);
+              // Continue anyway - the documents were uploaded successfully
+              this.isSubmitting = false;
+              this.documentsUploaded = true;
+              //this.documentIds = uploadResponse.documentIds;
+
+              // Rediriger vers la page d'analyse même si la mise à jour du step échoue
+              this.router.navigate(['/ai-calculating']);
+            }
+          });
         },
         error: (error) => {
           console.error('PDF upload failed:', error);
           this.errorMessage = error.message || 'Failed to upload documents. Please try again.';
           this.isSubmitting = false;
         }
-      });
+      }); 
     } else {
       // Pas de fichiers à uploader (cas d'erreur normalement)
       this.errorMessage = 'No documents to upload. Please select your RIB files.';
