@@ -36,7 +36,7 @@
                         <h2 class="category-title">{{categoryItem.category.title}}</h2>
                         <div class="category-badges">
                             <span class="recommended-badge" *ngIf="categoryItem.isRecommended">
-                                ⭐ Recommended for You
+                                Recommended for You
                             </span>
                         </div>
                     </div>
@@ -46,7 +46,6 @@
                     <!-- Revenue Match Info for Recommended Category -->
                     <div class="revenue-match-info" *ngIf="categoryItem.isRecommended && showRevenueInfo">
                         <div class="match-indicator">
-                            <span class="match-icon">💡</span>
                             <span class="match-text">
                                 This category matches your monthly revenue of {{getFormattedMonthlyRevenue()}}
                             </span>
@@ -89,20 +88,20 @@
                         </div>
 
                         <div class="funding-delay">
-                            <span class="delay-icon">⏱️</span>
+                            <span class="delay-icon">funding delay : </span>
                             <span class="delay-text">{{option.delay}}</span>
                         </div>
 
                         <div class="option-features">
                             <div class="feature-item" *ngFor="let feature of option.features">
-                                <div class="feature-icon">✓</div>
+                                <div class="feature-icon">[OK]</div>
                                 <span class="feature-text">{{feature}}</span>
                             </div>
                         </div>
-                        
+
                         <div class="option-select" *ngIf="isOptionSelected(categoryItem.index, optIndex)">
                             <div class="select-indicator">
-                                <span class="select-icon">✓</span>
+                                <span class="select-icon">[X]</span>
                                 Selected
                             </div>
                         </div>
@@ -166,7 +165,6 @@
         <div class="modal-body">
             <!-- Revenue Context in Modal -->
             <div class="modal-revenue-context" *ngIf="showRevenueInfo">
-                <div class="context-icon">📊</div>
                 <div class="context-info">
                     <span class="context-label">Based on your monthly revenue:</span>
                     <span class="context-value">{{getFormattedMonthlyRevenue()}}</span>
@@ -175,7 +173,6 @@
 
             <!-- Selection Overview -->
             <div class="confirmation-overview">
-                <div class="overview-icon">💼</div>
                 <div class="overview-text">
                     <h4 class="overview-title">You have selected {{getSelectedCount()}} financing option(s)</h4>
                     <p class="overview-subtitle">Please review your selections before proceeding</p>
@@ -190,40 +187,37 @@
                         <div class="option-summary">
                             <div class="option-header-confirm">
                                 <h5 class="option-name">{{selection.option.title}}</h5>
-                                <span class="option-category-badge" 
+                                <span class="option-category-badge"
                                       [class.recommended-category-badge]="isCategoryRecommended(selection.categoryIndex)">
                                     {{selection.category.title}}
-                                    <span *ngIf="isCategoryRecommended(selection.categoryIndex)"> ⭐</span>
+                                    <span *ngIf="isCategoryRecommended(selection.categoryIndex)"> [*]</span>
                                 </span>
                             </div>
                             
                             <div class="option-key-details">
                                 <div class="key-detail">
-                                    <span class="detail-icon">💰</span>
+                                    <span class="detail-icon">[$]</span>
                                     <div class="detail-info">
                                         <span class="detail-label">Funding Amount</span>
                                         <span class="detail-value">{{selection.option.amount | currency:'USD':'symbol':'1.0-0'}}</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="key-detail">
-                                    <span class="detail-icon">💸</span>
                                     <div class="detail-info">
                                         <span class="detail-label">Payment</span>
                                         <span class="detail-value">{{selection.option.payment}}</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="key-detail">
-                                    <span class="detail-icon">📅</span>
                                     <div class="detail-info">
                                         <span class="detail-label">Term</span>
                                         <span class="detail-value">{{selection.option.term}}</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="key-detail">
-                                    <span class="detail-icon">🔄</span>
                                     <div class="detail-info">
                                         <span class="detail-label">Total Payback</span>
                                         <span class="detail-value payback">{{selection.option.payback | currency:'USD':'symbol':'1.0-0'}}</span>
@@ -231,7 +225,7 @@
                                 </div>
 
                                 <div class="key-detail">
-                                    <span class="detail-icon">⏱️</span>
+                                    <span class="detail-icon">funding delay : </span>
                                     <div class="detail-info">
                                         <span class="detail-label">Funding Delay</span>
                                         <span class="detail-value">{{selection.option.delay}}</span>
@@ -245,7 +239,7 @@
 
             <!-- Important Notice -->
             <div class="confirmation-notice">
-                <div class="notice-icon">⚠️</div>
+                <div class="notice-icon">[!]</div>
                 <div class="notice-content">
                     <h5 class="notice-title">Important Information</h5>
                     <ul class="notice-list">
@@ -286,17 +280,17 @@
         </div>
         
         <div class="modal-actions">
-            <button type="button" 
-                    class="form-btn secondary-btn" 
+            <button type="button"
+                    class="form-btn secondary-btn"
                     (click)="closeConfirmationModal()">
-                <span class="btn-icon">🔙</span>
+                <span class="btn-icon"></span>
                 Review Again
             </button>
-            <button type="button" 
-                    class="form-btn primary-btn confirm-btn" 
+            <button type="button"
+                    class="form-btn primary-btn confirm-btn"
                     (click)="confirmSelections()"
                     [disabled]="isProcessing">
-                <span *ngIf="!isProcessing" class="btn-icon">✅</span>
+                <span *ngIf="!isProcessing" class="btn-icon"></span>
                 <span *ngIf="isProcessing" class="spinner"></span>
                 <span>{{isProcessing ? 'Processing...' : 'Confirm & Proceed'}}</span>
             </button>

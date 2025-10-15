@@ -7,7 +7,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Lato, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -51,7 +51,7 @@ body {
     width: 100%;
     height: 6px;
     background-color: var(--border-light);
-    border-radius: 3px;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 16px;
     border: 1px solid var(--border-medium);
@@ -60,9 +60,9 @@ body {
 .progress-fill {
     height: 100%;
     background-color: var(--primary-dark);
-    border-radius: 3px;
+    border-radius: 0;
     width: 30%;
-    transition: width 0.5s ease;
+    transition: none;
 }
 
 .progress-steps {
@@ -82,7 +82,7 @@ body {
 .step-indicator {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: 0;
     background-color: var(--bg-secondary);
     color: var(--text-muted);
     display: flex;
@@ -90,7 +90,7 @@ body {
     justify-content: center;
     font-size: 14px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: none;
     border: 2px solid var(--border-medium);
 }
 
@@ -123,9 +123,9 @@ body {
 .form-section {
     background-color: var(--bg-card);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 32px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
     margin-bottom: 32px;
 }
 
@@ -154,10 +154,10 @@ body {
 .upload-item {
     background-color: var(--bg-secondary);
     border: 2px dashed var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: none;
     cursor: pointer;
     position: relative;
     z-index: 2;
@@ -166,7 +166,6 @@ body {
 .upload-item:hover {
     border-color: var(--primary-dark);
     background-color: var(--bg-primary);
-    box-shadow: var(--shadow-soft);
 }
 
 .upload-item.has-file {
@@ -186,7 +185,7 @@ body {
     height: 48px;
     margin: 0 auto 16px;
     background-color: var(--primary-dark);
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -256,11 +255,11 @@ body {
     color: white;
     border: 2px solid var(--primary-dark);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: none;
 }
 
 .upload-button:hover {
@@ -274,7 +273,7 @@ body {
     margin-top: 16px;
     padding: 12px;
     background-color: var(--bg-primary);
-    border-radius: 6px;
+    border-radius: 0;
     border: 1px solid var(--border-light);
     width: 100%;
     box-sizing: border-box;
@@ -339,7 +338,7 @@ body {
     border: none;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
@@ -347,20 +346,19 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: none;
     flex-shrink: 0;
 }
 
 .remove-file:hover {
     background-color: var(--primary-dark);
-    transform: scale(1.1);
 }
 
 /* Error Messages */
 .error-message {
     background-color: var(--bg-secondary);
     border: 2px solid var(--error-red);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 12px;
     margin-top: 12px;
     font-size: 12px;
@@ -382,11 +380,11 @@ body {
 
 .btn {
     padding: 12px 24px;
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: none;
     border: none;
     min-width: 120px;
     position: relative;
@@ -410,14 +408,12 @@ body {
     background-color: var(--primary-dark);
     color: white;
     border: 2px solid var(--primary-dark);
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
 }
 
 .btn-primary:hover:not(:disabled) {
     background-color: var(--primary-medium);
     border-color: var(--primary-medium);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
 }
 
 .btn-primary:disabled {
@@ -440,7 +436,7 @@ body {
 .security-notice {
     background-color: var(--bg-secondary);
     border: 2px solid var(--warning-amber);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 16px;
     margin-bottom: 24px;
     display: flex;
@@ -496,23 +492,12 @@ body {
 .loading-content {
     background-color: var(--bg-card);
     border: 2px solid var(--border-medium);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 40px;
     text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     max-width: 400px;
-    animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    animation: none;
 }
 
 .loading-spinner {
@@ -521,7 +506,7 @@ body {
     margin: 0 auto 24px;
     border: 4px solid var(--border-light);
     border-top: 4px solid var(--primary-dark);
-    border-radius: 50%;
+    border-radius: 0;
     animation: spin 1s linear infinite;
 }
 

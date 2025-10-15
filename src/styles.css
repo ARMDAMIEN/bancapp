@@ -1,8 +1,5 @@
     /* You can add global styles to this file, and also import other style files */
-    @font-face {
-        font-family: Roboto-Regular;
-        src: url('/assets/fonts/Roboto/Roboto-Regular.ttf');
-    }
+    /* Lato font is loaded from Google Fonts via index.html */
 
     app-root, app-sign-in {
     display: block;
@@ -10,48 +7,56 @@
     height: 100%;
     }
 
-    /* Palette de couleurs - Design bancaire traditionnel (tons clairs) */
+    /* Palette de couleurs - Design bancaire moderne */
 :root {
-    /* Couleurs principales - Inspiration banque classique */
-    --primary-dark: #1B3A52;           /* Bleu marine profond (pour headers/accents) */
-    --primary-medium: #2C5F7C;         /* Bleu ardoise */
-    --primary-light: #E8EEF2;          /* Bleu très pâle */
-    --primary-accent: #8B7355;         /* Brun doré subtil */
-    
-    /* Couleurs secondaires - Dominance blanche */
-    --secondary-charcoal: #3A3A3E;     /* Gris foncé (texte) */
+    /* Couleurs principales - Bleus */
+    --primary-blue: #004C97;           /* Bleu principal (liens, boutons, logo) */
+    --primary-dark: #0B1F3A;           /* Bleu foncé (titres, footer) */
+    --primary-medium: #004C97;         /* Bleu principal pour éléments moyens */
+    --primary-light: #E8EEF2;          /* Bleu très pâle pour backgrounds */
+    --primary-accent: #004C97;         /* Bleu principal pour accents */
+
+    /* Couleurs de texte */
+    --text-primary: #1E1F26;           /* Texte principal body */
+    --text-secondary: #5A6473;         /* Texte secondaire/descriptions */
+    --text-muted: #6B7280;             /* Gris moyen (icônes) */
+    --text-accent: var(--primary-blue);/* Bleu pour accents */
+    --text-gold: #004C97;              /* Bleu pour éléments premium */
+
+    /* Fonds */
+    --bg-primary: #FFFFFF;             /* Blanc (fond principal) */
+    --bg-secondary: #F8F9FA;           /* Gris très clair (cartes) */
+    --bg-card: #FFFFFF;                /* Cartes blanches */
+    --bg-header: var(--primary-dark);  /* Header bleu foncé */
+    --bg-footer: #0B1F3A;              /* Bleu foncé (footer) */
+
+    /* Transparences */
+    --bg-overlay: rgba(0, 0, 0, 0.7);  /* Overlay hero */
+    --text-footer: rgba(255, 255, 255, 0.7); /* Texte footer */
+    --btn-social: rgba(255, 255, 255, 0.1);  /* Boutons sociaux */
+
+    /* Couleurs fonctionnelles */
+    --success-green: #10B981;          /* Vert succès */
+    --error-red: #EF4444;              /* Rouge erreur */
+    --warning-amber: #F59E0B;          /* Orange warning */
+    --info-blue: #3B82F6;              /* Bleu info */
+
+    /* Couleurs secondaires */
     --secondary-light: #FFFFFF;        /* Blanc pur */
-    --secondary-medium: #E5E5E5;       /* Gris clair pour bordures */
-    --secondary-cream: #FAFAF8;        /* Blanc cassé léger */
-    
-    /* Couleurs fonctionnelles - Plus sobres */
-    --success-green: #1B3A52;          /* Vert forêt discret */
-    --error-red: #B85450;              /* Rouge brique */
-    --warning-amber: #C19A6B;          /* Ocre doré */
-    --info-blue: #5B8FA3;              /* Bleu gris */
-    
-    /* Variables d'interface - Fond blanc dominant */
-    --bg-primary: var(--secondary-light);        /* Blanc comme fond principal */
-    --bg-secondary: var(--secondary-cream);      /* Blanc cassé pour alternance */
-    --bg-card: var(--secondary-light);           /* Cartes blanches */
-    --bg-overlay: rgba(255, 255, 255, 0.98);     /* Overlay blanc */
-    --bg-header: var(--primary-dark);            /* Header bleu marine */
-    
-    --text-primary: var(--secondary-charcoal);   /* Texte foncé sur fond clair */
-    --text-secondary: rgba(58, 58, 62, 0.75);
-    --text-muted: rgba(58, 58, 62, 0.50);
-    --text-accent: var(--primary-dark);          /* Bleu marine pour accents */
-    --text-gold: var(--primary-accent);          /* Doré pour éléments premium */
-    
+    --secondary-medium: #E5E7EB;       /* Gris clair pour bordures */
+    --secondary-charcoal: #1E1F26;     /* Gris foncé (texte) */
+    --secondary-cream: #F8F9FA;        /* Gris très clair */
+
+    /* Bordures */
     --border-light: rgba(0, 0, 0, 0.08);
     --border-medium: rgba(0, 0, 0, 0.15);
-    --border-accent: rgba(27, 58, 82, 0.25);
-    
-    /* Effets et ombres - Très subtils sur fond blanc */
+    --border-accent: rgba(0, 76, 151, 0.25);
+
+    /* Effets et ombres */
     --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
     --shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.10);
     --shadow-strong: 0 4px 16px rgba(0, 0, 0, 0.12);
-    --glow-accent: 0 0 0 1px rgba(27, 58, 82, 0.1);
+    --glow-accent: 0 0 0 1px rgba(0, 76, 151, 0.1);
 }
 
    /* Reset global pour éliminer les bordures blanches */
@@ -300,11 +305,11 @@ html, body {
 
 
     .rbto-rg {
-        font-family: Roboto-Regular;
+        font-family: Lato-Regular;
     }
 
     .rbto-b {
-        font-family: Roboto-Bold;
+        font-family: Lato-Bold;
         font-weight: bold;
     }
 
@@ -10166,6 +10171,6 @@ html, body {
 
     body {
         margin: 0;
-        font-family: Roboto, "Helvetica Neue", sans-serif;
+        font-family: Lato, "Helvetica Neue", sans-serif;
     }
 

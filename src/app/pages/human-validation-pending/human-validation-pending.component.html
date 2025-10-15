@@ -27,7 +27,7 @@
                     <span class="status-text">AI Analysis Complete</span>
                 </div>
                 <div class="status-item" [class.pending]="validationStatus === 'pending'" [class.approved]="validationStatus === 'approved'" [class.error]="validationStatus === 'error'">
-                    <span class="status-icon">{{ validationStatus === 'approved' ? '✓' : (validationStatus === 'error' ? '⚠️' : '⏳') }}</span>
+                    <span class="status-icon">{{ validationStatus === 'approved' ? '✓' : (validationStatus === 'error' ? '!' : '...') }}</span>
                     <span class="status-text">
                         {{ validationStatus === 'approved' ? 'Validation Approved!' : (validationStatus === 'error' ? 'Error Checking Status' : 'Awaiting Human Review') }}
                     </span>
@@ -36,13 +36,12 @@
 
             <!-- Error Message -->
             <div class="error-message" *ngIf="errorMessage">
-                <span class="error-icon">⚠️</span>
+                <span class="error-icon">!</span>
                 <span>{{ errorMessage }}</span>
             </div>
 
             <!-- Wait Message -->
             <div class="wait-message">
-                <div class="wait-icon">⏱️</div>
                 <p class="wait-text">Please wait while our team validates your information...</p>
             </div>
 
@@ -54,7 +53,6 @@
 
             <!-- Additional Info -->
             <div class="info-card">
-                <div class="info-icon">💡</div>
                 <div class="info-content">
                     <h4 class="info-title">What's happening?</h4>
                     <p class="info-description">

@@ -7,7 +7,7 @@
 
   <!-- Error State -->
   <div class="error-state" *ngIf="errorMessage && !isLoading">
-    <div class="error-icon">⚠️</div>
+    <div class="error-icon">!</div>
     <p class="error-message">{{ errorMessage }}</p>
     <button class="retry-btn" (click)="loadUserProfile()">Retry</button>
   </div>
@@ -33,7 +33,6 @@
       <!-- Personal Information -->
       <div class="profile-section">
         <h2 class="section-title">
-          <span class="section-icon">👤</span>
           Personal Information
         </h2>
         <div class="info-grid">
@@ -59,7 +58,6 @@
       <!-- Company Information -->
       <div class="profile-section" *ngIf="userProfile.companyName">
         <h2 class="section-title">
-          <span class="section-icon">🏢</span>
           Company Information
         </h2>
         <div class="info-grid">
@@ -85,7 +83,6 @@
       <!-- Account Information -->
       <div class="profile-section">
         <h2 class="section-title">
-          <span class="section-icon">📊</span>
           Account Information
         </h2>
         <div class="info-grid">
@@ -103,7 +100,6 @@
       <!-- Documents Status -->
       <div class="profile-section">
         <h2 class="section-title">
-          <span class="section-icon">📄</span>
           Documents Status
         </h2>
         <div class="info-grid">

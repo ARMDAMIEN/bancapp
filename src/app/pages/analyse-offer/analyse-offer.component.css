@@ -64,10 +64,10 @@
     width: 60px;
     height: 60px;
     background-color: var(--primary-dark);
-    border-radius: 50%;
+    border-radius: 0;
     transform: translate(-50%, -50%);
-    animation: pulse-core 2s ease-in-out infinite;
-    box-shadow: var(--shadow-medium);
+    animation: none;
+    box-shadow: none;
 }
 
 .loading-title {
@@ -87,7 +87,7 @@
     width: 100%;
     height: 6px;
     background-color: var(--border-light);
-    border-radius: 3px;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 12px;
     border: 1px solid var(--border-medium);
@@ -96,8 +96,8 @@
 .progress-fill {
     height: 100%;
     background-color: var(--primary-dark);
-    border-radius: 3px;
-    transition: width 0.5s ease-out;
+    border-radius: 0;
+    transition: none;
 }
 
 .progress-text {
@@ -118,9 +118,9 @@
     gap: 12px;
     padding: 12px 16px;
     background-color: var(--bg-card);
-    border-radius: 6px;
+    border-radius: 0;
     border-left: 3px solid var(--border-light);
-    transition: all 0.3s ease;
+    transition: none;
 }
 
 .step-item.active {
@@ -138,7 +138,7 @@
     height: 24px;
     background-color: var(--border-medium);
     color: var(--text-primary);
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -194,7 +194,7 @@
     height: 60px;
     border: 4px solid var(--border-light);
     border-top: 4px solid var(--primary-dark);
-    border-radius: 50%;
+    border-radius: 0;
     animation: spin 1s linear infinite;
     margin-bottom: 24px;
 }
@@ -228,15 +228,14 @@
 .category-section {
     background-color: var(--bg-card);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px;
-    box-shadow: var(--shadow-soft);
-    transition: all 0.3s ease;
+    box-shadow: none;
+    transition: none;
 }
 
 .category-section:hover {
     border-color: var(--primary-dark);
-    box-shadow: var(--shadow-medium);
 }
 
 .category-header {
@@ -265,7 +264,7 @@
     padding: 4px 12px;
     background-color: var(--primary-accent);
     color: white;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
 }
@@ -281,23 +280,21 @@
 .option-card {
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: none;
     position: relative;
 }
 
 .option-card:hover {
     border-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft);
 }
 
 .option-card.selected {
     border-color: var(--primary-dark);
     background-color: var(--primary-light);
-    box-shadow: var(--shadow-medium);
+    box-shadow: none;
 }
 
 .option-header {
@@ -317,7 +314,7 @@
 
 .option-badge {
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
@@ -371,7 +368,7 @@
 /* Informations financières */
 .option-payback {
     background-color: var(--bg-primary);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 12px;
     margin-bottom: 12px;
     border: 1px solid var(--border-light);
@@ -411,7 +408,7 @@
 .payment-info {
     background-color: var(--bg-primary);
     border: 2px solid var(--success-green);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 12px;
     text-align: center;
     margin-bottom: 16px;
@@ -448,7 +445,7 @@
     height: 14px;
     background-color: var(--success-green);
     color: white;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -471,13 +468,13 @@
     background-color: var(--success-green);
     color: white;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 10px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 2px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
 }
 
 /* =========================
@@ -487,7 +484,7 @@
 .selection-summary {
     background-color: var(--bg-card);
     border: 2px solid var(--primary-dark);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px;
     margin: 32px 24px;
     max-width: 1200px;
@@ -517,8 +514,8 @@
     padding: 12px;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-medium);
-    border-radius: 6px;
-    transition: all 0.3s ease;
+    border-radius: 0;
+    transition: none;
 }
 
 .selected-option:hover {
@@ -566,20 +563,19 @@
     background-color: var(--error-red);
     color: white;
     border: none;
-    border-radius: 50%;
+    border-radius: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: none;
     margin-left: 12px;
 }
 
 .remove-selection:hover {
     background-color: var(--primary-dark);
-    transform: scale(1.1);
 }
 
 .summary-total {
@@ -625,8 +621,8 @@
     height: 44px;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 6px;
-    transition: all 0.3s ease;
+    border-radius: 0;
+    transition: none;
     cursor: pointer;
 }
 
@@ -634,13 +630,11 @@
     background-color: var(--primary-dark);
     color: white;
     border: 2px solid var(--primary-dark);
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
 }
 
 .primary-btn:hover:not(:disabled) {
     background-color: var(--primary-medium);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
 }
 
 .primary-btn:disabled {
@@ -679,17 +673,17 @@
     justify-content: center;
     padding: 20px;
     z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
+    animation: none;
 }
 
 .modal-content {
     background-color: var(--bg-primary);
-    border-radius: 8px;
+    border-radius: 0;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: var(--shadow-strong);
+    box-shadow: none;
     border: 2px solid var(--border-medium);
-    animation: modalSlideIn 0.3s ease-out;
+    animation: none;
 }
 
 .confirmation-modal {
@@ -723,8 +717,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    border-radius: 0;
+    transition: none;
 }
 
 .modal-close:hover {
@@ -743,7 +737,7 @@
     padding: 16px;
     background-color: var(--primary-light);
     border: 2px solid var(--primary-dark);
-    border-radius: 6px;
+    border-radius: 0;
     margin-bottom: 20px;
 }
 
@@ -786,7 +780,7 @@
 .confirmation-option {
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-light);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 16px;
 }
 
@@ -808,7 +802,7 @@
     background-color: var(--primary-light);
     color: var(--primary-dark);
     padding: 2px 6px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 9px;
     font-weight: 600;
     border: 1px solid var(--border-medium);
@@ -826,7 +820,7 @@
     gap: 6px;
     padding: 6px;
     background-color: var(--bg-primary);
-    border-radius: 4px;
+    border-radius: 0;
     border: 1px solid var(--border-light);
 }
 
@@ -865,7 +859,7 @@
     gap: 8px;
     background-color: var(--bg-secondary);
     border: 2px solid var(--warning-amber);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 12px;
     margin-bottom: 20px;
 }
@@ -902,7 +896,7 @@
 
 .next-steps {
     background-color: var(--bg-secondary);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 16px;
     margin-bottom: 20px;
     border: 1px solid var(--border-light);
@@ -932,7 +926,7 @@
     height: 20px;
     background-color: var(--primary-dark);
     color: white;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1004,34 +998,13 @@
     height: 12px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-top: 2px solid white;
-    border-radius: 50%;
+    border-radius: 0;
     animation: spin 1s linear infinite;
 }
 
 /* =========================
    ANIMATIONS
 ========================= */
-
-@keyframes pulse-core {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.05); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
 
 @keyframes spin {
     0% { transform: rotate(0deg); }

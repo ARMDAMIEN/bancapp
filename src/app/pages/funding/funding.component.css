@@ -52,13 +52,13 @@
 .step-circle {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: none;
     border: 2px solid var(--border-medium);
 }
 
@@ -72,7 +72,7 @@
     background-color: var(--primary-dark);
     color: white;
     border-color: var(--primary-dark);
-    box-shadow: var(--shadow-medium);
+    box-shadow: none;
 }
 
 .step.pending .step-circle {
@@ -114,14 +114,13 @@
 .funding-section {
     background-color: var(--bg-primary);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 32px;
-    box-shadow: var(--shadow-soft);
-    transition: all 0.3s ease;
+    box-shadow: none;
+    transition: none;
 }
 
 .funding-section:hover {
-    box-shadow: var(--shadow-medium);
     border-color: var(--primary-dark);
 }
 
@@ -181,20 +180,20 @@
     color: var(--text-muted);
     background-color: var(--bg-secondary);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     border: 1px solid var(--border-light);
 }
 
 .upload-zone {
     height: 160px;
     border: 2px dashed var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     background-color: var(--bg-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: none;
     position: relative;
     overflow: hidden;
 }
@@ -202,14 +201,11 @@
 .upload-zone:hover {
     border-color: var(--primary-dark);
     background-color: var(--bg-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft);
 }
 
 .upload-zone.dragover {
     border-color: var(--primary-dark);
     background-color: var(--primary-light);
-    box-shadow: var(--shadow-medium);
 }
 
 .upload-zone.uploaded {
@@ -251,7 +247,7 @@
     color: var(--text-muted);
     background-color: var(--bg-secondary);
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     display: inline-block;
     border: 1px solid var(--border-light);
 }
@@ -299,19 +295,18 @@
     background: var(--error-red);
     color: white;
     border: none;
-    border-radius: 50%;
+    border-radius: 0;
     width: 24px;
     height: 24px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: none;
 }
 
 .remove-file:hover {
     background-color: var(--primary-dark);
-    transform: scale(1.1);
 }
 
 .file-input {
@@ -364,16 +359,16 @@
     width: 100%;
     height: 48px;
     border: 2px solid var(--border-medium);
-    border-radius: 6px;
+    border-radius: 0;
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    transition: all 0.2s ease;
+    transition: none;
 }
 
 .revenue-input:focus {
     outline: none;
     border-color: var(--primary-dark);
-    box-shadow: 0 0 0 3px rgba(27, 58, 82, 0.1);
+    box-shadow: none;
 }
 
 .input-helper {
@@ -393,7 +388,7 @@
 .revenue-summary-card {
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px;
     margin-top: 20px;
 }
@@ -431,7 +426,7 @@
     gap: 4px;
     padding: 12px;
     background-color: var(--bg-primary);
-    border-radius: 6px;
+    border-radius: 0;
     border: 1px solid var(--border-light);
 }
 
@@ -489,7 +484,7 @@
 .application-status {
     background-color: var(--bg-secondary);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px;
 }
 
@@ -517,7 +512,7 @@
     width: 100%;
     height: 8px;
     background-color: var(--border-light);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 16px;
     border: 1px solid var(--border-medium);
@@ -526,8 +521,8 @@
 .progress-fill {
     height: 100%;
     background-color: var(--primary-dark);
-    border-radius: 4px;
-    transition: width 0.5s ease-out;
+    border-radius: 0;
+    transition: none;
 }
 
 .status-items {
@@ -551,7 +546,7 @@
 .status-check {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: 0;
     background-color: var(--border-medium);
     color: white;
     display: flex;
@@ -594,21 +589,19 @@
     background-color: var(--primary-dark);
     color: white;
     border: 2px solid var(--primary-dark);
-    border-radius: 6px;
+    border-radius: 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
 }
 
 .submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
     background-color: var(--primary-medium);
 }
 
@@ -617,8 +610,6 @@
     border-color: var(--border-medium);
     color: var(--text-muted);
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
 .btn-icon {
@@ -630,7 +621,7 @@
     height: 20px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-top: 2px solid white;
-    border-radius: 50%;
+    border-radius: 0;
     animation: spin 1s linear infinite;
 }
 
@@ -638,7 +629,7 @@
 .error-message-card {
     background-color: var(--bg-secondary);
     border: 2px solid var(--error-red);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 20px;
     display: flex;
     align-items: center;
@@ -749,14 +740,8 @@
 }
 
 /* Additional hover effects */
-.upload-zone:hover .upload-icon svg {
-    transform: scale(1.1);
-    transition: transform 0.3s ease;
-}
-
 .revenue-item:hover .revenue-input {
     border-color: var(--primary-dark);
-    box-shadow: 0 0 0 3px rgba(27, 58, 82, 0.08);
 }
 
 /* Loading states */
