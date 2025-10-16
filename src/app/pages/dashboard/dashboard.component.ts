@@ -21,7 +21,22 @@ interface Transaction {
 interface UserSelectionResponse {
   selectedOffer?: string | null;
   selectedOffers?: string[];
+  bankingOption?: BankingOption | null;
   message?: string;
+}
+
+interface BankingOption {
+  id?: number;
+  title: string;
+  badge: string;
+  type: string;
+  amount: string;
+  structure: string;
+  payback: string;
+  term: string;
+  payment: string;
+  frequency: string;
+  delay: string;
 }
 
 interface BankInfo {
@@ -61,6 +76,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   lastName: string = '';
   companyName: string = '';
   accountId: string = '';
+
+  // Banking option from backend (when option 2 is selected)
+  selectedBankingOption: BankingOption | null = null;
 
   // Informations de solde
   currentBalance: number = 0;
@@ -267,13 +285,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
       selectedOffer = response.selectedOffers[0];
     }
 
+    // Handle bankingOption if returned from backend (when option 2 is selected)
+    if (response.bankingOption) {
+      this.selectedBankingOption = response.bankingOption;
+      console.log('💳 Banking option loaded from user selection response:', this.selectedBankingOption);
+
+      // Update balance from banking option amount
+      const amount = parseFloat(this.selectedBankingOption.amount.replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(amount)) {
+        this.currentBalance = amount;
+        console.log('💰 Balance updated from banking option:', this.currentBalance);
+      }
+    }
+
     if (selectedOffer) {
       this.selectedOffer = selectedOffer;
       console.log('✅ Selected offer found:', selectedOffer);
       this.parseSelectedOffer(selectedOffer);
 
       // Ensure balance is set from the selected option (override any profile balance)
-      if (this.selectedFundingOption) {
+      // Only update if bankingOption hasn't already set the balance
+      if (this.selectedFundingOption && !response.bankingOption) {
         this.currentBalance = this.selectedFundingOption.amount;
         console.log('💰 Balance forced from selected option after parsing:', this.currentBalance);
       }
@@ -327,6 +359,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private updateBalanceFromSelection(): void {
+    // Don't update balance if we have a banking option (option 2 uses backend data)
+    if (this.selectedBankingOption) {
+        console.log('⏭️ Skipping balance update - using banking option amount instead');
+        return;
+    }
+
     if (this.selectedFundingOption) {
         this.currentBalance = this.selectedFundingOption.amount;
         console.log('✅ Balance updated from selected funding option:', this.currentBalance);

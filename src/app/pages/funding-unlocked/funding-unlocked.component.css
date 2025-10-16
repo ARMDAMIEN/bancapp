@@ -24,12 +24,12 @@
     text-align: center;
     padding: 48px 40px;
     background: var(--bg-card);
-    border-radius: 8px;
-    box-shadow: var(--shadow-medium);
+    border-radius: 0;
+    box-shadow: none;
     border: 2px solid var(--border-medium);
     max-width: 480px;
     width: 90%;
-    animation: fadeIn 0.5s ease-out;
+    animation: none;
 }
 
 .loading-icon {
@@ -49,7 +49,7 @@
     border: 4px solid var(--border-light);
     border-top-color: var(--primary-dark);
     border-right-color: var(--primary-dark);
-    border-radius: 50%;
+    border-radius: 0;
     animation: spinLoader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
 
@@ -64,7 +64,7 @@
     border: 3px solid var(--primary-light);
     border-bottom-color: var(--primary-accent);
     border-left-color: var(--primary-accent);
-    border-radius: 50%;
+    border-radius: 0;
     animation: spinLoader 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
 }
 
@@ -86,18 +86,18 @@
     width: 100%;
     height: 8px;
     background: var(--bg-secondary);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 16px;
     border: 1px solid var(--border-light);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
 }
 
 .loading-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
-    border-radius: 4px;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--primary-dark);
+    border-radius: 0;
+    transition: none;
     position: relative;
 }
 
@@ -108,11 +108,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.3) 50%, 
-        transparent 100%);
-    animation: shimmer 2s infinite;
+    background: transparent;
+    animation: none;
 }
 
 @keyframes shimmer {
@@ -148,8 +145,8 @@
     text-align: center;
     padding: 48px 40px;
     background: var(--bg-card);
-    border-radius: 8px;
-    box-shadow: var(--shadow-strong);
+    border-radius: 0;
+    box-shadow: none;
     border: 2px solid var(--success-green);
     max-width: 480px;
     width: 90%;
@@ -164,10 +161,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, 
-        var(--success-green) 0%, 
-        var(--primary-accent) 50%, 
-        var(--success-green) 100%);
+    background: var(--success-green);
 }
 
 .celebration-icon {
@@ -266,11 +260,11 @@
 .unlocked-card {
     background: var(--bg-card);
     border: 2px solid var(--border-medium);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 3rem;
     max-width: 700px;
     width: 100%;
-    box-shadow: var(--shadow-medium);
+    box-shadow: none;
     text-align: center;
     position: relative;
 }
@@ -282,11 +276,8 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, 
-        var(--primary-dark) 0%, 
-        var(--primary-accent) 50%, 
-        var(--primary-dark) 100%);
-    border-radius: 8px 8px 0 0;
+    background: var(--primary-dark);
+    border-radius: 0;
 }
 
 .success-badge {
@@ -294,15 +285,15 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1.5rem;
-    background: linear-gradient(135deg, var(--success-green) 0%, var(--primary-dark) 100%);
+    background: var(--success-green);
     color: white;
-    border-radius: 20px;
+    border-radius: 0;
     font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 2rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    box-shadow: 0 2px 8px rgba(27, 58, 82, 0.15);
+    box-shadow: none;
 }
 
 .badge-icon {
@@ -328,9 +319,9 @@
 }
 
 .amount-display {
-    background: linear-gradient(135deg, var(--primary-light) 0%, rgba(232, 238, 242, 0.5) 100%);
+    background: var(--primary-light);
     border: 2px solid var(--primary-dark);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 2rem 1.5rem;
     margin-bottom: 2rem;
     position: relative;
@@ -344,8 +335,8 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(139, 115, 85, 0.05) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
+    background: transparent;
+    animation: none;
 }
 
 @keyframes rotate {
@@ -377,7 +368,7 @@
 .funding-details {
     background: var(--bg-secondary);
     border: 1px solid var(--border-light);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 0;
     margin-bottom: 2rem;
     overflow: hidden;
@@ -389,7 +380,7 @@
     align-items: center;
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border-light);
-    transition: background-color 0.2s ease;
+    transition: none;
 }
 
 .detail-row:last-child {
@@ -418,10 +409,10 @@
 
 .dashboard-btn {
     width: 100%;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+    background: var(--primary-dark);
     color: white;
     border: 2px solid var(--primary-dark);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1rem 2rem;
     font-size: 0.9rem;
     font-weight: 600;
@@ -430,10 +421,10 @@
     align-items: center;
     justify-content: center;
     gap: 0.625rem;
-    transition: all 0.3s ease;
+    transition: none;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    box-shadow: 0 4px 12px rgba(27, 58, 82, 0.15);
+    box-shadow: none;
     position: relative;
     overflow: hidden;
 }
@@ -445,24 +436,24 @@
     left: 50%;
     width: 0;
     height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    background: transparent;
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition: none;
 }
 
 .dashboard-btn:hover::before {
-    width: 300px;
-    height: 300px;
+    width: 0;
+    height: 0;
 }
 
 .dashboard-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(27, 58, 82, 0.25);
+    transform: none;
+    box-shadow: none;
 }
 
 .dashboard-btn:active {
-    transform: translateY(0);
+    transform: none;
 }
 
 .dashboard-btn .btn-icon {
@@ -481,10 +472,10 @@
     align-items: flex-start;
     gap: 1rem;
     padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-light);
     border-left: 3px solid var(--primary-accent);
-    border-radius: 8px;
+    border-radius: 0;
     text-align: left;
 }
 

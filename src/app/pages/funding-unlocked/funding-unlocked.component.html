@@ -14,14 +14,8 @@
   <!-- Celebration Screen -->
   <div class="celebration-overlay" *ngIf="isCelebrating && !showContent">
     <div class="celebration-content">
-      <div class="celebration-icon">🎉</div>
       <h2 class="celebration-title">Success!</h2>
       <p class="celebration-subtitle">Your funding has been unlocked</p>
-      
-      <!-- Confetti Animation -->
-      <div class="confetti-container">
-        <div class="confetti" *ngFor="let i of confettiArray"></div>
-      </div>
     </div>
   </div>
 
@@ -62,13 +56,11 @@
 
       <div class="action-section">
         <button type="button" class="dashboard-btn" (click)="proceedToDashboard()">
-          <span class="btn-icon">📊</span>
           <span>Access My Dashboard</span>
         </button>
       </div>
 
       <div class="info-message">
-        <div class="info-icon">ℹ️</div>
         <p class="info-text">
           You can now access your dashboard to manage your funds, view transactions, and process withdrawals.
         </p>

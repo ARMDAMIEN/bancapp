@@ -36,6 +36,7 @@ export class ProfileComponent implements OnInit {
         console.log('  - companyCreationDate:', profile.companyCreationDate);
         console.log('  - accountBalance:', profile.accountBalance);
         console.log('  - selectedOffer:', profile.selectedOffer);
+        console.log('  - rib ; ', profile.hasAllRibDocuments)
 
         // Check if companyAddress exists
         if (profile.companyAddress) {

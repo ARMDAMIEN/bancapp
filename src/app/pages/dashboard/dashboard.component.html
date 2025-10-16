@@ -55,7 +55,6 @@
                 <div class="balance-actions">
                     <!-- Message de payment pending -->
                     <div class="withdrawal-pending-notice" *ngIf="isPaymentPending()">
-                        <div class="pending-icon">[PAYMENT]</div>
                         <div class="pending-text">
                             <span class="pending-title">Waiting for Your Payment</span>
                             <span class="pending-subtitle">We are waiting to receive your payment. Once received, your withdrawal will be processed.</span>
@@ -64,7 +63,6 @@
 
                     <!-- Message de withdrawal pending -->
                     <div class="withdrawal-pending-notice" *ngIf="isWithdrawalPending()">
-                        <div class="pending-icon">[PENDING]</div>
                         <div class="pending-text">
                             <span class="pending-title">Withdrawal In Progress</span>
                             <span class="pending-subtitle">Your withdrawal is being processed and should complete within
@@ -224,7 +222,6 @@
                     </div>
 
                     <div class="bank-info-empty" *ngIf="!bankInfo.accountHolderName">
-                        <div class="empty-icon">[BANK]</div>
                         <p class="empty-text">No bank account information on file.</p>
                     </div>
                 </div>
@@ -280,7 +277,6 @@
 
             <div class="modal-body">
                 <div class="payment-summary">
-                    <div class="summary-icon">[PAY]</div>
                     <div class="summary-text">
                         <p class="summary-title">Amount to Pay:</p>
                         <p class="summary-amount">{{getPaymentAmount()}}</p>
@@ -314,7 +310,6 @@
                                     <button type="button" class="copy-btn"
                                         (click)="copyToClipboard(paymentBankInfo.accountHolder)"
                                         title="Copy to clipboard">
-                                        [COPY]
                                     </button>
                                 </div>
                             </div>
@@ -328,7 +323,6 @@
                                     <button type="button" class="copy-btn"
                                         (click)="copyToClipboard(paymentBankInfo.routingNumber)"
                                         title="Copy to clipboard">
-                                        [COPY]
                                     </button>
                                 </div>
                             </div>
