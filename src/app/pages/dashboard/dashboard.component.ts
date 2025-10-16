@@ -296,18 +296,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.currentBalance = amount;
         console.log('💰 Balance updated from banking option:', this.currentBalance);
       }
+
+      // Convert bankingOption to FundingOption format for display
+      const paybackAmount = parseFloat(this.selectedBankingOption.payback.replace(/[^0-9.-]+/g, ''));
+      this.selectedFundingOption = {
+        title: this.selectedBankingOption.title,
+        badge: this.selectedBankingOption.badge,
+        type: this.selectedBankingOption.type,
+        amount: amount,
+        structure: this.selectedBankingOption.structure,
+        payback: !isNaN(paybackAmount) ? paybackAmount : 0,
+        term: this.selectedBankingOption.term,
+        payment: this.selectedBankingOption.payment,
+        frequency: this.selectedBankingOption.frequency,
+        delay: this.selectedBankingOption.delay,
+        features: []
+      };
+      console.log('✅ Selected funding option updated from banking option:', this.selectedFundingOption);
     }
 
     if (selectedOffer) {
       this.selectedOffer = selectedOffer;
       console.log('✅ Selected offer found:', selectedOffer);
-      this.parseSelectedOffer(selectedOffer);
 
-      // Ensure balance is set from the selected option (override any profile balance)
-      // Only update if bankingOption hasn't already set the balance
-      if (this.selectedFundingOption && !response.bankingOption) {
-        this.currentBalance = this.selectedFundingOption.amount;
-        console.log('💰 Balance forced from selected option after parsing:', this.currentBalance);
+      // Only parse if we don't have bankingOption (option 2 already handled above)
+      if (!response.bankingOption) {
+        this.parseSelectedOffer(selectedOffer);
+
+        // Update balance from the selected option
+        if (this.selectedFundingOption) {
+          this.currentBalance = this.selectedFundingOption.amount;
+          console.log('💰 Balance forced from selected option after parsing:', this.currentBalance);
+        }
+      } else {
+        // Still need to parse to set selectedCategory and selectedOption for display
+        const parts = selectedOffer.split('.');
+        if (parts.length === 2) {
+          this.selectedCategory = parseInt(parts[0], 10) - 1;
+          this.selectedOption = parseInt(parts[1], 10) - 1;
+        }
       }
     } else {
       console.log('❌ No selection found');
