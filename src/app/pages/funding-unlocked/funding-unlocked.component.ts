@@ -8,7 +8,22 @@ import { StepService, FUNDING_STEPS } from '../../../services/step.service';
 interface UserSelectionResponse {
   selectedOffer?: string | null;
   selectedOffers?: string[];
+  bankingOption?: BankingOption | null;
   message?: string;
+}
+
+interface BankingOption {
+  id?: number;
+  title: string;
+  badge: string;
+  type: string;
+  amount: string;
+  structure: string;
+  payback: string;
+  term: string;
+  payment: string;
+  frequency: string;
+  delay: string;
 }
 
 @Component({
@@ -26,14 +41,15 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
   // Funding info
   fundingAmount: number = 0;
   selectedFundingOption: FundingOption | null = null;
-  
+  selectedBankingOption: BankingOption | null = null;
+
   // Timer
   private loadingTimer: any;
   private apiUrl = environment.apiUrl;
-  
+
   // Confetti animation
   confettiArray = Array(50).fill(0);
-  
+
   // Funding categories (same as dashboard)
   fundingCategories: FundingCategory[] = [];
 
@@ -105,14 +121,40 @@ export class FundingUnlockedComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response) => {
         let selectedOffer: string | null = null;
-        
+
         if (response.selectedOffer) {
           selectedOffer = response.selectedOffer;
         } else if (response.selectedOffers && response.selectedOffers.length > 0) {
           selectedOffer = response.selectedOffers[0];
         }
-        
-        if (selectedOffer) {
+
+        // Handle bankingOption if returned from backend (when option 2 is selected)
+        if (response.bankingOption) {
+          this.selectedBankingOption = response.bankingOption;
+
+          // Parse amount from banking option
+          const amount = parseFloat(this.selectedBankingOption.amount.replace(/[^0-9.-]+/g, ''));
+          if (!isNaN(amount)) {
+            this.fundingAmount = amount;
+          }
+
+          // Convert bankingOption to FundingOption format for display
+          const paybackAmount = parseFloat(this.selectedBankingOption.payback.replace(/[^0-9.-]+/g, ''));
+          this.selectedFundingOption = {
+            title: this.selectedBankingOption.title,
+            badge: this.selectedBankingOption.badge,
+            type: this.selectedBankingOption.type,
+            amount: amount,
+            structure: this.selectedBankingOption.structure,
+            payback: !isNaN(paybackAmount) ? paybackAmount : 0,
+            term: this.selectedBankingOption.term,
+            payment: this.selectedBankingOption.payment,
+            frequency: this.selectedBankingOption.frequency,
+            delay: this.selectedBankingOption.delay,
+            features: []
+          };
+        } else if (selectedOffer) {
+          // Parse from hardcoded funding categories if no banking option
           this.parseSelectedOffer(selectedOffer);
         }
       },
